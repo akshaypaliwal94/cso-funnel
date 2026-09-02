@@ -1,0 +1,1456 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* =====================================================================
+   CSO FUNNEL · Akshay Paliwal · Sales Co-Founder
+   SKIN: SIGNAL & DEPTH (project override) —
+   /workspace/cso-funnel/design-system.project.md
+
+   This project OVERRIDES the locked SDP Clinical Blue skin. The client
+   arrived with a complete, measured colour system of their own, and a
+   locked skin exists to stop us re-deriving a look from nothing, not to
+   overrule a client who already has one.
+
+   KEPT FROM SDP:     section anatomy, component set, reveal choreography,
+                      sticky-bar behaviour, FAQ mechanics, the type pairing.
+   REPLACED:          every colour, and the POLARITY.
+
+   THE POLARITY FLIP is the structural consequence. Obsidian is "90% of
+   every screen", so this page is DARK-FIRST and the band rhythm inverts:
+   dark is the default ground, and ONE light band is the rare accent.
+
+   THE SPEND RATIO is the client's own rule, not a preference:
+     60% FOUNDATION (obsidian, graphite) · 30% STRUCTURE (cobalt, abyss)
+     10% SIGNAL (voltage, amber), only where you want a click.
+   Voltage is therefore a SURFACE colour (fills, rails, rings), never a
+   text colour: measured at 2.25:1 on obsidian it is unreadable as type.
+   Accent TEXT on dark is SAND (10.3:1) or AMBER (7.0:1).
+
+   PART 1 = the client's token block, transcribed.
+   PART 2 = the retained SDP anatomy, re-polarised, token-only.
+   PART 3 = this build's additions (process spine, venn, founder journey,
+            maths compare, placeholders, finale), token-only.
+   ===================================================================== */
+
+/* =====================================================================
+   PART 1 — THEME · SIGNAL & DEPTH (the only block to swap per client)
+   ===================================================================== */
+.sd-root {
+  /* ---- 01 · PRIMARY. "The spend. Never more than a tenth of the surface." */
+  --voltage:#1A0FF5; --voltage-rgb:26,15,245;
+  --signal:#1408CF;
+  --cobalt:#19108D;  --cobalt-rgb:25,16,141;
+  --abyss:#080842;
+
+  /* ---- 02 · FOUNDATION. "90% of every screen." */
+  --obsidian:#0D0D12; --obsidian-rgb:13,13,18;
+  --graphite:#1A1C20;
+  --slate:#272632;
+  --violet-moss:#414F27;
+
+  /* ---- 03 · WARM ACCENT. "Humanity, pricing, proof." */
+  --amber:#D48B5C;
+  --sand:#ECB089;
+  --bone:#F7EADD;
+  --ivory:#FEF3E8;
+
+  /* ---- SEMANTIC (the client's own assignment) ---- */
+  --bg:var(--obsidian);
+  --surface:var(--graphite);
+  --surface-raised:var(--slate);
+  --border:var(--slate);
+  --text-primary:var(--bone);
+  --text-secondary:#A9A3B5;
+  --text-muted:#6E6880;      /* 3.66:1 on obsidian. DECORATIVE ONLY, and
+                                only ever on obsidian: the client's table
+                                fails it on slate, cobalt and voltage. */
+  --action:var(--voltage);
+  --action-hover:var(--signal);
+  --action-2:var(--amber);
+  --focus-ring:#4E44FF;
+  --success:#5C7A38;
+  --warning:#D49A3E;
+
+  /* ---- ACCENT TEXT (derived from the contrast table, not invented) ----
+     Voltage is a surface, never type. These two are the accent voices. */
+  /* --rule-accent is retired. It carried the eyebrow's single 24px dash, and
+     the eyebrow now draws its own two-sided ramped rules from the voltage
+     steps directly. Left in place would be a token nothing reads, which is how
+     a palette quietly accumulates dead entries. */
+  --accent-text:var(--sand);          /* 10.3:1 on obsidian */
+  --accent-text-strong:var(--amber);  /*  7.0:1 on obsidian, and the
+                                          pricing colour by the client's
+                                          own assignment */
+  --cta-ink:var(--ivory);             /* 7.90:1 on a voltage surface */
+  --cta-ink-soft:var(--sand);         /* 4.58:1 on voltage, so the small
+                                          CTA sub-line is legible. AMBER
+                                          would be 3.15:1 = large only. */
+
+  /* ---- TYPE (retained from SDP; the client's PDF specifies none) ----
+     system-ui sits in the DISPLAY stack on purpose: Bebas Neue's latin
+     subset does not reliably carry the rupee sign, and this page prints
+     the rupee inside display-set numbers. */
+  --fh: var(--font-bebas), 'Bebas Neue', 'Helvetica Neue', system-ui, sans-serif;
+  --fb: var(--font-manrope), 'Manrope', 'Helvetica Neue', system-ui, sans-serif;
+
+  /* ---- RADII ---- */
+  --r-sm:8px; --r:12px; --r-lg:18px; --r-xl:28px;
+
+  /* ---- GRADIENTS (verbatim from the PDF) ---- */
+  --grad-hero:  linear-gradient(135deg,var(--abyss),var(--cobalt),var(--voltage));
+  --grad-cta:   linear-gradient(90deg,var(--voltage),var(--signal));
+  /* The CTA's lit rim. Light falls from the top, so the sheen sits at the top
+     edge and the rim resolves into deep cobalt underneath: the pill reads as a
+     lit object rather than as a shape with a stroke on it. Sand rather than
+     white at the peak, so the shine belongs to the warm accent family instead
+     of introducing a fourth colour. */
+  /* ---- THE SPECULAR RIM ----------------------------------------------
+     A thin luminous edge for key cards and panels. Mostly TRANSPARENT, so the
+     element's own dark hairline stays the base rim and this only adds light
+     where the highlight falls: a narrow band crossing the shape on the 128deg
+     diagonal, deep navy climbing through cobalt into a near-white peak and
+     falling away again.
+
+     The point is that it is SELECTIVE. A gradient that lit the whole perimeter
+     evenly would be a neon outline; this lights the two arcs where the band
+     crosses the ring and leaves the rest dark, which is how a highlight behaves
+     on polished glass or chrome. The peak is a hairline of the 0.50 stop, not a
+     broad glow, because a specular is small and hard-edged. */
+  /* ===================================================================
+     THE TONAL RAMPS, transcribed verbatim from the client's colour system
+     (page 4, "Every state you will ever need, already tuned").
+
+     These exist so that nothing on this page ever needs an invented colour
+     again. If a shade is wanted that is not one of the twelve core values,
+     it comes from a ramp step here, never from a hand-mixed rgba. 600 is the
+     base in all three ramps and equals the core token.
+     =================================================================== */
+  --volt-50:#F5F4FF; --volt-100:#E5E3FE; --volt-200:#CBC9FD; --volt-300:#ABA7FB;
+  --volt-400:#827CFA; --volt-500:#544CF8; --volt-600:#1A0FF5; --volt-700:#160DBF;
+  --volt-800:#100A82; --volt-900:#0B083F;
+
+  --amber-50:#FDFAF8; --amber-100:#FAF2EC; --amber-200:#F5E5DA; --amber-300:#EFD5C4;
+  --amber-400:#E8C0A6; --amber-500:#DFA986; --amber-600:#D48B5C; --amber-700:#A46C4A;
+  --amber-800:#6E4836; --amber-900:#32221F;
+
+  --slate-50:#F5F5F6; --slate-100:#E6E6E7; --slate-200:#CECED1; --slate-300:#B0B0B4;
+  --slate-400:#89898F; --slate-500:#5E5D66; --slate-600:#272632; --slate-700:#1F1E2A;
+  --slate-800:#171620; --slate-900:#0E0D16;
+
+  /* rgb triplets for the ramp steps used inside rgba() */
+  /* ---- THE SPACING LADDER ---------------------------------------------
+     An 8-POINT GRID. Every value below is a multiple of 8, which is the
+     convention Material, the Apple HIG and most shipped design systems use.
+     The point is not the number 8: it is that spacing stops being a series of
+     individual judgements and becomes a set of steps you pick from, so the
+     twentieth spacing decision on this page is as consistent as the first.
+
+     The ladder climbs at roughly 1.5x, loosening to 1.33x in the middle where
+     a pure 1.5 would leave gaps too coarse to choose between. Real systems do
+     this; a single unbroken ratio is a purist ideal that gives you too few
+     usable steps. */
+  --space-1:8px;  --space-2:16px; --space-3:24px; --space-4:40px;
+  --space-5:64px; --space-6:96px; --space-7:120px;
+
+  /* ---- VERTICAL RHYTHM, built from the ladder --------------------------
+     Space encodes relationship: the closer two things sit, the more they read
+     as one unit. The masthead opens as it descends, and each gap is fluid
+     between two LADDER STEPS rather than between two numbers, because a fixed
+     gap under a clamp() headline gets proportionally tighter exactly as the
+     screen grows.
+
+     --sp-label  eyebrow to title. The tightest of the three, because the
+                 eyebrow labels the title and the two are one object. Tightest
+                 does not mean small: it was 13px under a headline running up
+                 to 52px, and the eyebrow is now a full-width object with
+                 rules either side rather than a single word.
+     --sp-deck   title to deck. One full step above the label at both ends, so
+                 the two never read as one undifferentiated stack.
+     --sp-body   masthead to content. The gap that separates "what this
+                 section is" from "here it is".
+     --sp-sec    the section's own top and bottom padding.
+
+     FLUID BETWEEN TWO RUNGS. Each gap clamps from one ladder step to the next,
+     so at the ends it is exactly a rung and between them it interpolates.
+
+     That interpolation is deliberate, not a leak. The ladder's job is to fix
+     the ENDPOINTS a value can take, so no gap is ever an arbitrary choice; the
+     job of the vw term is to keep every gap on the page growing together as
+     the viewport does, which stepping at breakpoints cannot do without the
+     whole layout jumping at one width. This is the approach fluid systems like
+     Utopia are built on.
+
+     The rule this has to satisfy is that BOTH BOUNDS ARE RUNGS. That was the
+     real defect earlier: --sp-sec ran from 72px, which is on no step, so its
+     small end was off the ladder at every narrow viewport. It starts at 64
+     now, and all eight bounds below are ladder values. */
+  --sp-label:clamp(var(--space-2),2.1vw,var(--space-3));  /* 16 -> 24 */
+  --sp-deck: clamp(var(--space-3),3.1vw,var(--space-4));  /* 24 -> 40 */
+  --sp-body: clamp(var(--space-4),5.2vw,var(--space-5));  /* 40 -> 64 */
+  --sp-sec:  clamp(var(--space-5),8.6vw,var(--space-7));  /* 64 -> 120 */
+
+  --volt-50-rgb:245,244,255; --volt-200-rgb:203,201,253; --volt-300-rgb:171,167,251;
+  --volt-400-rgb:130,124,250; --volt-600-rgb:26,15,245; --volt-700-rgb:22,13,191;
+  --volt-500-rgb:84,76,248;  --volt-800-rgb:16,10,130;   --volt-900-rgb:11,8,63;
+
+  --rim-spec: linear-gradient(128deg,
+      rgba(8,8,66,0)        0%,
+      rgba(8,8,66,.55)     20%,
+      rgba(25,16,141,.75)  36%,
+      rgba(78,68,255,.92)  46%,
+      rgba(var(--volt-200-rgb),.98) 50%,
+      rgba(78,68,255,.85)  54%,
+      rgba(25,16,141,.65)  64%,
+      rgba(8,8,66,.45)     82%,
+      rgba(8,8,66,0)      100%);
+
+  /* THE TOP-LIT RIM. Shared by the CTA, the hero eyebrow and the VSL frame:
+     brightest at TOP CENTRE, falling away to nothing at the bottom.
+
+     A radial gradient anchored at 50% 0% of the border box, not a linear one.
+     A linear gradient can only run in a straight line, so it cannot be bright
+     in the middle of the top edge AND dim at both ends of it. A radial
+     centred on the top edge falls off in every direction at once: brightest
+     at top centre, easing along the straights, still lit as it turns the top
+     curves, and fully dark by the time it reaches the bottom.
+
+     The ellipse is very wide (200%) and exactly one box tall (100%). Wide, so
+     the light decays slowly ACROSS the top: at 120% the top curves already fell
+     to volt-700 and read as unlit, and the brief asks for light along the
+     straights and the top curves. Exactly one box tall, so the bottom edge sits
+     a full radius from the origin and lands on volt-900 no matter how the
+     button is sized: on a 690x70 pill the bottom measures 1.00 of the radius
+     while the top curves measure 0.28.
+
+     Every stop across the top sits ONE RAMP STEP lighter than the version that
+     first got this profile right: 200 to 100, 400 to 300, 700 to 600. A single
+     step is the smallest uniform lift available without mixing a value, so the
+     shape below is untouched and only the level moved. The two volt-900 stops
+     did not move: the bottom stays dark.
+
+     The stops are a SPIKE, a fast decay, then a HOLD. volt-50 sits at a single
+     point, drops to volt-300 by 11%, and then volt-300 is repeated at 32% so
+     the level is flat across that whole span. On the pill measured above, 11%
+     is a quarter of the way along the top edge and 32% is past the top curve,
+     so the curves and the outer straights sit at one consistent brightness and
+     only the centre is hotter. Repeating a stop is what holds a gradient
+     level; without the second volt-300 it would ramp continuously and the
+     "consistent" section would not exist.
+
+     The shine is VOLTAGE 50, the lightest step on the ramp: a COOL blue-white,
+     where the ivory used before was a warm neutral, which is what read as
+     silver. Every stop is a ramp step. */
+  /* The hotspot. A second, much tighter radial painted OVER the rim so the top
+     centre can be intensified WITHOUT lifting the rest of the edge with it:
+     widening the base gradient instead would have brightened the curves and the
+     straights too, which are already where they should be.
+
+     It is deliberately SMALL and decays fast. An earlier version held near-full
+     alpha out to a quarter of the top edge, which merged with the rim's own
+     bright plateau and made the whole top read as one even bar: the opposite of
+     a highlight. A highlight has to be a point with a falloff, and the flat
+     level either side of it belongs to the rim, not to this.
+
+     It fades to volt-50 at zero ALPHA rather than to `transparent`, because
+     `transparent` is rgba(0,0,0,0) and interpolating toward it drags the
+     midpoint through grey, which would put a dull band either side of the very
+     highlight this exists to create. */
+  --rim-hot: radial-gradient(ellipse 32% 70% at 50% 0%,
+      rgba(var(--volt-200-rgb),1)   0%,
+      rgba(var(--volt-200-rgb),.68) 24%,
+      rgba(var(--volt-200-rgb),.26) 55%,
+      rgba(var(--volt-200-rgb),0)  100%);
+
+  /* ---- THE CARD RIM ----------------------------------------------------
+     Same top-lit shape as --rim-top, with one difference that matters: it
+     never falls to volt-900. --rim-top dies into the page on purpose, which is
+     right for a button sitting on the ground but wrong for a card, whose
+     bottom edge then dissolves and leaves the box looking unclosed.
+
+     So the ramp settles onto volt-700 and HOLDS it from 75% out. volt-700
+     measures ten times the luminance of obsidian, so the bottom and the sides
+     stay clearly drawn while the top carries the shine. The card is lit from
+     above and still fully enclosed. */
+  --rim-card: radial-gradient(ellipse 200% 100% at 50% 0%,
+      var(--volt-200)  0%,
+      var(--volt-300)  5%,
+      var(--volt-400) 11%,
+      var(--volt-400) 32%,
+      var(--volt-500) 50%,
+      var(--volt-600) 66%,
+      var(--volt-700) 80%,
+      var(--volt-700)100%);
+
+  /* The CTA's hotspot, scaled up slightly and otherwise left alone. It was
+     widened to 62% with full alpha held to 14%, and a plateau is exactly what
+     kills this effect: the whole top edge lit evenly reads as a uniform strip,
+     where the CTA reads as a concentrated point that falls away. The falloff
+     curve here is the CTA's, 1 to .70 to .28 to 0, with no flat section. */
+  --rim-card-hot: radial-gradient(ellipse 38% 76% at 50% 0%,
+      rgba(var(--volt-200-rgb),1)   0%,
+      rgba(var(--volt-200-rgb),.70) 24%,
+      rgba(var(--volt-200-rgb),.28) 55%,
+      rgba(var(--volt-200-rgb),0)  100%);
+
+  --rim-top: radial-gradient(ellipse 200% 100% at 50% 0%,
+      var(--volt-200)  0%,
+      var(--volt-300)  5%,
+      var(--volt-400) 11%,
+      var(--volt-400) 32%,
+      var(--volt-600) 48%,
+      var(--volt-900) 70%,
+      var(--volt-900) 100%);
+  --grad-depth: linear-gradient(180deg,var(--obsidian),var(--volt-900));
+
+  /* ---- DERIVED ---- */
+  /* Ends at volt-700, ABOVE the background's volt-800 ceiling. These are
+     objects, not scenery: the result bar and the closing bar are the payoff
+     lines of their sections and are supposed to pop off the ground rather than
+     blend into it. volt-700 measures L=0.0350 against a background that never
+     exceeds 0.0224, so it reads as lit.
+
+     It is not full voltage (L=0.0715). That was tried and read as a slab of
+     light: at the width of the page, voltage is three times the hero's hottest
+     point and stops being an accent. volt-700 is the step that pops without
+     becoming the brightest thing on the screen. */
+  --grad-structure:linear-gradient(90deg,var(--abyss),var(--volt-900) 40%,var(--volt-700));
+  --glow-cta:      0 10px 30px rgba(var(--voltage-rgb),.34);
+  --glow-cta-hover:0 14px 40px rgba(var(--voltage-rgb),.52);
+  --shadow-card:   0 2px 14px rgba(0,0,0,.35);
+  --shadow-card-hover:0 12px 30px rgba(0,0,0,.5);
+  --inset-hi:      inset 0 1px 0 rgba(255,255,255,.16);
+
+  font-family:var(--fb); color:var(--text-primary);
+  /* NO background here. `.sd-root` is on <body>, the same element the page
+     gradient is set on, and this flat --bg fill was declared AFTER it in the
+     file, so it won the cascade and painted obsidian over the entire ramp.
+     That is why the page read as black no matter what the gradient said. */
+  line-height:1.6; font-size:16px; -webkit-font-smoothing:antialiased;
+}
+
+/* =====================================================================
+   PART 2 — RETAINED SDP ANATOMY, RE-POLARISED (token-only)
+   ===================================================================== */
+
+*{ box-sizing:border-box; }
+html{ -webkit-text-size-adjust:100%; }
+/* THE PAGE IS ONE GRADIENT.
+   Every section used to paint its own ground, which is what produced visible
+   seams: two flat fills meeting at a section edge is a hard line however close
+   the colours are. So the whole document carries a single vertical ramp here
+   and every band below is transparent. Nothing can seam, because there is only
+   one surface.
+
+   The ramp does not run once from dark to light: it CYCLES. A single ramp put
+   its only bright point at 100%, which meant the hero was lit, the finale was
+   lit, and the entire middle of the page, which is most of it, sat at
+   near-black. Instead the gradient rises and falls three times between
+   volt-900 and volt-700, so wherever the reader is on the page the ground is
+   moving through the range rather than sitting at one end of it.
+
+   The peaks are placed INSIDE sections, not at their boundaries. A peak landing
+   on a section edge would read as two different backgrounds meeting, which is
+   the seam this whole approach exists to remove.
+
+   Only the hero holds obsidian, because the fold has its own bloom and a lit
+   ground underneath would fight it.
+
+   The ceiling is the HERO's own brightness, and the shape matters as much as
+   the value. Measured, the hero bloom composites to L=0.0224 at its hottest
+   point but sits at 0.005 to 0.011 across most of its area, because the mask
+   keeps the bright part small. Earlier versions used volt-800 (L=0.0194) as a
+   broad stop, which made whole full-width bands as bright as the hero's single
+   hottest spot. That is why the sections read as too bright while the hero
+   read as right.
+
+   THE BACKGROUND IS NEVER BRIGHT. Its ceiling is volt-900 (L=0.0060), not
+   volt-800 (0.0194). Every stop in this ramp is obsidian, volt-900 or abyss,
+   which measure 0.0042, 0.0060 and 0.0062: the entire background lives inside
+   a 0.002 band of near-black and there is no value in it that can read as lit.
+
+   volt-800 was tried as the ceiling and removed. It measures under the hero's
+   own peak, so on paper it was safe, but the hero only touches its peak inside
+   a small masked bloom while a background stop holds that value across the full
+   width of the page. Area is the difference, and it is not recoverable by
+   tuning: the only reliable fix is to keep bright values out of the background
+   entirely.
+
+   Movement comes from hue and from a 1.4x luminance swing rather than from
+   brightness. That is the intended trade. The foreground is what pops, and it
+   pops because there is nothing behind it competing.
+
+   THE TAIL. From 80%, the end of the FAQ, the ramp lifts through abyss to
+   volt-900 at the very bottom, so the footer arrives as the page's brightest
+   point WITHOUT leaving the near-black band. volt-800 was tried here and read
+   as too hot even as a climb: at L=0.0194 it is three times the ground it rises
+   out of, and across the whole width of a footer that is a lit panel however
+   gradually it arrives.
+
+   volt-900 is 1.4x obsidian, which is enough to feel like an arrival and not
+   enough to be bright. The climb still runs across a fifth of the page and
+   never begins at an edge, so there is no line for a boundary to show on.
+
+   `scroll`, not `fixed`: fixed pins the ramp to the viewport so every screen
+   shows the same thing and nothing ever changes as you move. */
+body{ margin:0; overflow-x:hidden;
+  background:linear-gradient(180deg,
+    var(--obsidian)  0%,
+    var(--obsidian) 16%,
+    var(--volt-900) 27%,
+    var(--obsidian) 40%,
+    var(--abyss)    52%,
+    var(--obsidian) 64%,
+    var(--volt-900) 74%,
+    var(--obsidian) 80%,
+    var(--abyss)    90%,
+    var(--volt-900)100%);
+  background-attachment:scroll; }
+
+/* CRITICAL: margin-BLOCK only, never the `margin` shorthand.
+   These base rules are element-qualified (`.sd-root h1` = 0,1,1), so they
+   out-specify every component class that centres itself with `margin:0 auto`
+   (`.sdp-h1` = 0,1,0). A shorthand here writes margin-left/right:0 into those
+   blocks and silently drifts them flush-left inside their wrapper, which reads
+   as "the section is not centred" and is impossible to spot in the component's
+   own CSS. `margin-block` cannot reach the inline axis, so the collision cannot
+   happen. The UA default for h1-h4 has no inline margin, so nothing is lost. */
+.sd-root h1,.sd-root h2,.sd-root h3,.sd-root h4{ font-family:var(--fh); color:var(--ivory);
+  line-height:1.05; letter-spacing:.01em; font-weight:400; margin-block:0 .5em; }
+.sd-root p{ font-family:var(--fb); color:var(--text-primary); margin-bottom:1em; }
+.sd-root strong,.sd-root b{ font-weight:700; color:var(--ivory); }
+/* Same rule as the headings above, same reason: `.sd-root ul` (0,1,1) beat
+   a class-centred block (0,1,0) and killed its `margin:0 auto`, so a
+   max-width element sat flush left in a wider column. UA `ul` has no inline margin, only
+   a padding-left, which the padding reset already handles. */
+.sd-root ul{ margin-block:0; padding:0; list-style:none; }
+.sd-root :focus-visible{ outline:2px solid var(--focus-ring); outline-offset:3px; border-radius:4px; }
+
+/* ---- BANDS. Dark is the ground; light is the rare accent ------------- */
+/* The neutral bands carry an ambient COBALT wash rather than a flat fill.
+   The client's spend ratio gives 30% to "STRUCTURE — Cobalt + Abyss, hierarchy
+   and depth", and that tier was previously unspent: every band below the hero
+   was flat obsidian or graphite, which is why the page read as near-black with
+   a blue hero rather than as a blue-tinted system.
+
+   Applied as background LAYERS, not a ::before. A positioned pseudo-element
+   with inset:0 paints above non-positioned content and would sit over the text;
+   a background layer composites underneath with no stacking risk at all.
+
+   Measured at the densest point: bone 15.2:1, ivory 16.4:1, secondary 7.4:1.
+   Nothing is traded for it. */
+/* The band classes no longer paint a background: the page gradient behind them
+   is the only ground. They survive purely for the SURFACE TOKENS they promote,
+   so a card still lifts off whatever part of the ramp it happens to sit on. */
+.sd-dark  { background:transparent; }
+/* On a graphite band the cards must lift OFF it, so the band promotes the
+   surface tokens one step. Same components, no per-section overrides. */
+.sd-panel { background:transparent;
+  --surface:var(--slate); --surface-raised:var(--slate-700); --border:rgba(254,243,232,.13); }
+.sd-depth { background:transparent; }
+.sd-deep  { background:transparent;
+  --surface:rgba(254,243,232,.05); --surface-raised:rgba(254,243,232,.09);
+  --border:rgba(254,243,232,.15); }
+
+/* THE LIGHT BAND IS GONE. It was the one bone-coloured section on the page
+   (the proof beat) and it re-declared the whole semantic token set to survive
+   on a pale ground. With the page running as a single dark gradient there is
+   no beige anywhere, so the overrides, the light-band rim variant and the
+   dark-heading rules that went with it are all removed rather than left
+   unreachable. Proof now sits on the ramp like every other beat. */
+
+.sd-section{ padding:var(--sp-sec) 0; position:relative; overflow:hidden; }
+
+.sdp-wrap{ width:100%; max-width:1120px; margin:0 auto; padding:0 clamp(18px,4vw,28px); }
+
+/* ---- Typography atoms ---- */
+/* Section eyebrow: a rule on BOTH sides, built like the one above "Featured
+   in". Each line is brightest at its INNER end, beside the text, and walks the
+   voltage ramp outward before fading to nothing at the far end, so the pair
+   reads as one line passing behind the label and dissolving into the page.
+
+   The two are mirrors: the left runs its ramp left-to-right and the right runs
+   it right-to-left, so both are bright toward the middle of the screen.
+
+   Flex with `flex:1` on the rules, not the old inline-block dash. The label is
+   whatever width its words make it, and the rules take the rest, so they stay
+   symmetrical on a one-word eyebrow and a five-word one alike. `max-width`
+   stops them running the full column on a short label. */
+.sdp-eyebrow{ font-family:var(--fb);
+  font-size:11.5px; font-weight:700; letter-spacing:.18em; text-transform:uppercase;
+  margin-bottom:var(--sp-label); color:var(--accent-text); }
+
+.sdp-eyebrow.center{ display:flex; align-items:center; justify-content:center; gap:16px;
+  text-align:center; margin-left:auto; margin-right:auto; max-width:600px; }
+
+.sdp-eyebrow.center::before,
+.sdp-eyebrow.center::after{ content:""; flex:1 1 0; max-width:190px; height:1px; }
+
+/* Longer on desktop. The caps are raised together with the container, because
+   `flex:1` can only take the space the container gives it: leaving max-width at
+   600px would let the rules grow to 190px and stop, whatever the caps said. */
+@media (min-width:900px){
+  .sdp-eyebrow.center{ max-width:940px; gap:22px; }
+  .sdp-eyebrow.center::before,
+  .sdp-eyebrow.center::after{ max-width:340px; }
+}
+
+/* outer edge -> inner end */
+.sdp-eyebrow.center::before{
+  background:linear-gradient(90deg,
+    rgba(var(--volt-400-rgb),0)    0%,
+    rgba(var(--volt-400-rgb),.34) 28%,
+    var(--volt-400)               56%,
+    var(--volt-300)               80%,
+    var(--volt-200)              100%); }
+
+/* inner end -> outer edge (the mirror) */
+.sdp-eyebrow.center::after{
+  background:linear-gradient(90deg,
+    var(--volt-200)                0%,
+    var(--volt-300)               20%,
+    var(--volt-400)               44%,
+    rgba(var(--volt-400-rgb),.34) 72%,
+    rgba(var(--volt-400-rgb),0)  100%); }
+
+/* Same single-device-pixel hairline as the trust rule. */
+@media (min-resolution:2dppx){
+  .sdp-eyebrow.center::before,
+  .sdp-eyebrow.center::after{ height:.5px; }
+}
+
+/* "This is for you if" takes one extra ladder step between its eyebrow and its
+   title. Scoped to the section rather than changed globally, because the rest
+   of the page reads correctly at --sp-label and a global bump would move eight
+   mastheads to fix one.
+
+   It borrows --sp-deck, which is itself a discrete ladder step at every width,
+   so this section's eyebrow gap is 24px on mobile and 40px on desktop: rungs 3
+   and 4, never anything between. There is no hierarchy cost here either, since
+   this section passes no deck and nothing below the title competes with the
+   wider gap. */
+#fit .sdp-eyebrow.center{ margin-bottom:var(--sp-deck); }
+
+/* The masthead block. It carries the separation from the content, so that
+   space exists whether or not the section supplies a deck. */
+.sdp-head{ margin-bottom:var(--sp-body); }
+
+h2.sdp-h2{ text-align:center; font-size:clamp(28px,4.4vw,52px); letter-spacing:.02em;
+  line-height:1.14; margin-bottom:0; }
+/* Only when a deck follows. As the last child the headline needs no gap under
+   it, because the wrapper is already providing one. */
+h2.sdp-h2:not(:last-child){ margin-bottom:var(--sp-deck); }
+
+/* Inside a masthead the deck adds nothing below itself: the wrapper owns it.
+   Outside one (the hero, the finale) .sdp-sub keeps its own spacing. */
+.sd-root .sdp-head .sdp-sub{ margin-bottom:0; }
+.sd-root h2.sdp-h2 em{ font-style:normal; color:var(--accent-text); }
+
+.sd-root .sdp-sub{ width:100%; text-align:center; max-width:680px; margin:0 auto var(--sp-body);
+  /* 15px was below the 16px body, so the deck was the smallest text in the
+     masthead while being the one that has to be read. It now meets body size
+     and grows a little past it on wide screens. */
+  font-size:clamp(15px,1.45vw,17px); line-height:1.7; color:var(--text-secondary); }
+
+.sdp-h1{ max-width:1000px; margin:0 auto 18px; line-height:1.04; }
+.sdp-h1-l1{ display:block; font-family:var(--fh); font-size:clamp(34px,5.6vw,70px);
+  color:var(--ivory); line-height:1.0; letter-spacing:.02em; text-wrap:balance; }
+.sdp-h1-l2{ display:block; font-family:var(--fh); font-size:clamp(20px,3vw,36px);
+  color:var(--accent-text); line-height:1.1; margin-top:8px; text-wrap:balance; }
+
+/* The lit tokens inside headline line 1 ("3X", "60 Days"): the two words that
+   carry the promise, in the warm accent. Sand is 10.28:1 on obsidian, so this
+   is a full-strength text colour here and needs no size floor.
+   `inherit` on font and size, because this is a colour change inside a
+   sentence, not a second typographic voice. */
+.sdp-lit{ color:var(--accent-text); font:inherit; }
+
+/* Reveal — FAIL-OPEN (C7): content is visible until JS arms the page by
+   putting .sd-armed on the root. If the script never runs, nothing is
+   ever hidden. */
+.sd-armed [data-sdp-reveal]{ opacity:0; transform:translateY(28px); }
+[data-sdp-reveal]{ transition:opacity .7s ease, transform .7s cubic-bezier(.2,.8,.2,1); transition-delay:var(--d,0s); }
+.sd-armed [data-sdp-reveal].vis{ opacity:1; transform:translateY(0); }
+
+/* ---- HERO stage — obsidian ground, the client's HERO FIELD gradient
+   held to a masked bloom so voltage never takes the whole fold, with the
+   masked grid over it ------------------------------------------------- */
+.sdp-hero{ padding:22px 0 48px; position:relative; overflow:hidden; }
+/* The client's HERO FIELD gradient, held to a masked bloom. Opacity and reach
+   were raised together: at .30 behind a 70%-wide mask the blue read as a faint
+   tint rather than as the stage the system describes. At .52 behind a 92% mask
+   the fold is unmistakably lit and the type is untouched: ivory measures 13.0:1
+   and sand 7.5:1 even at the bloom's hottest point, which is the voltage end of
+   the gradient directly under the wordmark. */
+.sdp-hero::before{ content:""; position:absolute; inset:0; pointer-events:none;
+  background:var(--grad-hero); opacity:.52;
+  -webkit-mask-image:radial-gradient(ellipse 92% 72% at 50% 4%,#000 0%,transparent 74%);
+  mask-image:radial-gradient(ellipse 92% 72% at 50% 4%,#000 0%,transparent 74%); }
+
+/* The grid. Back at a much lower level: .20 alpha on the lines dropped to .11,
+   which is what makes it read as texture under the type rather than as a
+   drawn lattice. The radial mask is unchanged, so it still fades out before it
+   reaches the edges of the fold instead of tiling to the corners. */
+.sdp-hero::after{ content:""; position:absolute; inset:0; pointer-events:none;
+  background-image:
+    linear-gradient(rgba(var(--voltage-rgb),.11) 1px,transparent 1px),
+    linear-gradient(90deg,rgba(var(--voltage-rgb),.11) 1px,transparent 1px);
+  background-size:46px 46px;
+  -webkit-mask-image:radial-gradient(ellipse at 50% 38%,#000 34%,transparent 78%);
+  mask-image:radial-gradient(ellipse at 50% 38%,#000 34%,transparent 78%); }
+.sdp-hero-inner{ position:relative; z-index:1; text-align:center; padding-top:10px; }
+
+/* The client's wordmark. A 3D chrome, glowing, gaming-style lockup against
+   a flat, disciplined colour system: the two do not sit together easily.
+   It is the client's, so it ships as supplied, SMALL and unrestyled.
+   Flagged in the skin doc rather than solved here. */
+.cso-logo{ display:block; width:auto; height:clamp(46px,7vw,66px); margin:0 auto 22px; }
+
+/* ---- Hero gate: bordered pill + glowing dot ---- */
+/* The gate pill carries the same top-lit rim as the CTA: it is the first
+   object in the fold and a flat blue outline next to a lit button reads as
+   the unfinished one. Its own translucent voltage wash stays as the fill,
+   clipped to the padding box so the rim can own the border box. */
+.sdp-eyebrow-pill{ display:inline-flex; align-items:center; gap:10px; margin-bottom:20px;
+  padding:8px 18px 8px 14px; border-radius:999px;
+  border:1px solid transparent;
+  /* the fill is wrapped in a gradient because a COLOR is only legal in the
+     LAST layer of the background shorthand; as the first layer it invalidates
+     the whole declaration and the rim silently never paints. */
+  background:linear-gradient(rgba(var(--voltage-rgb),.13),rgba(var(--voltage-rgb),.13)) padding-box,
+             var(--rim-hot) border-box,
+             var(--rim-top) border-box;
+  font-family:var(--fb); font-size:11.5px; font-weight:700; letter-spacing:.14em;
+  text-transform:uppercase; color:var(--sand); line-height:1.5; text-align:left; }
+.sdp-eyebrow-pill .glowdot{ position:relative; width:8px; height:8px; border-radius:50%;
+  background:var(--focus-ring); flex:0 0 8px; box-shadow:0 0 10px 2px rgba(var(--voltage-rgb),.9); }
+.sdp-eyebrow-pill .glowdot::before{ content:""; position:absolute; inset:-4px; border-radius:50%;
+  background:var(--focus-ring); opacity:.4; animation:sdpDotPulse 2s ease-out infinite; }
+@keyframes sdpDotPulse{ 0%{transform:scale(.6);opacity:.5} 100%{transform:scale(2.6);opacity:0} }
+
+/* ---- PRIMARY CTA — wide voltage pill, shimmer sweep, circular arrow ---- */
+.sdp-lockup{ display:flex; flex-direction:column; align-items:center; width:100%; margin:28px auto 0; }
+/* The rim is painted with the padding-box / border-box technique: a transparent
+   border, the fill clipped to the padding box, and the rim gradient clipped to
+   the border box underneath it. A gradient cannot be a border-color, and a ring
+   drawn as a pseudo-element would be clipped by the overflow:hidden this button
+   needs for its shimmer. Two backgrounds on the element itself avoid both
+   problems and add no markup. */
+.sdp-cta{ display:inline-flex; flex-direction:column; align-items:center; justify-content:center; gap:5px;
+  min-width:min(690px,100%); max-width:100%; padding:17px 44px 15px;
+  border:1px solid transparent;
+  background:var(--grad-cta) padding-box,
+              var(--rim-hot) border-box,
+              var(--rim-top) border-box;
+  color:var(--cta-ink); border-radius:999px;
+  font-family:var(--fh); font-size:18px; letter-spacing:.06em; line-height:1.2;
+  text-align:center; text-decoration:none; position:relative; overflow:hidden;
+  /* no --inset-hi here: its white top line sits directly under the rim's own
+     upper arc and the two read as one muddy double edge.
+     The tight blue ring is what makes a 1px rim read as GLOWING rather than
+     merely drawn: at this weight the edge needs light bleeding off it, not
+     more width. */
+  /* The negative spread does most of the work here, not the alpha. At -6px on
+     a 13px blur only 7px of glow survives and the edge reads as bare; at -4px
+     on 18px it hazes well above the button. -4px on 15px is the middle. */
+  box-shadow:var(--glow-cta),
+    0 -5px 15px -4px rgba(var(--volt-300-rgb),.49),
+    0 -2px 7px -3px rgba(var(--volt-400-rgb),.38);
+  transition:transform .2s, filter .2s, box-shadow .2s; }
+/* The sweep is BLUE, not white. A white sheen travelling across a blue fill is
+   the other half of the silver read: the rim can be as blue as you like and the
+   button still flashes chrome every time it is hovered. rgb(130,144,255) is the
+   same peak the rim's arcs use, so the sweep looks like the same light moving
+   rather than a second, colder one. */
+.sdp-cta::after{ content:""; position:absolute; top:0; bottom:0; left:-60%; width:40%;
+  background:linear-gradient(120deg,transparent,rgba(var(--volt-300-rgb),.55),transparent);
+  transform:skewX(-20deg); transition:left .9s; }
+.sdp-cta:hover{ transform:translateY(-2px); filter:brightness(1.08);
+  box-shadow:var(--glow-cta-hover),
+    0 -6px 19px -4px rgba(var(--volt-300-rgb),.63),
+    0 -3px 10px -3px rgba(var(--volt-400-rgb),.52); }
+.sdp-cta:hover::after{ left:120%; }
+.sdp-cta > *{ position:relative; z-index:1; }
+.sdp-cta-main{ display:inline-flex; align-items:center; justify-content:center; gap:14px; flex-wrap:wrap; }
+.sdp-cta .arrow{ width:26px; height:26px; border-radius:50%; background:rgba(var(--volt-200-rgb),.28);
+  display:grid; place-items:center; color:var(--cta-ink); flex:0 0 26px; }
+.sdp-cta .cta-sub{ font-family:var(--fb); font-size:11px; font-weight:600; letter-spacing:.05em;
+  color:var(--cta-ink-soft); text-transform:uppercase; }
+.sd-root .sdp-cta-note{ display:block; width:100%; margin:14px auto 0; max-width:760px;
+  font-style:italic; font-size:13px; color:var(--text-secondary); text-align:center; }
+
+
+
+
+
+/* WHICH elements catch the light, and nothing else.
+
+   These are the page's load-bearing surfaces: the cards that carry the
+   argument, the video frame, the open FAQ row, the Venn's detail panel and the
+   result bar. Deliberately NOT applied to: the honest placeholders (an
+   unfinished slot should not look polished), the small chips and pills (a 1px
+   specular on a 28px pill is noise), or anything on the light band.
+
+   Composed here rather than added to the markup so the list of what glows is
+   one reviewable block instead of a class scattered across nine files. */
+.sdp-q.open,
+.cso-venn-detail,
+.cso-result{ position:relative; }
+
+.sdp-q.open::before,
+.cso-venn-detail::before,
+.cso-result::before{
+  content:""; position:absolute; inset:0; border-radius:inherit;
+  padding:1px; background:var(--rim-spec); opacity:.5; pointer-events:none;
+  -webkit-mask:linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+  -webkit-mask-composite:xor;
+  mask:linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+  mask-composite:exclude;
+  transition:opacity .28s ease; z-index:0; }
+
+.cso-venn-detail:hover::before{ opacity:.92; }
+
+/* The result bar is a statement, not a control: it holds a steady sheen and
+   does not brighten on hover, because nothing about it is clickable. */
+.cso-result::before{ opacity:.62; }
+
+/* The open FAQ row is already marked by a voltage border and a shadow, so its
+   specular stays low: two emphasis treatments at full strength read as a bug. */
+.sdp-q.open::before{ opacity:.42; }
+
+/* The success cards are excluded in the selectors above, not switched off
+   here. They already own their ::before for the voltage cap across the top
+   edge, and a pseudo-element can only be one thing: an override after the fact
+   would still inherit the ring's padding and mask, and the mask would cut a
+   hole straight through the cap. */
+
+
+@media (prefers-reduced-motion:reduce){
+  .sdp-q.open::before,.cso-venn-detail::before,.cso-result::before{ transition:none; }
+}
+
+/* ---- CARD SYSTEM — graphite panel, slate hairline, voltage on hover ---- */
+/* Every card carries the top-lit rim: brightest at top centre, dying by the
+   bottom. Painted with the padding-box / border-box technique rather than a
+   ::before ring, which leaves ::before free for the cards that already use it
+   (the success cards draw their own top cap there). */
+.sdp-card{ border:1px solid transparent; border-radius:14px; padding:26px;
+  /* --surface wrapped in a gradient: a colour in a non-final background
+     layer is invalid CSS and drops the entire declaration, which is why the
+     rims were not appearing on cards at all. */
+  background:linear-gradient(var(--surface),var(--surface)) padding-box,
+             var(--rim-card-hot) border-box,
+             var(--rim-card) border-box;
+  /* The glow is TIGHT, held close to the edge. The hero's bloom is a masked
+     overlay: its light lives inside the section and fades before it reaches
+     anything, so nothing on that fold throws light across the page. A card
+     glow spreading 22px did exactly that and read as a different, louder
+     effect than the one it is supposed to match. Halved.
+
+     Four shadows, four jobs: a 1px ring so the whole edge stays readable
+     including the bottom, a short even ambient so the card sits in its own
+     light, a top-weighted layer, and a tight volt-200 core above it so the
+     light reads as coming off the edge rather than hazing around it. */
+  box-shadow:
+    0 0 0 1px rgba(var(--volt-700-rgb),.30),
+    0 0 10px -6px rgba(var(--volt-500-rgb),.30),
+    0 -3px 11px -7px rgba(var(--volt-300-rgb),.62),
+    0 -2px 6px -5px rgba(var(--volt-200-rgb),.45),
+    var(--shadow-card);
+  transition:transform .2s, box-shadow .2s;
+  position:relative; }
+.sdp-card:hover{ transform:translateY(-2px);
+  box-shadow:
+    0 0 0 1px rgba(var(--volt-600-rgb),.45),
+    0 0 13px -5px rgba(var(--volt-500-rgb),.42),
+    0 -4px 14px -6px rgba(var(--volt-300-rgb),.72),
+    0 -2px 8px -4px rgba(var(--volt-200-rgb),.58),
+    var(--shadow-card-hover); }
+.sdp-pillar-num{ display:inline-flex; align-items:center; justify-content:center;
+  width:46px; height:46px; border-radius:10px;
+  background:linear-gradient(135deg,rgba(var(--voltage-rgb),.30),rgba(var(--cobalt-rgb),.20));
+  border:1px solid rgba(var(--voltage-rgb),.55);
+  font-family:var(--fh); font-size:22px; color:var(--ivory); letter-spacing:.04em; flex:0 0 46px; }
+
+/* ---- THE FIT: three grouped boxes ------------------------------------
+   The six source lines used to run as one list of six. Grouped two-by-two
+   they stop being a list of complaints and become a diagnosis with a shape,
+   and the reader can see which of the three they are standing in. */
+
+/* FOR YOU sits in the warm accent. The title is display type at up to 52px,
+   so this is a large-text use and sand clears it comfortably. */
+.fit-lit{ font-style:normal; color:var(--sand); }
+
+/* Two lines, always broken, never reflowed into a paragraph: the second line
+   is the turn ("you need a system") and it only lands if it starts on its
+   own. */
+.sd-root .fit-deck{ display:flex; flex-direction:column; gap:6px; }
+
+.fit-grid{ display:grid; grid-template-columns:repeat(3,1fr);
+  gap:var(--space-3); max-width:1060px; margin:0 auto; align-items:stretch; }
+@media (max-width:980px){ .fit-grid{ grid-template-columns:1fr; max-width:560px; } }
+
+/* The rim now comes from .sdp-card. All this box adds is a BLACK ground:
+   --surface on this band is slate, a lifted grey panel, and these cards should
+   sit as dark as the page so the lit edge is the only thing describing them. */
+.fit-box{ display:flex; flex-direction:column;
+  padding:var(--space-4) var(--space-3);
+  background:linear-gradient(var(--obsidian),var(--obsidian)) padding-box,
+             var(--rim-card-hot) border-box,
+             var(--rim-card) border-box; }
+
+/* The header is a row: icon, then the title and subtitle stacked beside it.
+   Left aligned, because a centred block next to a fixed-width icon leaves an
+   uneven gap on one side and the icon stops looking attached to the words. */
+.fit-box-head{ display:flex; align-items:flex-start; gap:14px; text-align:left; }
+
+/* The icon sits on the accent, in its own bed, so it reads as a marker for the
+   box rather than as a fourth piece of type. */
+.fit-box-ic{ flex:0 0 40px; width:40px; height:40px; border-radius:11px;
+  display:grid; place-items:center; color:var(--sand);
+  background:rgba(var(--voltage-rgb),.16);
+  border:1px solid rgba(var(--voltage-rgb),.42); }
+
+/* Title and subtitle the right way round: the subtitle was display type at up
+   to 21px while the title was a 12px label, so the box read as though its
+   subtitle were the heading. The title takes the display face; the subtitle
+   drops to BODY style, the same face and size as the pointers under it, so it
+   reads as prose introducing them rather than a second heading. */
+.fit-box-title{ text-align:left; font-family:var(--fh);
+  font-size:clamp(17px,1.9vw,21px); font-weight:400; letter-spacing:.06em;
+  text-transform:uppercase; color:var(--sand); margin:0 0 5px; }
+
+.sd-root .fit-box-sub{ text-align:left; font-family:var(--fb);
+  font-size:14.5px; line-height:1.55; font-weight:400;
+  color:var(--text-secondary); margin:0; }
+
+/* The divider. Same ramp language as the eyebrow rules: brightest where the
+   content is and fading out at both ends, rather than a flat hairline. */
+.fit-box-rule{ display:block; height:1px; margin:var(--space-3) 0;
+  background:linear-gradient(90deg,
+    rgba(var(--volt-400-rgb),0)    0%,
+    var(--volt-400)               18%,
+    var(--volt-300)               50%,
+    var(--volt-400)               82%,
+    rgba(var(--volt-400-rgb),0)  100%); }
+@media (min-resolution:2dppx){ .fit-box-rule{ height:.5px; } }
+
+.fit-box-points{ display:flex; flex-direction:column; gap:14px; margin:0; }
+.fit-box-points li{ display:flex; gap:12px; font-size:14.5px; line-height:1.6;
+  color:var(--text-primary); }
+.fit-box-points .ck{ flex:0 0 22px; width:22px; height:22px; border-radius:50%;
+  background:rgba(var(--voltage-rgb),.24); border:1.5px solid var(--focus-ring);
+  color:var(--ivory); display:grid; place-items:center; margin-top:1px; }
+
+/* ---- FAQ — rotate-to-cross ---- */
+.sdp-faq{ max-width:840px; margin:0 auto; text-align:left; }
+.sdp-q{ background:var(--surface); border:1px solid var(--border); border-radius:14px;
+  margin-bottom:12px; overflow:hidden; transition:border-color .25s, background .25s, box-shadow .25s; }
+.sdp-q.open{ border-color:var(--voltage); background:var(--surface-raised);
+  box-shadow:0 10px 30px rgba(var(--voltage-rgb),.14); }
+.sdp-q-head{ width:100%; background:transparent; border:0; text-align:left; padding:20px 24px;
+  display:flex; align-items:center; justify-content:space-between; gap:18px;
+  font-family:var(--fb); font-size:15.5px; font-weight:600; color:var(--ivory); cursor:pointer; }
+.sdp-q-head .ic{ flex:0 0 30px; width:30px; height:30px; border-radius:50%;
+  background:rgba(var(--voltage-rgb),.22); color:var(--ivory); display:grid; place-items:center;
+  border:1px solid rgba(var(--voltage-rgb),.45); transition:transform .3s, background .3s, color .3s; }
+.sdp-q.open .sdp-q-head .ic{ background:var(--voltage); border-color:var(--voltage);
+  color:var(--cta-ink); transform:rotate(45deg); }
+.sdp-q-body{ max-height:0; overflow:hidden; transition:max-height .45s cubic-bezier(.2,.8,.2,1); }
+.sdp-q.open .sdp-q-body{ max-height:900px; }
+.sdp-q-body-inner{ padding:0 24px 22px; }
+.sd-root .sdp-q-body-inner p{ font-size:14.5px; line-height:1.7; margin:0 0 12px; color:var(--text-primary); }
+.sd-root .sdp-q-body-inner p:last-child{ margin-bottom:0; }
+.sdp-q-list{ display:flex; flex-direction:column; gap:9px; margin:0 0 12px; }
+.sdp-q-list li{ display:flex; gap:11px; font-size:14.5px; line-height:1.6; color:var(--text-primary); }
+.sdp-q-list li::before{ content:""; flex:0 0 7px; width:7px; height:7px; border-radius:50%;
+  background:var(--voltage); margin-top:9px; box-shadow:0 0 8px rgba(var(--voltage-rgb),.8); }
+
+/* ---- VSL FRAME (hero focal media) ---- */
+/* The VSL frame is the ONE object on the page whose rim travels.
+   Everything else is top-lit and static, because a page of moving edges is
+   noise; this is the focal object of the fold, and the motion is what makes it
+   read as the thing to look at.
+
+   A CONIC gradient, not the radial used elsewhere: a conic sweeps around the
+   full perimeter, so the light is present on all four edges rather than falling
+   away at the bottom, which is what "everywhere" needs. Rotating its `from`
+   angle moves the highlight around the frame.
+
+   `--vsl-spin` has to be registered with @property or it is just a string and
+   cannot be interpolated: an unregistered custom property animates by
+   discrete jumps and the sweep would stutter round in steps. Where @property
+   is unsupported the angle simply stays at its initial value and the frame
+   keeps a handsome static rim, so nothing breaks. */
+@property --vsl-spin{ syntax:"<angle>"; inherits:false; initial-value:0deg; }
+
+.sdp-vsl{ position:relative; width:100%; max-width:900px; margin:24px auto 0; aspect-ratio:16/9;
+  border-radius:var(--r-xl); overflow:hidden;
+  border:1px solid transparent;
+  background:linear-gradient(160deg,var(--abyss),var(--graphite)) padding-box,
+             conic-gradient(from var(--vsl-spin) at 50% 50%,
+               var(--volt-800)   0deg,
+               var(--volt-600)  38deg,
+               var(--volt-300)  74deg,
+               var(--volt-200)  90deg,
+               var(--volt-300) 106deg,
+               var(--volt-600) 142deg,
+               var(--volt-800) 190deg,
+               var(--volt-700) 250deg,
+               var(--volt-500) 300deg,
+               var(--volt-700) 330deg,
+               var(--volt-800) 360deg) border-box;
+  animation:vslRimSpin 9s linear infinite;
+  /* Was `0 40px 90px -40px #000`. On a near-black ground a pure-black shadow
+     pushed 40px down does not read as depth, it reads as a second dark rounded
+     rectangle sitting behind the frame, which is exactly what it looked like.
+     Pulled much closer, softened, and tinted to volt-900 so it belongs to the
+     palette instead of being pure black. */
+  /* The outer glow. Four layers on the SAME falloff principle as the node on
+     the trust line: short-and-strong stacked under long-and-weak, so the light
+     has a curve instead of a flat haze. It is even on all four sides, because
+     the rim it belongs to is a conic that lights the whole perimeter, and a
+     glow weighted to one edge under an all-round rim would read as a mistake.
+
+     One colour, volt-400, across every layer. The earlier version stepped
+     500 to 600 outward, which darkened as it spread and read as shading rather
+     than as light; holding a single step means only the alpha falls and the
+     glow stays the same blue all the way out.
+
+     The reach has been pulled in twice: 14, 38 and 80 first to 7, 19 and 40,
+     then to 4, 12 and 25, with the spreads and the lift offsets scaled to
+     match each time. Alphas are untouched, so the glow is the same
+     strength at the edge and simply does not travel as far.
+
+     Each layer is then lifted by roughly a quarter of its own blur, so the
+     light drains off the BOTTOM while the top and sides keep it. Offsetting
+     rather than dimming is what preserves the falloff: cutting the bottom with
+     lower alpha would thin the whole glow evenly, since a box-shadow has one
+     alpha for its entire ring. The 1px rim is deliberately NOT offset, because
+     it traces the frame's own edge and would show as a doubled line the moment
+     it moved.
+
+     The volt-900 drop underneath still runs downward, which is what the bottom
+     now reads as: the frame grounded on the page rather than lit from below.
+
+     The volt-900 drop stays underneath it and keeps the frame sitting on the
+     page rather than floating. */
+  box-shadow:
+    0 0 0 1px rgba(var(--volt-400-rgb),.30),
+    0 -1px 4px 0 rgba(var(--volt-400-rgb),.34),
+    0 -3px 12px 1px rgba(var(--volt-400-rgb),.26),
+    0 -7px 25px 4px rgba(var(--volt-400-rgb),.16),
+    0 16px 44px -28px rgba(var(--volt-900-rgb),.9); }
+@keyframes vslRimSpin{ to{ --vsl-spin:360deg; } }
+.sdp-vsl-play{ position:absolute; inset:0; display:grid; place-items:center; cursor:pointer; border:0;
+  background:radial-gradient(circle at 50% 50%, rgba(8,8,66,.30), rgba(13,13,18,.62)); transition:background .3s; }
+.sdp-vsl-disc{ position:relative; width:82px; height:82px; border-radius:50%; display:grid; place-items:center;
+  background:var(--grad-cta); color:var(--cta-ink); box-shadow:var(--glow-cta);
+  transition:transform .3s cubic-bezier(.2,.8,.2,1); }
+.sdp-vsl-play:hover .sdp-vsl-disc{ transform:scale(1.06); }
+.sdp-vsl-disc::after{ content:""; position:absolute; inset:0; border-radius:50%;
+  border:2px solid rgba(var(--voltage-rgb),.6); animation:sdpDiscPing 2.6s ease-out infinite; }
+@keyframes sdpDiscPing{ 0%{transform:scale(1);opacity:.6} 100%{transform:scale(1.5);opacity:0} }
+.sdp-vsl.playing .sdp-vsl-play{ display:none; }
+.sdp-vsl video{ position:absolute; inset:0; width:100%; height:100%; object-fit:cover;
+  background:var(--obsidian); }
+
+/* ---- STICKY CTA — fixed obsidian glass, voltage seam + sweep ---- */
+.sdp-stuck{ position:fixed; left:0; right:0; bottom:0; z-index:999;
+  background:linear-gradient(180deg,rgba(13,13,18,.90),rgba(13,13,18,.99));
+  -webkit-backdrop-filter:blur(20px) saturate(140%); backdrop-filter:blur(20px) saturate(140%);
+  padding:12px 0 calc(12px + env(safe-area-inset-bottom)); border-top:1px solid rgba(var(--voltage-rgb),.45);
+  box-shadow:0 -16px 40px rgba(0,0,0,.55), inset 0 1px 0 rgba(var(--voltage-rgb),.2);
+  transform:translateY(120%); transition:transform .45s cubic-bezier(.2,.8,.2,1); }
+.sdp-stuck.on{ transform:translateY(0); }
+.sdp-stuck::before{ content:""; position:absolute; top:0; left:0; right:0; height:1px;
+  background:linear-gradient(90deg,transparent 10%,var(--focus-ring) 50%,transparent 90%);
+  background-size:200% 100%; animation:sdpStuckSweep 5s linear infinite; }
+@keyframes sdpStuckSweep{ from{background-position:0 0;} to{background-position:200% 0;} }
+.sdp-stuck-inner{ display:flex; align-items:center; justify-content:center; gap:20px; flex-wrap:wrap; }
+.sdp-stuck-label{ font-family:var(--fb); font-size:13px; font-weight:600; color:var(--bone); letter-spacing:.01em; }
+/* Same object as the primary CTA, so it carries the same rim. A docked button
+   that drops the treatment reads as a different, cheaper control. */
+.sdp-stuck-go{ display:inline-flex; align-items:center; gap:9px; padding:11px 24px; border-radius:999px;
+  border:1px solid transparent;
+  background:var(--grad-cta) padding-box,
+              var(--rim-hot) border-box,
+              var(--rim-top) border-box;
+  color:var(--cta-ink); font-family:var(--fh); font-size:16px;
+  letter-spacing:.05em; text-decoration:none; white-space:nowrap;
+  box-shadow:var(--glow-cta), 0 -4px 12px -4px rgba(var(--volt-400-rgb),.45); }
+@media (max-width:720px){ .sdp-stuck-label{ display:none; } .sdp-stuck-go{ width:100%; justify-content:center; } }
+
+/* =====================================================================
+   PART 3 — THIS BUILD'S ADDITIONS (token-only, re-theme with Part 1)
+   ===================================================================== */
+
+/* ---- Trust row (Featured in) — hairline chip row ---- */
+/* The rule above "Featured in" is a 1px hairline whose COLOUR carries the
+   light, not its thickness. No bloom, no glow layer: it walks the voltage ramp
+   from volt-400 at the centre out to volt-900 at both ends, and volt-900
+   against the obsidian ground measures 1.03, so the line dissolves rather than
+   stopping.
+
+   The ramp runs 200, 300, 400 outward from the centre and then STOPS changing
+   colour: past volt-400 the line holds that one value and only its opacity
+   falls away to zero. The peak is volt-200 rather than volt-50 because the
+   lightest two steps are near-neutral and read as white on this ground; 200 is
+   where the line still looks lit but is unmistakably the brand blue. So the outer half is the same blue thinning out
+   rather than a march into darker and darker steps, which is what makes the
+   ends dissolve into the ground instead of turning navy against it.
+
+   The fade lands on rgba(volt-300, 0) rather than on `transparent`, because
+   `transparent` is rgba(0,0,0,0): interpolating toward it drags the midpoint
+   through grey and would put a dull band on both sides of the line.
+
+   A plain 90deg linear gradient, because the brief is a colour ramp along the
+   line and nothing more. The earlier radial version varied the lit HEIGHT as
+   well, which is what made it look thick.
+
+   `border-top` is gone: a border underneath would show as a flat hairline the
+   whole width and defeat the fade. The bottom border stays plain. */
+/* No bottom border and no background. Both were section-edge devices: a
+   full-width hairline is exactly the "section breakage" the single page
+   gradient exists to remove, and an obsidian fill here would be a flat patch
+   sitting on the ramp. The lit rule above it stays, because that one is a
+   designed object rather than a seam. */
+.cso-trust{ position:relative; padding:24px 0; }
+
+.cso-trust::before{ content:""; position:absolute; top:0; left:0; right:0; height:1px;
+  pointer-events:none;
+  background:linear-gradient(90deg,
+    rgba(var(--volt-400-rgb),0)    0%,
+    rgba(var(--volt-400-rgb),.30) 20%,
+    rgba(var(--volt-400-rgb),.65) 32%,
+    var(--volt-400)               40%,
+    var(--volt-300)               46%,
+    var(--volt-200)               50%,
+    var(--volt-300)               54%,
+    var(--volt-400)               60%,
+    rgba(var(--volt-400-rgb),.65) 68%,
+    rgba(var(--volt-400-rgb),.30) 80%,
+    rgba(var(--volt-400-rgb),0)  100%); }
+
+/* Thinner than 1px is only possible where there are device pixels to spare.
+   On a 2x screen 0.5px CSS is exactly ONE device pixel, the thinnest a line can
+   physically be; on a 1x screen 1px is already that limit, so the base rule
+   stays and only high-density displays step down. Written as a media query
+   rather than a flat 0.5px, because on a 1x display 0.5px rounds unpredictably
+   and can vanish entirely. */
+@media (min-resolution:2dppx){
+  .cso-trust::before{ height:.5px; }
+}
+
+/* The node, centred on the line and the same volt-200 as the line's peak. It
+   reads as a node by being thicker at that point, not by being a different
+   colour: a second colour here would break the single ramp the line is built
+   from.
+
+   SIX stacked shadows now, reaching 56px, with the inner two at full and near
+   full alpha. The node was made smaller and the glow much larger at the same
+   time, and that pairing is the whole idea: a small source with a long throw
+   reads as intense, where a large source with a short throw reads as a blob.
+   Shrinking the diamond is what LETS the glow go this bright without the centre
+   turning into a solid lump.
+
+   Stacking is what gives it a falloff curve. One big soft shadow at the same
+   total strength would read as a flat disc of haze, because a single blur ramps
+   linearly; layering short-and-strong under long-and-weak is what makes light
+   look like it is coming FROM something.
+
+   The glow sits on the SATURATED half of the ramp: 400, 500 and 600, not the
+   200 and 300 it used before. Those upper steps are only 52 and 84 apart across
+   their channels, and a near-neutral spread over a dark ground washes out to
+   white as soon as it is blurred and layered, however blue the hex looks on its
+   own. volt-600 is 230 apart and is the base voltage itself, so the bloom is
+   unambiguously the brand colour.
+
+   The node stays volt-200, which is the line's own peak. A pale core inside a
+   saturated halo is how light actually behaves, and it keeps the node reading
+   as part of the line rather than as a lamp sitting on it.
+
+   It is a DIAMOND: a square turned 45deg, not a rotated rectangle with a
+   radius. Its points sit on the horizontal and vertical axes, so the two
+   side points run along the line and it reads as a node ON the rule rather
+   than a shape parked over it.
+
+   Sized 4px, which is 5.7px point to point once rotated. Small enough that the
+   SHAPE is nearly a spark and the GLOW is what you actually see, which is the
+   intent: a bright point source, not a marker with a halo.
+
+   `margin-top:-1.5px` on a 4px box puts its centre half a pixel down, the
+   middle of the 1px line. The rotation is about that same centre, so it does
+   not move. Half a pixel out and the node sits visibly on top of the rule
+   rather than in it. */
+.cso-trust::after{ content:""; position:absolute; top:0; left:50%;
+  width:4px; height:4px; margin:-1.5px 0 0 -2px; border-radius:.5px;
+  transform:rotate(45deg);
+  background:var(--volt-200); pointer-events:none;
+  box-shadow:
+    0 0 0 1px rgba(var(--volt-300-rgb),.85),
+    0 0 4px 1px rgba(var(--volt-400-rgb),1),
+    0 0 9px 2px rgba(var(--volt-500-rgb),.9),
+    0 0 18px 4px rgba(var(--volt-500-rgb),.62),
+    0 0 34px 9px rgba(var(--volt-600-rgb),.45),
+    0 0 56px 16px rgba(var(--volt-600-rgb),.22); }
+.cso-trust-cap{ display:block; text-align:center; font-family:var(--fb); font-size:10.5px;
+  font-weight:700; letter-spacing:.2em; text-transform:uppercase; color:var(--text-secondary); margin-bottom:16px; }
+.cso-trust-row{ display:flex; align-items:center; justify-content:center; flex-wrap:wrap; gap:10px 26px; }
+.cso-trust-item{ font-family:var(--fh); font-size:clamp(19px,2.4vw,26px); letter-spacing:.04em;
+  color:var(--bone); opacity:.6; transition:opacity .25s, color .25s; }
+.cso-trust-item:hover{ opacity:1; color:var(--sand); }
+.cso-trust-sep{ width:4px; height:4px; border-radius:50%; background:var(--slate); }
+.cso-trust-note{ display:block; text-align:center; margin-top:14px; font-family:var(--fb);
+  font-size:10.5px; letter-spacing:.14em; text-transform:uppercase; color:var(--text-muted); }
+@media (max-width:640px){ .cso-trust-sep{ display:none; } }
+
+/* ---- Success stories — named-result cards with a lit figure ---- */
+.cso-wins{ display:grid; grid-template-columns:repeat(3,1fr); gap:18px; max-width:1000px; margin:0 auto; }
+@media (max-width:860px){ .cso-wins{ grid-template-columns:1fr; max-width:440px; } }
+.cso-win{ text-align:center; padding:32px 24px; }
+.cso-win::before{ content:""; position:absolute; inset:0 0 auto 0; height:3px; border-radius:14px 14px 0 0;
+  background:var(--grad-cta); }
+.cso-win-name{ font-family:var(--fb); font-size:11.5px; font-weight:800; letter-spacing:.16em;
+  text-transform:uppercase; color:var(--text-secondary); margin-bottom:14px; }
+.cso-win-figure{ font-family:var(--fh); font-size:clamp(30px,4.6vw,44px); line-height:1;
+  letter-spacing:.03em; color:var(--accent-text-strong); }
+.cso-win-figure .unit{ display:block; margin-top:9px; font-family:var(--fb); font-size:12.5px;
+  font-weight:600; letter-spacing:.02em; text-transform:none; color:var(--text-secondary); }
+
+/* ---- Honest placeholder frame (wherever client content is missing) ---- */
+.cso-ph{ position:relative; display:grid; place-items:center; text-align:center;
+  padding:clamp(28px,5vw,54px) 24px; border:1.5px dashed var(--slate); border-radius:var(--r-lg);
+  background:
+    repeating-linear-gradient(135deg, rgba(var(--voltage-rgb),.05) 0 10px, transparent 10px 20px),
+    var(--surface); }
+.cso-ph-tag{ display:inline-flex; align-items:center; gap:8px; font-family:var(--fb); font-size:10px;
+  font-weight:800; letter-spacing:.18em; text-transform:uppercase; color:var(--accent-text);
+  background:rgba(var(--voltage-rgb),.16); border:1px solid rgba(var(--voltage-rgb),.4);
+  padding:6px 12px; border-radius:999px; margin-bottom:14px; }
+.sd-root .cso-ph-what{ font-family:var(--fb); font-size:14.5px; line-height:1.7;
+  color:var(--text-secondary); max-width:60ch; margin:0 auto; }
+.cso-ph-src{ display:inline-block; margin-top:14px; font-family:var(--fb); font-size:11.5px;
+  letter-spacing:.04em; color:var(--text-muted); word-break:break-all; }
+
+/* ---- Mechanism: the three numbers ---- */
+.cso-three{ display:grid; grid-template-columns:repeat(3,1fr); gap:18px; max-width:1000px; margin:0 auto 34px; }
+@media (max-width:860px){ .cso-three{ grid-template-columns:1fr; max-width:520px; } }
+.cso-three-card{ text-align:center; padding:30px 22px; }
+.cso-three-ck{ width:34px; height:34px; margin:0 auto 16px; border-radius:50%; display:grid;
+  place-items:center; background:rgba(var(--voltage-rgb),.24); border:1.5px solid var(--focus-ring);
+  color:var(--ivory); }
+/* The "50%" is lit INLINE inside its own sentence, never lifted out above
+   it: pulling it out would print the same figure twice on one card. */
+.sd-root .cso-three-line{ font-size:16px; line-height:1.7; color:var(--text-primary); margin:0; }
+.cso-three-line .pct{ font-family:var(--fh); font-size:1.85em; line-height:.9; letter-spacing:.02em;
+  color:var(--accent-text); vertical-align:-.06em; padding:0 .06em; }
+
+/* These four are <p> elements, so they must out-specify `.sd-root p` or the
+   base body colour silently wins over their own. */
+.sd-root .cso-multiply{ width:100%; text-align:center; font-family:var(--fh); font-size:clamp(22px,3.2vw,34px);
+  letter-spacing:.03em; line-height:1.25; color:var(--ivory); margin:0 auto 56px; max-width:760px; }
+.cso-multiply .em-word{ font-style:normal; color:var(--accent-text); }
+
+/* ---- Mechanism: the maths (before, after, result) ---- */
+.cso-maths-cap{ display:block; text-align:center; font-family:var(--fb); font-size:11px;
+  font-weight:800; letter-spacing:.2em; text-transform:uppercase; color:var(--accent-text); margin-bottom:22px; }
+.cso-maths{ display:grid; grid-template-columns:1fr 52px 1fr; align-items:stretch; gap:0;
+  max-width:1000px; margin:0 auto; }
+.cso-maths-arrow{ display:grid; place-items:center; color:var(--focus-ring); }
+@media (max-width:860px){
+  .cso-maths{ grid-template-columns:1fr; gap:14px; }
+  .cso-maths-arrow{ transform:rotate(90deg); height:34px; }
+}
+.cso-maths-card{ padding:28px 26px; text-align:left; }
+/* Marks the "after" column without a border-color, which would paint a solid
+   line over the rim gradient and hide it on this one card. The glow does the
+   emphasis instead. */
+.cso-maths-card.after{ box-shadow:var(--shadow-card),
+  0 -4px 18px -7px rgba(var(--volt-300-rgb),.7),
+  0 12px 30px rgba(var(--voltage-rgb),.14); }
+.sd-root .cso-maths-card p{ font-size:15px; line-height:1.7; margin:0; }
+.cso-maths-card .fig{ color:var(--accent-text-strong); font-weight:800; }
+.cso-result{ max-width:1000px; margin:18px auto 0; padding:26px 30px; border-radius:var(--r-lg);
+  background:var(--grad-structure); color:var(--ivory); text-align:center;
+  box-shadow:0 20px 46px -20px rgba(var(--voltage-rgb),.6), var(--inset-hi); }
+.sd-root .cso-result p{ margin:0; font-family:var(--fh); font-size:clamp(22px,3.4vw,34px);
+  letter-spacing:.04em; line-height:1.25; color:var(--ivory); }
+.sd-root .cso-result p .fig{ color:var(--ivory); position:relative; }
+.cso-result .fig::after{ content:""; position:absolute; left:0; right:0; bottom:-5px; height:2px;
+  background:rgba(254,243,232,.75); }
+
+.cso-prose{ max-width:64ch; margin:44px auto 0; text-align:left; }
+.sd-root .cso-prose p{ font-size:16px; line-height:1.75; margin:0 0 18px; color:var(--text-primary); }
+.sd-root .cso-prose p:last-child{ margin-bottom:0; }
+
+/* =====================================================================
+   THE VENN — rebuilt as SVG in the brand tokens.
+   The client's PNG is a LIGHT design and would be a white hole on a
+   dark page, so only its geometry and labels are reused.
+   Voltage is used as a SURFACE here (never as type), and the centre is
+   the one voltage fill in the section: it is the payoff.
+   ===================================================================== */
+.cso-venn-cap{ display:block; width:100%; text-align:center; font-family:var(--fb); font-size:13px;
+  color:var(--text-secondary); margin:0 auto 20px; }
+.cso-venn{ position:relative; width:100%; max-width:680px; margin:0 auto; }
+.cso-venn svg{ display:block; width:100%; height:auto; overflow:visible; }
+
+.vn-region{ cursor:pointer; transition:fill-opacity .28s; }
+.vn-only { fill:var(--cobalt); fill-opacity:.30; }
+.vn-only:hover{ fill-opacity:.46; }
+.vn-only.sel{ fill-opacity:.62; }
+.vn-pair { fill:var(--cobalt); fill-opacity:.58; }
+.vn-pair:hover{ fill-opacity:.76; }
+.vn-pair.sel{ fill:var(--volt-700); fill-opacity:.85; }
+/* The core wedge is the diagram's payoff and the one thing in the Venn that
+   should pop, so it sits at volt-700, above the background ceiling. The
+   circles and overlaps around it stay in the dark range (L=0.0071 and 0.0121,
+   inside the background's own band) precisely so this reads as the lit centre:
+   the contrast comes from what surrounds it, not from pushing it to voltage. */
+.vn-core { fill:var(--volt-700); fill-opacity:1; }
+.vn-core:hover,.vn-core.sel{ fill:var(--volt-600); fill-opacity:1; }
+
+.vn-ring{ fill:none; stroke:rgba(var(--voltage-rgb),.75); stroke-width:1.6; pointer-events:none;
+  transition:stroke .28s, stroke-width .28s; }
+.vn-ring.on{ stroke:var(--focus-ring); stroke-width:3; }
+
+.vn-txt{ pointer-events:none; }
+.vn-rim{ font-family:var(--fb); font-size:13px; font-weight:700; letter-spacing:.16em;
+  fill:var(--sand); text-transform:uppercase; }
+.vn-name{ font-family:var(--fh); font-size:38px; letter-spacing:.04em; fill:var(--ivory); text-anchor:middle; }
+.vn-item{ font-family:var(--fb); font-size:14px; font-weight:500; fill:var(--bone); text-anchor:middle; }
+.vn-pair-label{ font-family:var(--fb); font-size:15px; font-weight:800; letter-spacing:.08em;
+  fill:var(--ivory); text-anchor:middle; text-transform:uppercase; }
+.vn-core-label{ font-family:var(--fh); font-size:26px; letter-spacing:.03em; fill:var(--ivory); text-anchor:middle; }
+.vn-icon{ fill:none; stroke:var(--sand); stroke-width:1.6; stroke-linecap:round; stroke-linejoin:round; }
+
+/* reserves its own height so selecting a region does not jolt the page */
+.cso-venn-panel{ max-width:680px; margin:24px auto 0; min-height:118px; display:grid; align-items:center; }
+.sd-root .cso-venn-hint{ text-align:center; font-family:var(--fb); font-size:12.5px;
+  color:var(--text-secondary); margin:0; }
+.cso-venn-detail{ background:var(--surface); border:1px solid rgba(var(--voltage-rgb),.4);
+  border-radius:var(--r-lg); padding:22px 26px; text-align:left; }
+.cso-venn-detail .vd-path{ display:block; font-family:var(--fb); font-size:10.5px; font-weight:800;
+  letter-spacing:.18em; text-transform:uppercase; color:var(--sand); margin-bottom:8px; }
+.sd-root .cso-venn-detail h4{ font-family:var(--fh); font-size:clamp(22px,3vw,30px); letter-spacing:.03em;
+  color:var(--ivory); margin:0 0 10px; }
+.cso-venn-detail .vd-items{ display:flex; flex-wrap:wrap; gap:8px; }
+.cso-venn-detail .vd-items li{ font-family:var(--fb); font-size:13px; font-weight:600;
+  color:var(--bone); background:rgba(var(--voltage-rgb),.14); border:1px solid rgba(var(--voltage-rgb),.32);
+  border-radius:999px; padding:7px 14px; }
+
+/* base first, THEN the breakpoint: a later same-specificity rule would
+   win back over the media query and the stack would never appear */
+.cso-venn-stack{ display:none; flex-direction:column; gap:10px; max-width:520px; margin:0 auto; }
+.cso-venn-stack button{ width:100%; text-align:left; background:var(--surface); border:1px solid var(--border);
+  border-radius:12px; padding:15px 18px; font-family:var(--fb); font-size:14px; font-weight:700;
+  line-height:1.5; color:var(--text-primary); cursor:pointer; transition:border-color .2s, background .2s; }
+.cso-venn-stack button .sub{ display:block; font-weight:500; font-size:12px; letter-spacing:.12em;
+  text-transform:uppercase; color:var(--text-secondary); margin-top:5px; }
+.cso-venn-stack button.sel{ border-color:var(--voltage); background:var(--surface-raised); color:var(--ivory); }
+.cso-venn-stack button.core{ background:var(--grad-cta); border-color:var(--voltage); color:var(--cta-ink); }
+.cso-venn-stack button.core .sub{ color:var(--cta-ink-soft); }
+@media (max-width:640px){
+  .cso-venn{ display:none; }
+  .cso-venn-stack{ display:flex; }
+}
+
+/* =====================================================================
+   THE 60-DAY INSTALL — the page's process spine and its ONE heavy
+   motion moment. Scroll-linked journey spine (§1 heavy).
+   FAIL-OPEN: every phase is lit by default. JS only ever ADDS the
+   `armed` class, which is what dims the un-reached phases. No script,
+   no dimming.
+   ===================================================================== */
+.cso-spine{ position:relative; max-width:940px; margin:0 auto; }
+.cso-spine-rail{ position:absolute; left:23px; top:12px; bottom:12px; width:2px;
+  background:var(--slate); border-radius:2px; }
+/* no overflow:hidden on the rail: it would clip the fill's own glow, which is
+   the thing that reads as the scroll head */
+.cso-spine-fill{ position:absolute; left:0; top:0; width:100%; height:100%;
+  background:linear-gradient(180deg,var(--cobalt),var(--voltage));
+  box-shadow:0 0 16px rgba(var(--voltage-rgb),.75); }
+.cso-spine.armed .cso-spine-fill{ height:calc(var(--tl-p,0) * 100%); transition:height .18s linear; }
+@media (max-width:640px){ .cso-spine-rail{ left:15px; } }
+
+.cso-phase{ position:relative; display:grid; grid-template-columns:48px 1fr; gap:26px;
+  padding:0 0 44px; }
+.cso-phase:last-of-type{ padding-bottom:26px; }
+.cso-phase-node{ position:relative; z-index:1; width:48px; height:48px; border-radius:50%;
+  display:grid; place-items:center; font-family:var(--fh); font-size:21px; letter-spacing:.04em;
+  background:var(--voltage); color:var(--cta-ink); border:1px solid var(--voltage);
+  box-shadow:0 0 0 6px rgba(var(--voltage-rgb),.16), 0 0 22px rgba(var(--voltage-rgb),.5);
+  transition:background .45s, color .45s, box-shadow .45s, border-color .45s; }
+.cso-spine.armed .cso-phase:not(.lit) .cso-phase-node{ background:var(--graphite); color:var(--text-secondary);
+  border-color:var(--slate); box-shadow:none; }
+.cso-spine.armed .cso-phase:not(.lit) .cso-phase-card{ opacity:.5; }
+.cso-phase-card{ transition:opacity .5s ease; }
+@media (max-width:640px){
+  .cso-phase{ grid-template-columns:32px 1fr; gap:16px; }
+  .cso-phase-node{ width:32px; height:32px; font-size:15px; }
+}
+
+.cso-phase-eyebrow{ display:block; font-family:var(--fb); font-size:11px; font-weight:800;
+  letter-spacing:.2em; text-transform:uppercase; color:var(--sand); margin-bottom:8px; }
+.sd-root .cso-phase-card h3{ font-family:var(--fh); font-size:clamp(26px,3.6vw,38px);
+  letter-spacing:.04em; color:var(--ivory); margin:0 0 14px; }
+.cso-phase-chips{ display:flex; flex-wrap:wrap; gap:9px; margin-bottom:20px; }
+.cso-chip{ font-family:var(--fb); font-size:10.5px; font-weight:800; letter-spacing:.16em;
+  text-transform:uppercase; padding:7px 13px; border-radius:6px; }
+.cso-chip.badge{ background:rgba(var(--voltage-rgb),.20); border:1px solid rgba(var(--voltage-rgb),.5); color:var(--bone); }
+.cso-chip.weeks{ background:transparent; border:1px solid var(--slate); color:var(--text-secondary); }
+
+.cso-phase-list{ display:flex; flex-direction:column; gap:14px; margin:0 0 22px; }
+.cso-phase-list li{ display:grid; grid-template-columns:9px 1fr; gap:14px; align-items:start;
+  font-family:var(--fb); font-size:15px; line-height:1.7; color:var(--text-primary); }
+.cso-phase-list li::before{ content:""; width:7px; height:7px; margin-top:10px; border-radius:2px;
+  transform:rotate(45deg); background:var(--voltage); box-shadow:0 0 8px rgba(var(--voltage-rgb),.85); }
+.cso-phase-list b{ color:var(--ivory); font-weight:700; }
+
+.sd-root .cso-phase-note{ font-family:var(--fb); font-size:14.5px; line-height:1.75; font-style:italic;
+  color:var(--text-secondary); border-left:2px solid var(--slate); padding-left:18px; margin:0 0 24px; }
+
+.cso-quote{ position:relative; border:1px solid var(--slate); border-left:3px solid var(--amber);
+  border-radius:0 var(--r) var(--r) 0; background:rgba(212,139,92,.07); padding:20px 24px; margin:4px 0 0; }
+.sd-root .cso-quote p{ font-family:var(--fb); font-size:15.5px; line-height:1.72; color:var(--bone);
+  margin:0 0 12px; font-style:italic; }
+.cso-quote cite{ font-family:var(--fb); font-size:10.5px; font-weight:800; letter-spacing:.18em;
+  text-transform:uppercase; color:var(--amber); font-style:normal; }
+
+/* --- the seven AI systems: a numbered ledger, trigger and consequence ---
+   No column headers: naming the columns would be writing copy the client
+   has not written. The source's own separators become the column rules. */
+.cso-ledger{ border-top:1px solid var(--slate); margin:0 0 24px; }
+.cso-ledger-row{ display:grid; grid-template-columns:38px 1.15fr 1fr; gap:18px; align-items:baseline;
+  padding:15px 0; border-bottom:1px solid var(--slate); transition:background .2s; }
+.cso-ledger-row:hover{ background:rgba(var(--voltage-rgb),.06); }
+/* The ordinal is TYPE, so it takes the warm accent, not voltage: voltage
+   measures 2.25:1 on obsidian and the lighter --focus-ring only 3.33:1,
+   which is an icon value, not a text one. */
+.cso-ledger-n{ font-family:var(--fh); font-size:18px; letter-spacing:.06em; color:var(--sand); }
+.cso-ledger-name{ font-family:var(--fb); font-size:15px; font-weight:700; color:var(--ivory); }
+.cso-ledger-trigger{ display:block; font-family:var(--fb); font-size:13px; font-style:italic;
+  font-weight:500; color:var(--sand); margin-top:4px; }
+.cso-ledger-kills{ font-family:var(--fb); font-size:14px; line-height:1.6; color:var(--text-secondary); }
+@media (max-width:720px){
+  .cso-ledger-row{ grid-template-columns:30px 1fr; gap:12px; }
+  .cso-ledger-kills{ grid-column:2; }
+}
+
+/* --- the three numbers this all moves (a compact band, deliberately a
+   DIFFERENT render from the mechanism section's cards above) --- */
+.cso-numbers{ display:grid; grid-template-columns:repeat(3,1fr); gap:0; max-width:940px;
+  margin:0 auto; border:1px solid var(--slate); border-radius:var(--r-lg); overflow:hidden;
+  background:var(--graphite); }
+.cso-numbers div{ padding:30px 22px; text-align:center; border-right:1px solid var(--slate); }
+.cso-numbers div:last-child{ border-right:0; }
+.cso-numbers .n{ display:block; font-family:var(--fh); font-size:clamp(40px,6vw,60px); line-height:1;
+  letter-spacing:.02em; color:var(--sand); margin-bottom:10px; }
+.cso-numbers .t{ display:block; font-family:var(--fb); font-size:14px; line-height:1.6; color:var(--text-primary); }
+@media (max-width:720px){
+  .cso-numbers{ grid-template-columns:1fr; }
+  .cso-numbers div{ border-right:0; border-bottom:1px solid var(--slate); }
+  .cso-numbers div:last-child{ border-bottom:0; }
+}
+
+.cso-closing-bar{ max-width:940px; margin:20px auto 0; padding:26px 30px; border-radius:var(--r-lg);
+  background:var(--grad-structure); box-shadow:0 22px 50px -22px rgba(var(--voltage-rgb),.62), var(--inset-hi);
+  text-align:center; }
+.cso-closing-bar .big{ display:block; font-family:var(--fh); font-size:clamp(26px,4.4vw,44px);
+  letter-spacing:.05em; line-height:1.15; color:var(--ivory); }
+.sd-root .cso-closing-bar p{ margin:10px 0 0; font-size:14.5px; line-height:1.65; color:rgba(254,243,232,.86); }
+
+.sd-root .cso-footnote{ max-width:820px; margin:26px auto 0; text-align:center; font-family:var(--fb);
+  font-size:13.5px; line-height:1.75; color:var(--text-secondary); }
+.cso-signature{ display:block; text-align:center; margin-top:18px; font-family:var(--fb);
+  font-size:11px; font-weight:800; letter-spacing:.22em; text-transform:uppercase; color:var(--amber); }
+
+/* ---- Founder ---- */
+.cso-founder-head{ display:grid; grid-template-columns:300px 1fr; gap:38px; align-items:center;
+  max-width:940px; margin:0 auto 54px; }
+@media (max-width:820px){
+  .cso-founder-head{ grid-template-columns:1fr; gap:24px; max-width:460px; text-align:center; }
+}
+.cso-portrait{ position:relative; border-radius:var(--r-lg); overflow:hidden;
+  border:1px solid rgba(var(--voltage-rgb),.35);
+  box-shadow:0 14px 40px -26px rgba(var(--volt-900-rgb),.9); }
+.cso-portrait img{ display:block; width:100%; height:auto; }
+.cso-founder-name{ font-family:var(--fh); font-size:clamp(30px,4.6vw,46px); letter-spacing:.03em;
+  color:var(--ivory); margin:0 0 10px; }
+.cso-founder-role{ display:inline-block; font-family:var(--fb); font-size:11px; font-weight:800;
+  letter-spacing:.2em; text-transform:uppercase; color:var(--amber); }
+
+/* Numbered chapter ledger: the ORDERING is the structure, the BODIES are
+   prose, so the prose stays prose. */
+.cso-chapters{ max-width:820px; margin:0 auto; text-align:left; }
+.cso-chapter{ display:grid; grid-template-columns:46px 1fr; gap:22px; padding:30px 0;
+  border-bottom:1px solid rgba(254,243,232,.12); }
+.cso-chapter:last-child{ border-bottom:0; padding-bottom:0; }
+.cso-chapter:first-child{ padding-top:0; }
+.sd-root .cso-chapter h3{ font-family:var(--fh); font-size:clamp(21px,2.8vw,29px); letter-spacing:.03em;
+  color:var(--ivory); margin:6px 0 12px; }
+.sd-root .cso-chapter p{ font-size:15.5px; line-height:1.75; margin:0 0 14px; color:var(--bone); }
+.sd-root .cso-chapter p:last-child{ margin-bottom:0; }
+@media (max-width:560px){ .cso-chapter{ grid-template-columns:1fr; gap:12px; } }
+
+/* The journey photographs. Framed as documents, ungraded and uncaptioned:
+   the client supplied five images and no captions, and writing one for
+   each would be inventing a story around someone else's photographs. */
+.cso-journey{ max-width:1000px; margin:54px auto 0; }
+.cso-journey-cap{ display:block; text-align:center; font-family:var(--fb); font-size:10.5px;
+  font-weight:800; letter-spacing:.22em; text-transform:uppercase; color:var(--sand); margin-bottom:20px; }
+.cso-journey-strip{ display:grid; grid-template-columns:repeat(5,1fr); gap:12px; }
+@media (max-width:860px){ .cso-journey-strip{ grid-template-columns:repeat(2,1fr); } }
+.cso-journey-frame{ position:relative; margin:0; aspect-ratio:4/3; border-radius:var(--r); overflow:hidden;
+  border:1px solid rgba(254,243,232,.18); background:var(--graphite);
+  transition:transform .3s cubic-bezier(.2,.8,.2,1), border-color .3s; }
+.cso-journey-frame img{ width:100%; height:100%; object-fit:cover; display:block; }
+.cso-journey-frame::after{ content:""; position:absolute; inset:0;
+  background:linear-gradient(180deg,rgba(8,8,66,.10),rgba(13,13,18,.34)); transition:opacity .3s; }
+.cso-journey-frame:hover{ transform:translateY(-4px); border-color:rgba(var(--voltage-rgb),.6); }
+.cso-journey-frame:hover::after{ opacity:0; }
+
+/* ---- Finale (the closing peak) — the deepest point on the page ---- */
+.cso-finale{ position:relative; padding:100px 0 76px; }
+
+/* The finale paints NOTHING of its own. Its two radial blooms are gone.
+
+   They were the section boundary. Both were clipped by this section's
+   `overflow:hidden`, and a bloom that meets a clip edge draws that edge at
+   whatever strength it happens to be: moving the centres inward reduced it but
+   could not remove it, because the gradient still had to end somewhere inside
+   a box with a hard edge.
+
+   The brightness they provided now comes from the page ramp climbing into the
+   footer, which has no edge to catch on because it belongs to the document
+   rather than to this section. */
+.cso-finale-inner{ position:relative; z-index:1; text-align:center; }
+.sd-root .cso-finale .sdp-sub{ color:var(--sand); font-size:clamp(16px,2.2vw,22px);
+  font-family:var(--fh); letter-spacing:.03em; }
+.cso-colophon{ position:relative; margin-top:56px; padding-top:34px; text-align:center; }
+.cso-colophon::before{ content:""; position:absolute; top:0; left:50%; transform:translateX(-50%);
+  width:min(420px,80%); height:1px;
+  background:linear-gradient(90deg,
+    rgba(var(--volt-400-rgb),0),rgba(var(--volt-400-rgb),.42),rgba(var(--volt-400-rgb),0)); }
+.cso-colophon-line{ display:inline-flex; align-items:center; flex-wrap:wrap; justify-content:center;
+  gap:12px; font-family:var(--fb); font-size:12px; letter-spacing:.12em; text-transform:uppercase;
+  color:var(--text-secondary); }
+.cso-colophon-line .star{ color:var(--amber); }
+.cso-colophon-mark{ display:block; height:34px; width:auto; margin:0 auto 22px; opacity:.9; }
+
+/* ---- Reduced motion (C7) ---- */
+@media (prefers-reduced-motion: reduce){
+  .sd-armed [data-sdp-reveal]{ opacity:1 !important; transform:none !important; }
+  [data-sdp-reveal],
+  .sdp-cta,.sdp-card,.sdp-q,.sdp-q-body,.sdp-stuck,
+  .cso-phase-node,.cso-phase-card,.cso-spine-fill,.cso-journey-frame{ transition:none !important; }
+  .sdp-eyebrow-pill .glowdot::before,
+  .sdp-vsl-disc::after,
+  /* The travelling rim stops. It does not revert to nothing: the conic holds
+     wherever --vsl-spin was registered to start, so the frame keeps a lit
+     border and only the movement is removed. */
+  .sdp-vsl,
+  .sdp-stuck::before{ animation:none !important; }
+  .sdp-cta::after{ display:none; }
+}
