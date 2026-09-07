@@ -98,6 +98,14 @@ export const forYouIf = {
       ],
     },
   ],
+
+  /* The disqualifier under the three boxes. Two lines, always broken: the
+     first states the exclusion, the second states who is left. Atul's copy,
+     verbatim, added 5 Sep. */
+  note: {
+    lead: "If these aren't your problems, this isn't the right engagement for you.",
+    turn: "We work with businesses that are serious about fixing revenue at the core.",
+  },
 };
 
 /* ------------------------------------------------------ SUCCESS STORIES --- */
@@ -107,10 +115,61 @@ export const forYouIf = {
  * in the source, so `result` is null and the card renders visibly incomplete
  * rather than being quietly dropped or filled in.
  */
-export const successStories: { name: string; result: string | null }[] = [
-  { name: "TGO", result: "Closed 10 CR in sales" },
-  { name: "Sourobh Kulkorni", result: "1 CR in 6 months" },
-  { name: "Hardik Dhawal", result: null },
+/* The card anatomy follows Atul's reference render (5 Sep): mark, brand name,
+   rule, figure, description, category chip, rule, two outcome cells.
+   `result` and `resultLit` are the only fields the SOURCE actually supplies.
+   Everything else is null until Atul writes it, and renders as a named slot
+   rather than as invented copy: this is the proof beat, and a fabricated
+   description here is exactly the claim we must not make.
+
+   `resultLit` is the token inside `result` that takes the amber display
+   treatment. It lights a word IN the sentence rather than splitting the
+   sentence in two, because "Closed 10 CR in sales" carries its figure in the
+   middle and a two-tier stack would have to reorder his words. If Atul wants
+   the reference's exact stacked look he supplies figure and caption as two
+   fields; that is a copy decision, not a design one. */
+export const successStories: {
+  name: string;
+  result: string | null;
+  resultLit?: string;
+  logo?: string | null;
+  /* The fraction of the logo FILE's height that the mark actually occupies,
+     measured off each file. The three supplied logos are padded very
+     differently — TGO runs edge to edge (1.00) while FAB is 29% empty white —
+     so rendering them at one size makes TGO look flush to its plate and the
+     other two look small and floating. Dividing the target height by this
+     number cancels each file's own margin and puts all three marks at the same
+     optical size. Re-measure if a file is replaced. */
+  logoTrim?: number;
+  desc?: string | null;
+  tag?: string | null;
+  outcomes?: { l1: string; l2: string }[] | null;
+}[] = [
+  {
+    name: "TGO",
+    result: "Closed 10 CR in sales",
+    resultLit: "10 CR",
+    logo: "/stories/tgo_logo.png",
+    logoTrim: 1.0,     /* 276x136, no margin at all */
+    desc: null, tag: null, outcomes: null,
+  },
+  {
+    name: "FM4 Therapy",
+    result: "1 CR in 6 months",
+    resultLit: "1 CR",
+    logo: "/stories/fm4-therapy.jpg",
+    logoTrim: 0.854,   /* 575x480, 35px of white on every side */
+    desc: "Sourobh Kulkorni, chose us to launch his flagship online program to help people reverse their knee, back & neck pain using his GOI patented ball therapy.",
+    tag: null, outcomes: null,
+  },
+  {
+    name: "FAB",
+    result: null,
+    logo: "/stories/fab.jpg",
+    logoTrim: 0.808,   /* 755x480, 46px of white on every side */
+    desc: "FAB Bank, Middle East's biggest bank chose us to launch their entire corporate wellness program for their 7500 workforce.",
+    tag: null, outcomes: null,
+  },
 ];
 
 /* ---------------------------------------------------------- MECHANISM --- */
@@ -134,7 +193,95 @@ export const mechanism = {
     "That is why fixing only your pitch, or only your follow-up, never works. One number goes up for a month. The other two pull it straight back down.",
     "You already know how this feels. One month everything works. Next month — same leads, same team, same ad spend — and the number falls off a cliff. Here is what I build instead:",
   ],
+  /* ---- Structure added to match Atul's reference render (6 Sep) ----------
+     FLAGGED: the labels below are MINE, not the source's. The source states
+     the maths as prose ("Say you get 100 leads a month. Ten of them close, at
+     ₹1 lakh each..."), and a table needs row names. Every VALUE in the table
+     is a number the source itself states; only the row and column labels are
+     new, and they name the numbers rather than making any claim about them.
+     The eyebrow is the reference's own wording. Atul to approve or replace. */
+  engineEyebrow: "The engine behind 3X growth",
+
+  /* FLAGGED, same as the pyramid: the intro line and the three title/sub pairs
+     below are transcribed from Atul's reference render (6 Sep), not from the
+     copy doc. The doc states each driver as a single sentence carrying its own
+     figure ("A 50% lift in how many of your leads say yes"); the card he asked
+     to replicate states them as a NAME and a plain-English gloss, with no
+     figure at all — the figures live on the pyramid beside it. Approve or
+     replace. The closing line IS the doc's own. */
+  engineIntro:
+    "Revenue growth isn't about working harder or getting more leads. It comes from improving three key drivers:",
+  drivers: [
+    {
+      title: "Lead-to-close conversion",
+      sub: "Get more of your leads to say yes.",
+    },
+    {
+      title: "Average deal value",
+      sub: "Increase what each deal is worth.",
+    },
+    {
+      title: "Recovery of deals lost after the first call",
+      sub: "Win back the deals you're currently losing.",
+    },
+  ],
+
+  mathsTable: {
+    head: { metric: "Metric", before: "Before", after: "After installing the system" },
+    rows: [
+      { metric: "Leads per month",             before: "100",      after: "100" },
+      { metric: "Deals closed",                before: "10",       after: "15" },
+      { metric: "Average deal value",          before: "₹1 lakh",  after: "₹1.5 lakh" },
+      { metric: "Recovered / follow-up sales", before: "0",        after: "+5 clients" },
+      { metric: "Referral sales",              before: "0",        after: "+2 clients" },
+    ],
+    total: { metric: "Total revenue", before: "₹10 lakh", after: "₹30 lakh" },
+  },
+
+  /* The pyramid tiers, in the SAME ORDER the source names its three numbers,
+     and rendered bottom-up so the base is the first driver.
+
+     FLAGGED: the label and caption on each tier are taken from Atul's own
+     reference render (6 Sep), not from the copy doc. The doc states each driver
+     as one sentence ("A 50% lift in how many of your leads say yes"), which has
+     no title in it, and the layout he asked to match needs a label, a figure
+     and a caption as three separate pieces. These are his image's wording, so
+     nothing here is invented, but they are not the copy doc's words either and
+     should be approved or replaced. The figure is the doc's own 50%. */
+  pyramid: [
+    {
+      label: "More leads say yes",
+      pct: "+50%",
+      caption: "Get more of your leads to say yes.",
+    },
+    {
+      label: "Higher deal value",
+      pct: "+50%",
+      caption: "Increase what each deal is worth.",
+    },
+    {
+      label: "Recover lost deals",
+      pct: "+50%",
+      caption: "Win back the deals you currently lose after the first call.",
+    },
+  ],
+
+
   vennInstruction: "Tap any part of the diagram to see details on what we fix.",
+
+  /* The head of the diagram beat. The headline and its deck are the FIRST of
+     the two closing paragraphs, split at its own sentence break — every word is
+     the doc's, only the line break is new. The paragraph below them is the
+     second closing paragraph, whole. */
+  systemEyebrow: "The system",
+
+  /* FLAGGED: the summary bar under the diagram. Its first line is the three
+     circle names joined, and its headline is venn.core.label — both already in
+     the doc. The closing line is from Atul's reference render (6 Sep), not the
+     doc. Approve or replace. */
+  vennSummary: {
+    note: "Same leads. Same team. Same spend. A completely different outcome.",
+  },
 };
 
 /* ---------------------------------------------------------------- VENN --- */
@@ -365,6 +512,19 @@ export const process60 = {
 
 /* ------------------------------------------------------------- FOUNDER --- */
 
+/* FLAGGED: everything in this block is transcribed from Atul's reference render
+   (7 Sep), not from the copy doc — the deck, the one-line summary, the three
+   credential chips, and each chapter's year, spine label and pull-quote. The
+   chapter TITLES and BODIES below are the doc's own and are untouched. Approve
+   or replace. */
+export const founderDeck = "Same journey. Real lessons. A bigger impact now.";
+export const founderLine = "From AI sales to building TGO to owning the revenue gap.";
+export const founderChips = [
+  { icon: "bars", label: "Sales operator" },
+  { icon: "rocket", label: "Builder at scale" },
+  { icon: "target", label: "Obsessed with revenue outcomes" },
+];
+
 export const founderChapters = [
   {
     n: "01",
@@ -497,4 +657,8 @@ export const missing = {
   storyResult: {
     label: "Result not supplied",
   },
+  storyLogo: { label: "Logo" },
+  storyDesc: { label: "One-line description of the work" },
+  storyTag: { label: "Category" },
+  storyOutcomes: { label: "Two outcomes" },
 };

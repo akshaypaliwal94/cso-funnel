@@ -29,10 +29,7 @@ export function Hero() {
           alt="Lead-to-Cash System"
         />
 
-        <div className="sdp-eyebrow-pill">
-          <span className="glowdot" aria-hidden />
-          <span>{hero.callout}</span>
-        </div>
+        <div className="sdp-eyebrow-pill">{hero.callout}</div>
 
         <h1 className="sdp-h1" data-sdp-reveal style={{ "--d": ".06s" } as React.CSSProperties}>
           <span className="sdp-h1-l1">{litten(hero.headlineL1, hero.headlineL1Lit)}</span>

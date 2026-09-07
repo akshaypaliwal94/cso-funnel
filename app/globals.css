@@ -303,6 +303,139 @@
       var(--volt-900) 100%);
   --grad-depth: linear-gradient(180deg,var(--obsidian),var(--volt-900));
 
+  /* ---- THE LIT EDGE ----------------------------------------------------
+     THE HOUSE TREATMENT FOR EVERY CARD AND EVERY DIVIDER. Measured off the
+     reference render rather than estimated, and the measurements are the
+     reason it works:
+
+       - The line is LIT ALONG ITS WHOLE WIDTH. It cuts on at full strength at
+         the corner and never fades in. Fading both ends to nothing lights only
+         the middle third, which is the failure mode this replaced.
+       - It ends AT the corners. No overhang: a pixel outside the card is bare
+         ground.
+       - Brightness runs blue -> WHITE -> blue: a pure-white nucleus at 50%, a
+         secondary flare at 19%, a long dim tail down the right half. The
+         asymmetry is the difference between a reflection and a decal, so it is
+         reproduced rather than averaged out.
+       - The core is 2px with the halo gone by 14px. A hard thin line with a
+         tight bloom, never a soft bar.
+
+     The halo is a drop-shadow ON the line, so it inherits the line's own alpha:
+     brightest under the nucleus, nearly absent under the tail. No hand-placed
+     second gradient tracks that. */
+  --edge-line: linear-gradient(90deg,
+      rgba(var(--volt-500-rgb),0)   0%,
+      rgba(var(--volt-500-rgb),.34) 2%,
+      rgba(var(--volt-400-rgb),.44) 9%,
+      rgba(var(--volt-200-rgb),.88) 19%,
+      rgba(var(--volt-300-rgb),.56) 30%,
+      rgba(var(--volt-50-rgb),.94)  41%,
+      #FFFFFF                       50%,
+      rgba(var(--volt-50-rgb),.90)  58%,
+      rgba(var(--volt-400-rgb),.46) 65%,
+      rgba(var(--volt-500-rgb),.26) 76%,
+      rgba(var(--volt-500-rgb),.24) 92%,
+      rgba(var(--volt-500-rgb),0)  100%);
+  --edge-halo:
+      drop-shadow(0 0 4px rgba(var(--volt-300-rgb),.85))
+      drop-shadow(0 0 12px rgba(var(--volt-500-rgb),.55));
+
+  /* The same profile at roughly half strength, with no pure white in it, for
+     rules INSIDE a card and for the section dividers. Same light, quieter:
+     an interior rule that peaks at white competes with the card's own edge. */
+  --edge-line-soft: linear-gradient(90deg,
+      rgba(var(--volt-500-rgb),0)   0%,
+      rgba(var(--volt-500-rgb),.18) 2%,
+      rgba(var(--volt-400-rgb),.24) 9%,
+      rgba(var(--volt-200-rgb),.48) 19%,
+      rgba(var(--volt-300-rgb),.30) 30%,
+      rgba(var(--volt-200-rgb),.60) 41%,
+      rgba(var(--volt-50-rgb),.72)  50%,
+      rgba(var(--volt-200-rgb),.58) 58%,
+      rgba(var(--volt-400-rgb),.26) 65%,
+      rgba(var(--volt-500-rgb),.15) 76%,
+      rgba(var(--volt-500-rgb),.13) 92%,
+      rgba(var(--volt-500-rgb),0)  100%);
+  --edge-halo-soft: drop-shadow(0 0 5px rgba(var(--volt-400-rgb),.45));
+
+  /* The vertical cut of the same rule, for column separators. */
+  --edge-line-v: linear-gradient(180deg,
+      rgba(var(--volt-500-rgb),0)   0%,
+      rgba(var(--volt-400-rgb),.24) 9%,
+      rgba(var(--volt-200-rgb),.52) 26%,
+      rgba(var(--volt-50-rgb),.68)  50%,
+      rgba(var(--volt-200-rgb),.46) 72%,
+      rgba(var(--volt-500-rgb),.14) 88%,
+      rgba(var(--volt-500-rgb),0)  100%);
+
+  /* THE SIDE STROKE — now MODULATED, the way the pyramid's outline is.
+     A single ramp lights every border identically top to bottom, which reads as
+     a printed edge. Light pools where a surface turns, so the corners get hot
+     spots and the long runs get a couple of softer flares, and the ramp
+     underneath only carries the falloff.
+
+     Layer order is the order it paints: corners first (brightest, on top),
+     then the flares, then the ramp. The last layer takes the `border-box`
+     keyword at the call site; the rest default to a border-box clip anyway, so
+     all of them show only in the border strip and never over the fill.
+
+     --rim-flare-a / -b are the positions of the two run flares. They default
+     here and are overridden per card below, so no two adjacent borders light in
+     the same place — the CSS equivalent of the pyramid's seeded scatter. */
+  /* Where the run flares sit. Three of them, and they are what stops every box
+     lighting identically — see the scatter block further down. */
+  --rim-flare-a: 34%;   /* top edge   */
+  --rim-flare-b: 68%;   /* bottom edge */
+  --rim-flare-c: 42%;   /* the sides   */
+  --rim-edge:
+    /* the four corner pools — mandatory, light gathers where a surface turns */
+    radial-gradient(34px 30px at 0 0,
+      rgba(var(--volt-50-rgb),.95), rgba(var(--volt-50-rgb),0) 74%),
+    radial-gradient(34px 30px at 100% 0,
+      rgba(var(--volt-50-rgb),.95), rgba(var(--volt-50-rgb),0) 74%),
+    radial-gradient(34px 30px at 0 100%,
+      rgba(var(--volt-200-rgb),.78), rgba(var(--volt-200-rgb),0) 74%),
+    radial-gradient(34px 30px at 100% 100%,
+      rgba(var(--volt-200-rgb),.78), rgba(var(--volt-200-rgb),0) 74%),
+    /* flares along the runs: TWO on each long edge and one on each side, at
+       positions that never line up with each other. One flare per edge was the
+       bug — it put a single bright point in the middle of the bottom of every
+       box on the page, which is the opposite of scattered.
+
+       Levels are set for EIGHT flares, not one. Splitting the light eight ways
+       at the old alphas left every point faint; each is now roughly 1.8x what
+       it was, and the two bottom corners come up from .50 to .78 so they match
+       the top pair rather than trailing them. */
+    radial-gradient(86px 32px at var(--rim-flare-a) 0,
+      rgba(var(--volt-50-rgb),.78), rgba(var(--volt-50-rgb),0) 80%),
+    radial-gradient(58px 28px at calc(var(--rim-flare-a) + 41%) 0,
+      rgba(var(--volt-200-rgb),.52), rgba(var(--volt-200-rgb),0) 80%),
+    radial-gradient(74px 28px at var(--rim-flare-b) 100%,
+      rgba(var(--volt-200-rgb),.58), rgba(var(--volt-200-rgb),0) 80%),
+    radial-gradient(52px 26px at calc(var(--rim-flare-b) - 37%) 100%,
+      rgba(var(--volt-200-rgb),.42), rgba(var(--volt-200-rgb),0) 80%),
+    radial-gradient(28px 68px at 0 var(--rim-flare-c),
+      rgba(var(--volt-200-rgb),.48), rgba(var(--volt-200-rgb),0) 80%),
+    radial-gradient(28px 60px at 100% calc(100% - var(--rim-flare-c)),
+      rgba(var(--volt-200-rgb),.40), rgba(var(--volt-200-rgb),0) 80%),
+    /* the ramp underneath, carrying the falloff */
+    linear-gradient(180deg,
+      var(--volt-100)                 0%,
+      var(--volt-100)                 3%,
+      rgba(var(--volt-200-rgb),.62)   9%,
+      rgba(var(--volt-600-rgb),.52)  32%,
+      rgba(var(--volt-600-rgb),.34)  64%,
+      rgba(var(--volt-600-rgb),.20) 100%);
+
+  /* The light landing INSIDE the card, gone by a third of the way down.
+     Measured (6,12,45) just under the top edge against (2,5,13) at the bottom,
+     so it is a narrow wash and not a panel tint. Without it the line floats on
+     a flat panel and stops looking like it is lighting anything. */
+  --edge-wash: radial-gradient(ellipse 88% 34% at 50% 0%,
+      rgba(var(--volt-600-rgb),.20) 0%,
+      rgba(var(--volt-600-rgb),.07) 42%,
+      rgba(var(--volt-600-rgb),0)  100%);
+
   /* ---- DERIVED ---- */
   /* Ends at volt-700, ABOVE the background's volt-800 ceiling. These are
      objects, not scenery: the result bar and the closing bar are the payoff
@@ -480,23 +613,31 @@ body{ margin:0; overflow-x:hidden;
   font-size:11.5px; font-weight:700; letter-spacing:.18em; text-transform:uppercase;
   margin-bottom:var(--sp-label); color:var(--accent-text); }
 
-.sdp-eyebrow.center{ display:flex; align-items:center; justify-content:center; gap:16px;
+.sdp-eyebrow.center,
+.cso-journey-cap,
+.cso-maths-cap{ display:flex; align-items:center; justify-content:center; gap:16px;
   text-align:center; margin-left:auto; margin-right:auto; max-width:600px; }
 
-.sdp-eyebrow.center::before,
-.sdp-eyebrow.center::after{ content:""; flex:1 1 0; max-width:190px; height:1px; }
+.sdp-eyebrow.center::before,.sdp-eyebrow.center::after,
+.cso-journey-cap::before,.cso-journey-cap::after,
+.cso-maths-cap::before,.cso-maths-cap::after{ content:""; flex:1 1 0; max-width:190px; height:1px; }
 
 /* Longer on desktop. The caps are raised together with the container, because
    `flex:1` can only take the space the container gives it: leaving max-width at
    600px would let the rules grow to 190px and stop, whatever the caps said. */
 @media (min-width:900px){
-  .sdp-eyebrow.center{ max-width:940px; gap:22px; }
-  .sdp-eyebrow.center::before,
-  .sdp-eyebrow.center::after{ max-width:340px; }
+  .sdp-eyebrow.center,
+  .cso-journey-cap,
+  .cso-maths-cap{ max-width:940px; gap:22px; }
+  .sdp-eyebrow.center::before,.sdp-eyebrow.center::after,
+  .cso-journey-cap::before,.cso-journey-cap::after,
+  .cso-maths-cap::before,.cso-maths-cap::after{ max-width:340px; }
 }
 
 /* outer edge -> inner end */
-.sdp-eyebrow.center::before{
+.sdp-eyebrow.center::before,
+.cso-journey-cap::before,
+.cso-maths-cap::before{
   background:linear-gradient(90deg,
     rgba(var(--volt-400-rgb),0)    0%,
     rgba(var(--volt-400-rgb),.34) 28%,
@@ -505,7 +646,9 @@ body{ margin:0; overflow-x:hidden;
     var(--volt-200)              100%); }
 
 /* inner end -> outer edge (the mirror) */
-.sdp-eyebrow.center::after{
+.sdp-eyebrow.center::after,
+.cso-journey-cap::after,
+.cso-maths-cap::after{
   background:linear-gradient(90deg,
     var(--volt-200)                0%,
     var(--volt-300)               20%,
@@ -515,8 +658,9 @@ body{ margin:0; overflow-x:hidden;
 
 /* Same single-device-pixel hairline as the trust rule. */
 @media (min-resolution:2dppx){
-  .sdp-eyebrow.center::before,
-  .sdp-eyebrow.center::after{ height:.5px; }
+  .sdp-eyebrow.center::before,.sdp-eyebrow.center::after,
+  .cso-journey-cap::before,.cso-journey-cap::after,
+  .cso-maths-cap::before,.cso-maths-cap::after{ height:.5px; }
 }
 
 /* "This is for you if" takes one extra ladder step between its eyebrow and its
@@ -535,11 +679,24 @@ body{ margin:0; overflow-x:hidden;
    space exists whether or not the section supplies a deck. */
 .sdp-head{ margin-bottom:var(--sp-body); }
 
-h2.sdp-h2{ text-align:center; font-size:clamp(28px,4.4vw,52px); letter-spacing:.02em;
+/* Section titles run at the hero's own H1 scale (clamp(34px,5.6vw,70px)), so
+   every masthead down the page lands with the same weight the fold does.
+   Line-height stays at 1.14 rather than the hero's 1.0: section titles wrap to
+   two and three lines where the hero's is set to break by hand. */
+h2.sdp-h2{ text-align:center; font-size:clamp(34px,5.6vw,70px); letter-spacing:.02em;
   line-height:1.14; margin-bottom:0; }
 /* Only when a deck follows. As the last child the headline needs no gap under
-   it, because the wrapper is already providing one. */
-h2.sdp-h2:not(:last-child){ margin-bottom:var(--sp-deck); }
+   it, because the wrapper is already providing one.
+
+   Down to --space-1 (8px), and it is a MEASURED match to the hero, not a
+   guess. The hero sets 18px under an H1 at line-height 1.0, so 18px is the
+   whole gap. A section title runs at 1.14, which hangs half its extra leading
+   (~5px at 70px) under the last line before any margin applies, and the deck's
+   own 1.7 line-height hangs ~5px more above its first. Both are invisible and
+   both are real, so a 16px margin renders as roughly 26px of air. 8px puts the
+   optical gap on the hero's 18px. The title and its deck are one object; the
+   gap that does the separating is the one under them, and --sp-body owns it. */
+h2.sdp-h2:not(:last-child){ margin-bottom:var(--space-1); }
 
 /* Inside a masthead the deck adds nothing below itself: the wrapper owns it.
    Outside one (the hero, the finale) .sdp-sub keeps its own spacing. */
@@ -606,30 +763,29 @@ h2.sdp-h2:not(:last-child){ margin-bottom:var(--sp-deck); }
    Flagged in the skin doc rather than solved here. */
 .cso-logo{ display:block; width:auto; height:clamp(46px,7vw,66px); margin:0 auto 22px; }
 
-/* ---- Hero gate: bordered pill + glowing dot ---- */
-/* The gate pill carries the same top-lit rim as the CTA: it is the first
-   object in the fold and a flat blue outline next to a lit button reads as
-   the unfinished one. Its own translucent voltage wash stays as the fill,
-   clipped to the padding box so the rim can own the border box. */
-.sdp-eyebrow-pill{ display:inline-flex; align-items:center; gap:10px; margin-bottom:20px;
-  padding:8px 18px 8px 14px; border-radius:999px;
-  border:1px solid transparent;
-  /* the fill is wrapped in a gradient because a COLOR is only legal in the
-     LAST layer of the background shorthand; as the first layer it invalidates
-     the whole declaration and the rim silently never paints. */
-  background:linear-gradient(rgba(var(--voltage-rgb),.13),rgba(var(--voltage-rgb),.13)) padding-box,
-             var(--rim-hot) border-box,
-             var(--rim-top) border-box;
+/* ---- Hero gate: beige text in a beige border ---- */
+/* Deliberately the quietest object in the fold. It names who the page is for,
+   it does not compete with the CTA: no voltage wash, no lit rim, no pulsing
+   dot. One hairline in the warm accent at low alpha, the same accent for the
+   type, and nothing else. The border is alpha-mixed rather than flat --sand so
+   the rule reads as a hairline and not as a second, brighter object. */
+.sdp-eyebrow-pill{ display:inline-block; margin-bottom:20px;
+  padding:9px 18px; border-radius:999px;
+  border:1px solid color-mix(in oklab, var(--sand) 42%, transparent);
+  background:transparent;
   font-family:var(--fb); font-size:11.5px; font-weight:700; letter-spacing:.14em;
-  text-transform:uppercase; color:var(--sand); line-height:1.5; text-align:left; }
-.sdp-eyebrow-pill .glowdot{ position:relative; width:8px; height:8px; border-radius:50%;
-  background:var(--focus-ring); flex:0 0 8px; box-shadow:0 0 10px 2px rgba(var(--voltage-rgb),.9); }
-.sdp-eyebrow-pill .glowdot::before{ content:""; position:absolute; inset:-4px; border-radius:50%;
-  background:var(--focus-ring); opacity:.4; animation:sdpDotPulse 2s ease-out infinite; }
-@keyframes sdpDotPulse{ 0%{transform:scale(.6);opacity:.5} 100%{transform:scale(2.6);opacity:0} }
+  text-transform:uppercase; color:var(--sand); line-height:1.5; text-align:center; }
 
 /* ---- PRIMARY CTA — wide voltage pill, shimmer sweep, circular arrow ---- */
-.sdp-lockup{ display:flex; flex-direction:column; align-items:center; width:100%; margin:28px auto 0; }
+/* 56px, doubled from 28px. The lockup repeats after every beat on this page,
+   so this one number sets the breathing room before every CTA at once.
+
+   The HERO is exempt and stays at 28px. There the lockup is welded to the VSL
+   frame directly above it: the video ends and the button is the next thing you
+   reach, and pushing them apart breaks that hand-off. Everywhere else the
+   lockup follows a finished block of content and wants the separation. */
+.sdp-lockup{ display:flex; flex-direction:column; align-items:center; width:100%; margin:56px auto 0; }
+.sdp-hero .sdp-lockup{ margin-top:28px; }
 /* The rim is painted with the padding-box / border-box technique: a transparent
    border, the fill clipped to the padding box, and the rim gradient clipped to
    the border box underneath it. A gradient cannot be a border-color, and a ring
@@ -729,43 +885,82 @@ h2.sdp-h2:not(:last-child){ margin-bottom:var(--sp-deck); }
   .sdp-q.open::before,.cso-venn-detail::before,.cso-result::before{ transition:none; }
 }
 
-/* ---- CARD SYSTEM — graphite panel, slate hairline, voltage on hover ---- */
-/* Every card carries the top-lit rim: brightest at top centre, dying by the
-   bottom. Painted with the padding-box / border-box technique rather than a
-   ::before ring, which leaves ::before free for the cards that already use it
-   (the success cards draw their own top cap there). */
-.sdp-card{ border:1px solid transparent; border-radius:14px; padding:26px;
-  /* --surface wrapped in a gradient: a colour in a non-final background
-     layer is invalid CSS and drops the entire declaration, which is why the
-     rims were not appearing on cards at all. */
-  background:linear-gradient(var(--surface),var(--surface)) padding-box,
-             var(--rim-card-hot) border-box,
-             var(--rim-card) border-box;
-  /* The glow is TIGHT, held close to the edge. The hero's bloom is a masked
-     overlay: its light lives inside the section and fades before it reaches
-     anything, so nothing on that fold throws light across the page. A card
-     glow spreading 22px did exactly that and read as a different, louder
-     effect than the one it is supposed to match. Halved.
+/* ---- CARD SYSTEM — one lit edge, every card, no exceptions ---- */
+/* The edge is the house treatment defined in the token block: a hard 2px line
+   across the top with a tight halo, a side stroke lit at the corners and dead
+   by the bottom, and a narrow wash of that light falling into the panel. */
+.sdp-card{ position:relative; border:1px solid transparent; border-radius:14px; padding:26px;
+  /* THE LIT EDGE, the house treatment. --card-ground lets a card sit on a
+     different fill (the fit boxes want black, not the slate panel) without
+     touching anything else about the edge. A colour has to be wrapped in a
+     gradient here: a bare colour in a non-final background layer is invalid
+     CSS and drops the whole declaration, which is why the rims silently
+     failed to paint at all on the first build. */
+  background:
+    var(--edge-wash) padding-box,
+    linear-gradient(var(--card-ground,var(--surface)),var(--card-ground,var(--surface))) padding-box,
+    var(--rim-edge) border-box;
+  box-shadow:var(--shadow-card);
+  transition:transform .2s, box-shadow .2s; }
 
-     Four shadows, four jobs: a 1px ring so the whole edge stays readable
-     including the bottom, a short even ambient so the card sits in its own
-     light, a top-weighted layer, and a tight volt-200 core above it so the
-     light reads as coming off the edge rather than hazing around it. */
-  box-shadow:
-    0 0 0 1px rgba(var(--volt-700-rgb),.30),
-    0 0 10px -6px rgba(var(--volt-500-rgb),.30),
-    0 -3px 11px -7px rgba(var(--volt-300-rgb),.62),
-    0 -2px 6px -5px rgba(var(--volt-200-rgb),.45),
-    var(--shadow-card);
-  transition:transform .2s, box-shadow .2s;
-  position:relative; }
-.sdp-card:hover{ transform:translateY(-2px);
-  box-shadow:
-    0 0 0 1px rgba(var(--volt-600-rgb),.45),
-    0 0 13px -5px rgba(var(--volt-500-rgb),.42),
-    0 -4px 14px -6px rgba(var(--volt-300-rgb),.72),
-    0 -2px 8px -4px rgba(var(--volt-200-rgb),.58),
-    var(--shadow-card-hover); }
+/* THE SCATTER. The pyramid hashes its own geometry so no two edges light in the
+   same place. A stylesheet has no hash, so this uses position — but the earlier
+   version cycled on nth-child only, which meant a card that is the ONLY child of
+   its container was always variant 1. Most boxes on this page are exactly that,
+   so they all shared one arrangement and the same flare sat in the middle of
+   every bottom edge.
+
+   Two changes fix it. The rim itself now carries eight flares at positions that
+   never coincide, so a single box already reads as varied around its perimeter.
+   And the cycle runs on SEVEN steps across both nth-child and nth-of-type, so
+   grids, stacks and lone cards land on different sets. */
+.sdp-card:nth-child(7n+2),.sdp-q:nth-child(7n+2),.cso-journey-frame:nth-child(7n+2),
+.cso-chapter:nth-child(7n+2) .cso-chapter-card,.cso-phase:nth-child(7n+2) .cso-phase-card{
+  --rim-flare-a:62%; --rim-flare-b:28%; --rim-flare-c:66%; }
+.sdp-card:nth-child(7n+3),.sdp-q:nth-child(7n+3),.cso-journey-frame:nth-child(7n+3),
+.cso-chapter:nth-child(7n+3) .cso-chapter-card,.cso-phase:nth-child(7n+3) .cso-phase-card{
+  --rim-flare-a:22%; --rim-flare-b:76%; --rim-flare-c:31%; }
+.sdp-card:nth-child(7n+4),.sdp-q:nth-child(7n+4),.cso-journey-frame:nth-child(7n+4),
+.cso-chapter:nth-child(7n+4) .cso-chapter-card,.cso-phase:nth-child(7n+4) .cso-phase-card{
+  --rim-flare-a:48%; --rim-flare-b:15%; --rim-flare-c:74%; }
+.sdp-card:nth-child(7n+5),.sdp-q:nth-child(7n+5),.cso-journey-frame:nth-child(7n+5),
+.cso-chapter:nth-child(7n+5) .cso-chapter-card,.cso-phase:nth-child(7n+5) .cso-phase-card{
+  --rim-flare-a:71%; --rim-flare-b:44%; --rim-flare-c:23%; }
+.sdp-card:nth-child(7n+6),.sdp-q:nth-child(7n+6),.cso-journey-frame:nth-child(7n+6),
+.cso-chapter:nth-child(7n+6) .cso-chapter-card,.cso-phase:nth-child(7n+6) .cso-phase-card{
+  --rim-flare-a:17%; --rim-flare-b:59%; --rim-flare-c:57%; }
+.sdp-card:nth-child(7n+7),.sdp-q:nth-child(7n+7),.cso-journey-frame:nth-child(7n+7),
+.cso-chapter:nth-child(7n+7) .cso-chapter-card,.cso-phase:nth-child(7n+7) .cso-phase-card{
+  --rim-flare-a:55%; --rim-flare-b:81%; --rim-flare-c:39%; }
+
+/* Sections stagger too, so the lone boxes that sit one-per-container do not all
+   inherit the default set. */
+#results .cso-mtable-wrap,#system .cso-venn-sum,.cso-result{
+  --rim-flare-a:64%; --rim-flare-b:26%; --rim-flare-c:70%; }
+.cso-closing-bar,.cso-numbers,.cso-quote{
+  --rim-flare-a:29%; --rim-flare-b:72%; --rim-flare-c:35%; }
+.cso-founder-chips li:nth-child(2){ --rim-flare-a:66%; --rim-flare-b:24%; --rim-flare-c:60%; }
+.cso-founder-chips li:nth-child(3){ --rim-flare-a:25%; --rim-flare-b:70%; --rim-flare-c:34%; }
+.cso-chip.weeks{ --rim-flare-a:58%; --rim-flare-b:33%; --rim-flare-c:62%; }
+
+/* THE LINE, on ::after because ::before is spoken for on the cards that draw
+   their own devices there. left/right 1px so it ends exactly at the corners,
+   top -1px so it sits ON the border rather than inside it. */
+.sdp-card::after{ content:""; position:absolute; z-index:2; pointer-events:none;
+  left:1px; right:1px; top:-1px; height:2px; border-radius:2px;
+  background:var(--edge-line); filter:var(--edge-halo); }
+
+/* Cards that clip their own content cannot hang the line over the border, so
+   it sits flush at 0 instead. */
+.sdp-card.is-clipped::after{ top:0; }
+/* Hover lifts the card and brightens THE LINE. It deliberately does not ring
+   the card in glow: a halo around all four sides is the bloom this system
+   replaced, and it reads as a different effect from the one at rest. */
+.sdp-card:hover{ transform:translateY(-2px); box-shadow:var(--shadow-card-hover); }
+.sdp-card:hover::after{
+  filter:drop-shadow(0 0 5px rgba(var(--volt-300-rgb),1))
+         drop-shadow(0 0 16px rgba(var(--volt-500-rgb),.72)); }
+.sdp-card::after{ transition:filter .22s; }
 .sdp-pillar-num{ display:inline-flex; align-items:center; justify-content:center;
   width:46px; height:46px; border-radius:10px;
   background:linear-gradient(135deg,rgba(var(--voltage-rgb),.30),rgba(var(--cobalt-rgb),.20));
@@ -786,18 +981,23 @@ h2.sdp-h2:not(:last-child){ margin-bottom:var(--sp-deck); }
    own. */
 .sd-root .fit-deck{ display:flex; flex-direction:column; gap:6px; }
 
+/* Widened from 1060px to the full width the wrap allows (--content-max less
+   its own padding). The subtitles have to hold on one line, and the honest way
+   to buy that is width, not smaller type: at 1060px each card gave the
+   subtitle ~223px, which forced it down to 12px. At 1144px it gets ~251px and
+   the line sits at 14px, where it belongs against the 14.5px pointers beneath
+   it. */
 .fit-grid{ display:grid; grid-template-columns:repeat(3,1fr);
-  gap:var(--space-3); max-width:1060px; margin:0 auto; align-items:stretch; }
+  gap:var(--space-3); max-width:1144px; margin:0 auto; align-items:stretch; }
 @media (max-width:980px){ .fit-grid{ grid-template-columns:1fr; max-width:560px; } }
 
-/* The rim now comes from .sdp-card. All this box adds is a BLACK ground:
-   --surface on this band is slate, a lifted grey panel, and these cards should
-   sit as dark as the page so the lit edge is the only thing describing them. */
+/* The fit boxes take the shared lit edge from .sdp-card and change one thing:
+   the GROUND. --surface on this band is slate, a lifted grey panel, and these
+   should sit as dark as the page so the lit edge is the only thing describing
+   them. */
 .fit-box{ display:flex; flex-direction:column;
-  padding:var(--space-4) var(--space-3);
-  background:linear-gradient(var(--obsidian),var(--obsidian)) padding-box,
-             var(--rim-card-hot) border-box,
-             var(--rim-card) border-box; }
+  --card-ground:var(--obsidian);
+  padding:var(--space-4) var(--space-3); }
 
 /* The header is a row: icon, then the title and subtitle stacked beside it.
    Left aligned, because a centred block next to a fixed-width icon leaves an
@@ -806,7 +1006,7 @@ h2.sdp-h2:not(:last-child){ margin-bottom:var(--sp-deck); }
 
 /* The icon sits on the accent, in its own bed, so it reads as a marker for the
    box rather than as a fourth piece of type. */
-.fit-box-ic{ flex:0 0 40px; width:40px; height:40px; border-radius:11px;
+.fit-box-ic{ flex:0 0 52px; width:52px; height:52px; border-radius:14px;
   display:grid; place-items:center; color:var(--sand);
   background:rgba(var(--voltage-rgb),.16);
   border:1px solid rgba(var(--voltage-rgb),.42); }
@@ -816,45 +1016,152 @@ h2.sdp-h2:not(:last-child){ margin-bottom:var(--sp-deck); }
    subtitle were the heading. The title takes the display face; the subtitle
    drops to BODY style, the same face and size as the pointers under it, so it
    reads as prose introducing them rather than a second heading. */
-.fit-box-title{ text-align:left; font-family:var(--fh);
+/* Scoped `.sd-root .fit-box-title` (0,2,0) on purpose. The base heading rule is
+   element-qualified, `.sd-root h3` = (0,1,1), and it sets `margin-block:0 .5em`
+   — 10.5px under a 21px title. A bare `.fit-box-title` (0,1,0) loses to it, so
+   every margin set there was silently discarded and the gap never moved. This
+   is the same specificity trap the comment on that base rule documents for the
+   inline axis; it bites on the block axis too. */
+.sd-root .fit-box-title{ text-align:left; font-family:var(--fh);
   font-size:clamp(17px,1.9vw,21px); font-weight:400; letter-spacing:.06em;
-  text-transform:uppercase; color:var(--sand); margin:0 0 5px; }
+  line-height:1.2; text-transform:uppercase; color:var(--sand);
+  margin-block:0 2px; }
 
+/* Holds on ONE line, at a size that still reads. Each card now gives it about
+   251px (365px column, less 48px padding, less the 52px icon and its 14px
+   gap); the longest of the three, "Leads are coming in. But sales lag.", is 35
+   characters and lands around 241px at 14px with the tracking pulled in
+   slightly. nowrap is the guarantee, not the mechanism: below 981px the grid
+   drops to one 560px column where all three fit several times over. */
 .sd-root .fit-box-sub{ text-align:left; font-family:var(--fb);
-  font-size:14.5px; line-height:1.55; font-weight:400;
-  color:var(--text-secondary); margin:0; }
+  font-size:14px; line-height:1.35; font-weight:400; letter-spacing:-.008em;
+  white-space:nowrap; color:var(--text-secondary); margin:0; }
 
 /* The divider. Same ramp language as the eyebrow rules: brightest where the
    content is and fading out at both ends, rather than a flat hairline. */
-.fit-box-rule{ display:block; height:1px; margin:var(--space-3) 0;
-  background:linear-gradient(90deg,
-    rgba(var(--volt-400-rgb),0)    0%,
-    var(--volt-400)               18%,
-    var(--volt-300)               50%,
-    var(--volt-400)               82%,
-    rgba(var(--volt-400-rgb),0)  100%); }
+/* --space-2 (16px), the SAME value the pointer rules below use. It was
+   --space-3 (24px), so the head rule stood 24px off the first pointer while
+   every rule after it stood 14px off its neighbours: one rhythm for the first
+   gap and a tighter one for the rest, which reads as a mistake rather than as
+   hierarchy. Every rule in this card is now equidistant from the text on both
+   sides of it. */
+.fit-box-rule{ display:block; height:1px; margin:var(--space-2) 0;
+  background:var(--edge-line-soft); filter:var(--edge-halo-soft); }
 @media (min-resolution:2dppx){ .fit-box-rule{ height:.5px; } }
 
-.fit-box-points{ display:flex; flex-direction:column; gap:14px; margin:0; }
+/* The pointers are separated by the house rule as well. The gap becomes
+   padding so the rule has something to sit between: a flex `gap` is empty
+   space no child can paint into.
+
+   No halo on this one. --edge-halo is a `filter`, and a filter on the <li>
+   would glow the pointer's text and its tick along with the rule. That
+   restraint is also correct on the merits: this is the third rule inside one
+   card, and a repeated interior separator should be the quietest of the
+   three. */
+.fit-box-points{ display:flex; flex-direction:column; gap:0; margin:0; }
 .fit-box-points li{ display:flex; gap:12px; font-size:14.5px; line-height:1.6;
-  color:var(--text-primary); }
+  color:var(--text-primary); padding:var(--space-2) 0; }
+.fit-box-points li:first-child{ padding-top:0; }
+.fit-box-points li:last-child{ padding-bottom:0; }
+.fit-box-points li + li{
+  background:var(--edge-line-soft) top left / 100% 1px no-repeat; }
+/* ---- The disqualifier bar under the three boxes ---------------------- */
+/* Carries the house lit edge, so it belongs to the same family as the boxes
+   above it, but it is a BAR rather than a fourth box: one row, the width of
+   the whole grid, icon and copy side by side. The ground is obsidian like the
+   boxes, not the slate panel. */
+/* Narrower than the grid above it (1144px), and centred under it. Matching the
+   grid made it read as a fourth cell in the row; pulled in, it reads as a coda
+   to the three, which is what it is. 800px is about the floor: the longer of
+   the two lines runs ~70 characters, which needs roughly 600px at 16.5px, and
+   what is left after the padding, the 52px mark, the two gaps and the rule is
+   ~650px. Below this it starts wrapping and the two-line lockup breaks. */
+.fit-note{ position:relative; display:flex; align-items:center; gap:var(--space-3);
+  max-width:800px; margin:var(--space-3) auto 0;
+  border:1px solid transparent; border-radius:14px;
+  padding:22px var(--space-3);
+  background:
+    var(--edge-wash) padding-box,
+    linear-gradient(var(--obsidian),var(--obsidian)) padding-box,
+    var(--rim-edge) border-box;
+  box-shadow:var(--shadow-card); }
+.fit-note::after{ content:""; position:absolute; z-index:2; pointer-events:none;
+  left:1px; right:1px; top:-1px; height:2px; border-radius:2px;
+  background:var(--edge-line); filter:var(--edge-halo); }
+
+/* The mark takes the WARM accent, not voltage. Voltage on this page is the
+   action colour and this bar is the one place that is telling you NOT to act;
+   sand also matches the turn line it introduces. No bed behind it: the three
+   box icons sit in tinted tiles because they label a card, this one is a
+   standalone mark. */
+.fit-note-ic{ flex:0 0 auto; display:grid; place-items:center; color:var(--sand); }
+
+/* The vertical cut of the house rule, sized to the copy beside it. */
+/* Sized to the copy block, which is also what the mark is sized to: the three
+   objects in this row now share one height. */
+.fit-note-rule{ flex:0 0 1px; align-self:stretch; min-height:52px;
+  background:var(--edge-line-v); }
+
+.sd-root .fit-note-copy{ margin:0; display:flex; flex-direction:column; gap:4px;
+  text-align:left; }
+/* Two lines, always broken. The first is the exclusion, the second is the
+   turn, and the turn only lands if it starts on its own line. */
+.fit-note-lead{ font-family:var(--fb); font-size:clamp(15px,1.5vw,16.5px);
+  font-weight:700; line-height:1.5; color:var(--ivory); }
+.fit-note-turn{ font-family:var(--fb); font-size:clamp(15px,1.5vw,16.5px);
+  font-weight:500; line-height:1.5; color:var(--sand); }
+
+@media (max-width:640px){
+  .fit-note{ flex-direction:column; align-items:flex-start; gap:16px;
+    max-width:560px; padding:22px; }
+  /* Stacked, the divider turns with the layout: a vertical rule between things
+     that are no longer side by side reads as a stray mark. */
+  .fit-note-rule{ flex:0 0 1px; align-self:stretch; min-height:0; height:1px;
+    width:100%; background:var(--edge-line-soft); }
+}
+
 .fit-box-points .ck{ flex:0 0 22px; width:22px; height:22px; border-radius:50%;
   background:rgba(var(--voltage-rgb),.24); border:1.5px solid var(--focus-ring);
   color:var(--ivory); display:grid; place-items:center; margin-top:1px; }
 
 /* ---- FAQ — rotate-to-cross ---- */
 .sdp-faq{ max-width:840px; margin:0 auto; text-align:left; }
-.sdp-q{ background:var(--surface); border:1px solid var(--border); border-radius:14px;
-  margin-bottom:12px; overflow:hidden; transition:border-color .25s, background .25s, box-shadow .25s; }
-.sdp-q.open{ border-color:var(--voltage); background:var(--surface-raised);
-  box-shadow:0 10px 30px rgba(var(--voltage-rgb),.14); }
+/* The FAQ rows carry the edge too, at soft strength: eight of them stacked at
+   full strength would turn the section into a ladder of white lines. They clip
+   their own body, so the line sits flush at 0 rather than hanging over the
+   border. */
+/* Obsidian ground, like every other box in the funnel. These sat on --surface
+   (slate) and opened onto --surface-raised, which is the panel system the page
+   used before it had a lit edge — so a stack of eight rows read as eight grey
+   slabs with lit borders rather than as boxes the edge describes. */
+.sdp-q{ position:relative; border:1px solid transparent; border-radius:14px;
+  margin-bottom:12px; overflow:hidden; transition:background .25s, box-shadow .25s;
+  background:
+    linear-gradient(var(--obsidian),var(--obsidian)) padding-box,
+    var(--rim-edge) border-box; }
+.sdp-q::after{ content:""; position:absolute; z-index:2; pointer-events:none;
+  left:1px; right:1px; top:0; height:1.5px;
+  background:var(--edge-line-soft); filter:var(--edge-halo-soft);
+  transition:background .25s, filter .25s; }
+/* The open row is marked by its LINE and its wash, not by a different fill and
+   a voltage bloom underneath it. The bloom was the last drop-shadow of that kind
+   on the page; every other box lifts with --shadow-card. */
+.sdp-q.open{ background:
+    var(--edge-wash) padding-box,
+    linear-gradient(var(--obsidian),var(--obsidian)) padding-box,
+    var(--rim-edge) border-box;
+  box-shadow:var(--shadow-card-hover); }
+.sdp-q.open::after{ height:2px; background:var(--edge-line); filter:var(--edge-halo); }
 .sdp-q-head{ width:100%; background:transparent; border:0; text-align:left; padding:20px 24px;
   display:flex; align-items:center; justify-content:space-between; gap:18px;
   font-family:var(--fb); font-size:15.5px; font-weight:600; color:var(--ivory); cursor:pointer; }
 .sdp-q-head .ic{ flex:0 0 30px; width:30px; height:30px; border-radius:50%;
   background:rgba(var(--voltage-rgb),.22); color:var(--ivory); display:grid; place-items:center;
   border:1px solid rgba(var(--voltage-rgb),.45); transition:transform .3s, background .3s, color .3s; }
-.sdp-q.open .sdp-q-head .ic{ background:var(--voltage); border-color:var(--voltage);
+/* The open icon brightens its own tinted bed rather than flipping to a solid
+   voltage disc: nothing else on the page carries a filled voltage panel. */
+.sdp-q.open .sdp-q-head .ic{ background:rgba(var(--voltage-rgb),.46);
+  border-color:var(--focus-ring);
   color:var(--cta-ink); transform:rotate(45deg); }
 .sdp-q-body{ max-height:0; overflow:hidden; transition:max-height .45s cubic-bezier(.2,.8,.2,1); }
 .sdp-q.open .sdp-q-body{ max-height:900px; }
@@ -1106,17 +1413,135 @@ h2.sdp-h2:not(:last-child){ margin-bottom:var(--sp-deck); }
 @media (max-width:640px){ .cso-trust-sep{ display:none; } }
 
 /* ---- Success stories — named-result cards with a lit figure ---- */
-.cso-wins{ display:grid; grid-template-columns:repeat(3,1fr); gap:18px; max-width:1000px; margin:0 auto; }
+/* ---- SUCCESS STORY CARDS — per Atul's reference render, 5 Sep --------- */
+/* Anatomy, top to bottom: mark, brand name, lit rule, figure, description,
+   category chip, lit rule, two outcome cells. Every rule in the card is the
+   house lit rule, so the card is built from the same light as everything else
+   on the page. */
+.cso-wins{ display:grid; grid-template-columns:repeat(3,1fr); gap:18px;
+  max-width:1144px; margin:0 auto; align-items:stretch; }
 @media (max-width:860px){ .cso-wins{ grid-template-columns:1fr; max-width:440px; } }
-.cso-win{ text-align:center; padding:32px 24px; }
-.cso-win::before{ content:""; position:absolute; inset:0 0 auto 0; height:3px; border-radius:14px 14px 0 0;
-  background:var(--grad-cta); }
-.cso-win-name{ font-family:var(--fb); font-size:11.5px; font-weight:800; letter-spacing:.16em;
-  text-transform:uppercase; color:var(--text-secondary); margin-bottom:14px; }
-.cso-win-figure{ font-family:var(--fh); font-size:clamp(30px,4.6vw,44px); line-height:1;
-  letter-spacing:.03em; color:var(--accent-text-strong); }
-.cso-win-figure .unit{ display:block; margin-top:9px; font-family:var(--fb); font-size:12.5px;
-  font-weight:600; letter-spacing:.02em; text-transform:none; color:var(--text-secondary); }
+
+/* No fill, like the fit boxes in section 2: --surface on these bands is slate,
+   a lifted grey panel, and these should sit as dark as the page so the lit edge
+   is the only thing describing them. */
+.cso-win{ display:flex; flex-direction:column; align-items:center;
+  --card-ground:var(--obsidian);
+  text-align:center; padding:30px 24px 24px; }
+
+/* The mark sits in its own reserved box so the card's rhythm is identical
+   whether the logo has landed or not. */
+.cso-win-mark{ display:grid; place-items:center; min-height:76px; margin-bottom:16px; }
+
+/* THE PLATE. The three supplied files cannot sit on obsidian as they are: TGO
+   is a black wordmark on transparent (invisible), FM4 and FAB are JPGs with
+   baked white backgrounds (bright rectangles). One light plate takes all
+   three, and it reads as a deliberate brand chip rather than as three
+   mismatched files.
+
+   Fixed box, identical on every card, so the row reads as one chip repeated.
+   The MARK inside it is sized by --logo-h, set per card from that file's
+   measured margin, because the three files are padded completely differently:
+   TGO's artwork runs edge to edge while 29% of the FAB file is empty white.
+   Rendered at one shared size they came out looking random, TGO flush to the
+   plate and the other two floating small in the middle of it. Cancelling each
+   file's own margin is what makes them look like a set. */
+.cso-win-plate{ display:grid; place-items:center;
+  width:172px; height:68px; padding:12px 16px;
+  border-radius:12px; background:var(--ivory);
+  box-shadow:0 2px 10px rgba(0,0,0,.35); }
+.cso-win-plate img{ height:var(--logo-h,40px); width:auto;
+  max-width:100%; object-fit:contain; }
+
+/* Brand name: tracked caps, the widest tracking on the page, because at this
+   size the letterspacing IS the styling. Ivory, not muted: it is the card's
+   subject, not a label for something else. */
+.cso-win-name{ font-family:var(--fb); font-size:12.5px; font-weight:700;
+  letter-spacing:.26em; text-transform:uppercase; color:var(--ivory);
+  margin:0 0 2px; padding-left:.26em; }
+
+/* The card's internal rules. Same soft house line as the fit boxes, and no
+   halo for the same reason: --edge-halo is a filter and would glow whatever
+   sits in the element. Width is pulled in from the card's edges so the rule
+   reads as belonging to the content, not to the box. */
+.cso-win-rule{ display:block; width:min(100%,260px); height:1px;
+  margin:var(--space-2) 0; background:var(--edge-line-soft); }
+@media (min-resolution:2dppx){ .cso-win-rule{ height:.5px; } }
+
+/* THE FIGURE. The source sentence entire, with its amount lit and set at
+   display scale; the words around it stay at reading size so the sentence
+   still reads as a sentence rather than as a headline with debris attached. */
+.sd-root .cso-win-figure{ font-family:var(--fb); font-size:17px; font-weight:700;
+  line-height:1.3; color:var(--ivory); margin:0 0 10px; text-wrap:balance; }
+.cso-win-amount{ display:block; font-family:var(--fh);
+  font-size:clamp(34px,4.4vw,48px); line-height:1.05; letter-spacing:.03em;
+  color:var(--accent-text-strong); }
+
+/* The supplied descriptions run ~150 characters, far longer than the two-line
+   blurbs in the reference render, so the measure opens up to the card's own
+   width rather than holding a 34ch column that would set them as six short
+   ragged lines. Card heights stay level regardless: the outcome block below is
+   pinned with margin-top:auto. */
+.sd-root .cso-win-desc{ font-family:var(--fb); font-size:14.5px; line-height:1.6;
+  color:var(--text-secondary); margin:0 0 16px; max-width:100%;
+  text-wrap:pretty; }
+
+/* Category chip: a bordered pill, not a filled one. Filled would make it the
+   loudest object on a card whose subject is the figure above it. */
+.cso-win-tag{ display:inline-flex; align-items:center; justify-content:center;
+  padding:8px 16px; border-radius:999px; border:1px solid transparent;
+  background:linear-gradient(var(--obsidian),var(--obsidian)) padding-box,
+             var(--rim-edge) border-box;
+  font-family:var(--fb); font-size:12.5px; font-weight:600; line-height:1.3;
+  color:var(--text-primary); }
+
+/* Two outcome cells, split by the vertical cut of the house rule. margin-top
+   auto pins this block to the bottom edge, so the three cards' footers line up
+   even when the copy above them runs to different lengths. */
+.cso-win-outcomes{ display:grid; grid-template-columns:1fr 1px 1fr;
+  align-items:center; gap:0; width:100%; margin-top:auto; list-style:none;
+  padding:0; }
+.cso-win-outcomes li{ display:flex; align-items:center; gap:10px;
+  text-align:left; padding:4px 12px; }
+.cso-win-outcomes li:first-child{ padding-left:0; }
+.cso-win-outcomes li:last-child{ padding-right:0; }
+/* The divider is a grid CELL, not a border, so it spans the row's full height
+   and stays centred between two cells of unequal content. */
+.cso-win-outcomes::before{ content:""; grid-column:2; grid-row:1;
+  align-self:stretch; min-height:44px; background:var(--edge-line-v); }
+
+.cso-win-oc-ic{ flex:0 0 38px; width:38px; height:38px; border-radius:10px;
+  display:grid; place-items:center; color:var(--ivory);
+  background:rgba(var(--voltage-rgb),.16);
+  border:1px solid rgba(var(--voltage-rgb),.42); }
+.cso-win-oc-copy{ display:flex; flex-direction:column; gap:1px;
+  font-family:var(--fb); font-size:12.5px; line-height:1.35; }
+.cso-win-oc-copy .l1{ color:var(--ivory); font-weight:600; }
+.cso-win-oc-copy .l2{ color:var(--text-secondary); }
+
+/* ---- Named slots for the parts the source has not supplied ------------- */
+/* Quiet on purpose. Three cards with four pending slots each must not shout;
+   a dashed hairline and a small tracked label says "pending" without turning
+   the proof beat into a construction site. */
+.cso-slot{ display:inline-flex; align-items:center; justify-content:center;
+  font-family:var(--fb); font-size:9.5px; font-weight:700; letter-spacing:.16em;
+  text-transform:uppercase; color:var(--text-muted);
+  border:1px dashed rgba(var(--volt-400-rgb),.34); border-radius:8px;
+  padding:6px 10px; text-align:center; }
+.cso-slot-mark{ width:54px; height:54px; border-radius:12px; padding:4px;
+  line-height:1.15; }
+.cso-win-figure-empty,.cso-win-desc-empty{ min-height:0; }
+.cso-win-tag-empty{ color:var(--text-muted); border-style:dashed;
+  background:none; border:1px dashed rgba(var(--volt-400-rgb),.34);
+  font-size:10px; font-weight:700; letter-spacing:.16em; text-transform:uppercase; }
+
+@media (max-width:420px){
+  .cso-win-outcomes{ grid-template-columns:1fr; }
+  /* Stacked, a vertical rule between things no longer side by side reads as a
+     stray mark, so it becomes the horizontal cut. */
+  .cso-win-outcomes::before{ grid-column:1; height:1px; min-height:0;
+    background:var(--edge-line-soft); margin:10px 0; }
+}
 
 /* ---- Honest placeholder frame (wherever client content is missing) ---- */
 .cso-ph{ position:relative; display:grid; place-items:center; text-align:center;
@@ -1134,51 +1559,369 @@ h2.sdp-h2:not(:last-child){ margin-bottom:var(--sp-deck); }
   letter-spacing:.04em; color:var(--text-muted); word-break:break-all; }
 
 /* ---- Mechanism: the three numbers ---- */
-.cso-three{ display:grid; grid-template-columns:repeat(3,1fr); gap:18px; max-width:1000px; margin:0 auto 34px; }
-@media (max-width:860px){ .cso-three{ grid-template-columns:1fr; max-width:520px; } }
-.cso-three-card{ text-align:center; padding:30px 22px; }
-.cso-three-ck{ width:34px; height:34px; margin:0 auto 16px; border-radius:50%; display:grid;
-  place-items:center; background:rgba(var(--voltage-rgb),.24); border:1.5px solid var(--focus-ring);
+/* ---- MECHANISM — per Atul's reference render, 6 Sep ------------------- */
+/* Two panels: the drivers stated on the left, the same three shown stacking on
+   the right. Then the maths as a before/after table, then the result bar. */
+.cso-engine{ display:grid; grid-template-columns:1fr 1.15fr; gap:18px;
+  max-width:1144px; margin:0 auto 40px; align-items:stretch; }
+@media (max-width:900px){ .cso-engine{ grid-template-columns:1fr; max-width:560px; } }
+
+/* Same as sections 2 and 3: no panel fill, the lit edge does the describing. */
+.cso-engine-card{ display:flex; flex-direction:column; text-align:left;
+  --card-ground:var(--obsidian);
+  padding:28px 26px; }
+.cso-engine-eyebrow{ display:block; font-family:var(--fb); font-size:11px;
+  font-weight:800; letter-spacing:.18em; text-transform:uppercase;
+  color:var(--accent-text); margin-bottom:18px; }
+
+/* The intro paragraph, above the three drivers. */
+.sd-root .cso-engine-intro{ margin:0 0 var(--space-3); font-family:var(--fb);
+  font-size:clamp(15px,1.5vw,17px); line-height:1.55; color:var(--ivory); }
+
+.cso-drivers{ display:flex; flex-direction:column; gap:0; margin:0; padding:0;
+  list-style:none; }
+.cso-drivers li{ display:flex; align-items:flex-start; gap:16px;
+  padding:var(--space-2) 0; }
+.cso-drivers li:first-child{ padding-top:0; }
+/* The last row keeps no padding under it: the rule below already owns that
+   gap, and the two were stacking to 40px where every gap between the rows is
+   16. */
+.cso-drivers li:last-child{ padding-bottom:0; }
+/* Same house rule as the fit-box pointers, and no halo for the same reason:
+   --edge-halo is a filter and would glow the row's text with it. */
+.cso-drivers li + li{ background:var(--edge-line-soft) top left / 100% 1px no-repeat; }
+
+/* The pyramid's icon bed exactly: a .24 voltage tint inside a 1.5px
+   --focus-ring border. These sat on a .16 tint inside a 1px rgba(voltage,.42)
+   hairline — dimmer and thinner than the tier icons directly beside them in the
+   same section, so the two halves of the beat did not read as one system. That
+   bed traces back to the section-2 ticks, which is the house icon treatment.
+
+   The glyph stays pure white rather than the pyramid's ivory: it is the most
+   legible thing that can sit in the circle, and the difference between the two
+   is a warm cast at this size. */
+.cso-driver-ic{ flex:0 0 44px; width:44px; height:44px; border-radius:50%;
+  display:grid; place-items:center; color:#fff;
+  background:rgba(var(--voltage-rgb),.24);
+  border:1.5px solid var(--focus-ring); }
+/* Same weight the tier glyphs take: at this size a 1.9 hairline reads as a
+   smudge rather than a symbol. */
+.cso-driver-ic svg{ stroke-width:2.2; }
+
+/* Name over gloss. The name is the louder of the two by weight and colour, not
+   by size: at two different sizes the pair starts reading as a heading and a
+   caption rather than as one item. */
+.cso-driver-copy{ display:flex; flex-direction:column; gap:3px; min-width:0; }
+.cso-driver-title{ font-family:var(--fb); font-size:15.5px; font-weight:700;
+  line-height:1.35; color:var(--ivory); }
+.cso-driver-sub{ font-family:var(--fb); font-size:14.5px; font-weight:400;
+  line-height:1.45; color:var(--text-secondary); }
+
+/* Tighter above than below: the rule closes the list and opens the payoff
+   line, so it should sit nearer the thing it is closing. */
+.cso-engine-rule{ display:block; height:1px; margin:var(--space-2) 0 var(--space-3);
+  background:var(--edge-line-soft); filter:var(--edge-halo-soft); }
+@media (min-resolution:2dppx){ .cso-engine-rule{ height:.5px; } }
+
+/* The turn of the whole section, so it sits at display scale and closes the
+   panel. margin-top:auto pins it to the bottom so both panels end level. */
+.sd-root .cso-multiply{ margin:auto 0 0; text-align:left; font-family:var(--fh);
+  font-size:clamp(22px,2.8vw,34px); line-height:1.1; letter-spacing:.02em;
   color:var(--ivory); }
-/* The "50%" is lit INLINE inside its own sentence, never lifted out above
-   it: pulling it out would print the same figure twice on one card. */
-.sd-root .cso-three-line{ font-size:16px; line-height:1.7; color:var(--text-primary); margin:0; }
-.cso-three-line .pct{ font-family:var(--fh); font-size:1.85em; line-height:.9; letter-spacing:.02em;
-  color:var(--accent-text); vertical-align:-.06em; padding:0 .06em; }
+.cso-multiply .em-word{ font-style:normal; color:var(--accent-text-strong); }
 
-/* These four are <p> elements, so they must out-specify `.sd-root p` or the
-   base body colour silently wins over their own. */
-.sd-root .cso-multiply{ width:100%; text-align:center; font-family:var(--fh); font-size:clamp(22px,3.2vw,34px);
-  letter-spacing:.03em; line-height:1.25; color:var(--ivory); margin:0 auto 56px; max-width:760px; }
-.cso-multiply .em-word{ font-style:normal; color:var(--accent-text); }
+/* The three-numbers line under the band. Centred, and overriding the shared
+   rule's `margin:auto 0 0` — that value pins the line to the BOTTOM of the
+   mechanism card it was written for, and left here it would also stop the
+   auto-centring. */
+.sd-root .cso-multiply-center{ margin:28px auto 0; text-align:center;
+  max-width:940px; }
+/* Sand, the theme's beige. It is the warm accent the page already uses for a
+   value-moment, so this reads as the same device as the lit figures elsewhere
+   rather than as a new colour. */
+.cso-multiply-center .tail{ color:var(--sand); }
 
-/* ---- Mechanism: the maths (before, after, result) ---- */
-.cso-maths-cap{ display:block; text-align:center; font-family:var(--fb); font-size:11px;
-  font-weight:800; letter-spacing:.2em; text-transform:uppercase; color:var(--accent-text); margin-bottom:22px; }
-.cso-maths{ display:grid; grid-template-columns:1fr 52px 1fr; align-items:stretch; gap:0;
-  max-width:1000px; margin:0 auto; }
-.cso-maths-arrow{ display:grid; place-items:center; color:var(--focus-ring); }
-@media (max-width:860px){
-  .cso-maths{ grid-template-columns:1fr; gap:14px; }
-  .cso-maths-arrow{ transform:rotate(90deg); height:34px; }
+/* ---- THE PYRAMID ------------------------------------------------------ */
+/* Drawn in SVG on the measured geometry. Two things the first attempt got
+   wrong and this fixes:
+     1. It is ONE triangle sliced into three bands, so all six side edges lie
+        on the same two lines. Three independently-sized trapezoids never line
+        up and read as a stack of unrelated shapes.
+     2. The corners are ROUNDED (r≈13 in a 600-unit box). A clip-path polygon
+        gives only sharp corners, which is the single biggest reason the shape
+        looked wrong next to the reference.
+   The glow is a drop-shadow pair on the SVG, so it follows the stroke's own
+   gradient — brightest at the apex where the stroke is lightest. */
+/* The CARD takes no fill. The pyramid's own tiers keep theirs — that fill is
+   the shape, not the panel behind it. */
+.cso-pyramid-card{ display:grid; place-items:center; padding:22px 18px;
+  --card-ground:var(--obsidian); }
+.cso-pyramid{ position:relative; width:100%; max-width:540px;
+  aspect-ratio:600 / 440; }
+.cso-pyr-svg{ position:absolute; inset:0; width:100%; height:100%; overflow:visible;
+  /* The outer bloom is WIDE and WEAK. Measured outward from a tier's edge in
+     the clean reference: the ground sits at 14-16 luma, lifts to 26 just
+     outside the line, and does not return to ground until about 45px out. So
+     there is a real halo — my earlier 2px was far too tight — but its peak is
+     only about +11 luma.
+
+     Crucially the tight layer stays weak. A drop-shadow does not blur the
+     shape, it blurs a copy behind it; what made the line look soft before was
+     a STRONG shadow sitting right against the edge and washing out the
+     contrast there. Wide and low does not do that. */
+  /* The uniform outer bloom is gone. It lit the whole outline equally, which
+     fights the point of a shine that varies as it travels — and it was the
+     thing that kept making the border read blurry. What spills outward now is
+     a masked, blurred stroke inside the SVG, so only the LIT stretches throw
+     any light at all. One hairline shadow is kept, at a level that is barely
+     measurable, just to stop the shape sitting flat on the panel. */
+  filter:drop-shadow(0 0 2px rgba(var(--volt-400-rgb),.10));
+  shape-rendering:geometricPrecision; }
+
+/* One copy block per band, positioned in the same units as the shape. Bands
+   are % of the 440-unit height: apex 0.9%->47.3%, middle 50%->73.4%, base
+   75.2%->99.1%. */
+.cso-tier{ position:absolute; left:0; right:0; display:flex;
+  flex-direction:column; align-items:center; justify-content:center;
+  text-align:center; pointer-events:none; }
+
+/* The icon-and-heading row. On the two bands it is icon | (label over figure);
+   the row centres as a group and the heading inside it stays left-aligned,
+   exactly as the reference has it. */
+.cso-tier-row{ display:flex; align-items:center; justify-content:center; gap:16px; }
+/* The label sits 7px off the figure. It looks like more than 7, because the
+   figure runs at line-height 1.05 and the label at 1.2, and both hang a little
+   leading into the gap before any of this applies. */
+.cso-tier-head{ display:flex; flex-direction:column; align-items:flex-start;
+  text-align:left; gap:7px; }
+
+/* WIDTHS COME FROM THE SHAPE, not from a flat padding. The pyramid narrows as
+   it rises, so a rectangular content box inside it overflows at the top even
+   when it looks fine at the bottom. Each element is capped at the width the
+   shape actually has AT ITS OWN HEIGHT (half-width = (y - 4) x 0.685 in the
+   600x440 box), less a small margin:
+
+     tier 1  icon y=122 -> 27% | label y=152 -> 34% | figure y=178 -> 40% | caption y=196 -> 44%
+     tier 2  row   y=232 -> 52% | caption y=300 -> 68%
+     tier 3  row   y=345 -> 78% | caption y=412 -> 93%
+
+   The row and the caption are capped separately because they sit at different
+   heights, and the caption always sits lower, where there is more room. */
+
+/* THE APEX. A triangle has no width to set anything beside anything else, so
+   everything stacks and centres, and the block sits LOW where the shape is
+   finally wide enough to hold a line of text. */
+.cso-tier-1{ top:.9%; height:46.4%; justify-content:flex-end; padding:0 0 10px; gap:1px; }
+.cso-tier-1 .cso-tier-row{ flex-direction:column; gap:6px; max-width:32%; }
+.cso-tier-1 .cso-tier-head{ align-items:center; text-align:center; }
+.cso-tier-1 .cso-tier-label{ max-width:100%; }
+
+.cso-tier-2{ top:50%; height:23.4%; padding:0; gap:1px; }
+.cso-tier-2 .cso-tier-row{ max-width:50%; }
+
+.cso-tier-3{ top:75.2%; height:23.9%; padding:0; gap:1px; }
+.cso-tier-3 .cso-tier-row{ max-width:75%; }
+
+/* THE HOUSE ICON BED, taken verbatim from the tick on the section-2 pointers
+   (.fit-box-points .ck): a voltage-tinted fill, a solid --focus-ring hairline,
+   and an ivory glyph. Same three values, so these read as the same component
+   at a larger size rather than as a second icon treatment.
+
+   The fill is what the earlier transparent ring was missing: on a shape whose
+   interior is nearly the page colour, a glyph with nothing behind it competes
+   with whatever the outline's glow is doing at that point. The tint gives it
+   its own ground. */
+.cso-tier-ic{ flex:0 0 auto; display:grid; place-items:center;
+  width:52px; height:52px; border-radius:50%;
+  background:rgba(var(--voltage-rgb),.24); border:1.5px solid var(--focus-ring);
+  color:var(--ivory); }
+/* Heavier stroke than the glyph's own 1.9: at 22px inside a ring, a hairline
+   drawing reads as a smudge rather than as a symbol. CSS wins over the SVG's
+   presentation attribute, so this needs no change to the component. */
+.cso-tier-ic svg{ stroke-width:2.2; }
+.cso-tier-1 .cso-tier-ic{ width:44px; height:44px; margin-bottom:2px; }
+
+/* 20% down from 14px, and the same 20% at every breakpoint below, so the
+   ratio between the label and the figure beside it holds at every size. */
+.cso-tier-label{ font-family:var(--fb); font-size:11.2px; font-weight:800;
+  letter-spacing:.06em; text-transform:uppercase; line-height:1.2;
+  color:var(--ivory); }
+.cso-tier-pct{ font-family:var(--fh); font-size:38px; line-height:1.05;
+  letter-spacing:.02em; color:var(--accent-text-strong); }
+@media (max-width:1100px){
+  .cso-tier-label{ font-size:10px; }
+  .cso-tier-pct{ font-size:31px; }
+  .cso-tier-ic{ width:44px; height:44px; }
+  .cso-tier-1 .cso-tier-ic{ width:36px; height:36px; }
+  .cso-tier-row{ gap:12px; }
 }
-.cso-maths-card{ padding:28px 26px; text-align:left; }
-/* Marks the "after" column without a border-color, which would paint a solid
-   line over the rim gradient and hide it on this one card. The glow does the
-   emphasis instead. */
-.cso-maths-card.after{ box-shadow:var(--shadow-card),
-  0 -4px 18px -7px rgba(var(--volt-300-rgb),.7),
-  0 12px 30px rgba(var(--voltage-rgb),.14); }
-.sd-root .cso-maths-card p{ font-size:15px; line-height:1.7; margin:0; }
-.cso-maths-card .fig{ color:var(--accent-text-strong); font-weight:800; }
-.cso-result{ max-width:1000px; margin:18px auto 0; padding:26px 30px; border-radius:var(--r-lg);
-  background:var(--grad-structure); color:var(--ivory); text-align:center;
-  box-shadow:0 20px 46px -20px rgba(var(--voltage-rgb),.6), var(--inset-hi); }
-.sd-root .cso-result p{ margin:0; font-family:var(--fh); font-size:clamp(22px,3.4vw,34px);
-  letter-spacing:.04em; line-height:1.25; color:var(--ivory); }
-.sd-root .cso-result p .fig{ color:var(--ivory); position:relative; }
-.cso-result .fig::after{ content:""; position:absolute; left:0; right:0; bottom:-5px; height:2px;
-  background:rgba(254,243,232,.75); }
+@media (max-width:900px){
+  .cso-tier-label{ font-size:11.2px; }
+  .cso-tier-pct{ font-size:36px; }
+  .cso-tier-ic{ width:50px; height:50px; }
+}
+@media (max-width:520px){
+  .cso-tier-label{ font-size:8.8px; letter-spacing:.05em; }
+  .cso-tier-pct{ font-size:26px; }
+  .cso-tier-ic{ width:36px; height:36px; }
+  .cso-tier-1 .cso-tier-ic{ width:30px; height:30px; }
+  .cso-tier-row{ gap:10px; }
+  .cso-tier-1{ padding:0 0 6px; }
+}
+
+/* ---- THE MATHS TABLE -------------------------------------------------- */
+/* margin-INLINE stays auto. `margin:0 0 18px` is a shorthand, so it writes
+   margin-left/right:0 and silently cancels the auto centring the shared eyebrow
+   rule sets — the same trap the base heading rules carry a warning about. */
+.cso-maths-cap{ text-align:center; font-family:var(--fb); font-size:11px;
+  font-weight:800; letter-spacing:.22em; text-transform:uppercase;
+  color:var(--accent-text); margin:0 auto 18px; }
+
+/* The house lit edge, as on every other panel. overflow:hidden clips the cell
+   washes to the rounded corners, so the scroll lives on an inner element:
+   overflow-x:auto with overflow-y:visible is invalid CSS and silently becomes
+   auto on both axes, which would clip the lit line off the top. */
+.cso-mtable-wrap{ position:relative; max-width:1144px; margin:0 auto;
+  border:1px solid transparent; border-radius:var(--r-lg); overflow:hidden;
+  background:
+    linear-gradient(var(--obsidian),var(--obsidian)) padding-box,
+    var(--rim-edge) border-box; }
+.cso-mtable-wrap::after{ content:""; position:absolute; z-index:2;
+  pointer-events:none; left:1px; right:1px; top:0; height:2px;
+  background:var(--edge-line); filter:var(--edge-halo); }
+.cso-mtable-scroll{ overflow-x:auto; }
+.cso-mtable{ width:100%; min-width:520px; border-collapse:separate;
+  border-spacing:0; text-align:left; }
+
+/* THE LIT RULES, drawn ONCE PER ROW and ONCE PER COLUMN — never per cell.
+   --edge-line-soft fades to nothing at both ends by design. Put on a cell it
+   restarts and tapers at every cell boundary, so a row reads as six short
+   dashes; put on the row it is a single stroke running the table's full width,
+   which is what a rule is supposed to be. Same for the columns, on <col>. */
+.cso-mtable th,.cso-mtable td{ padding:13px 20px; font-family:var(--fb);
+  font-size:14.5px; line-height:1.4; vertical-align:middle;
+  background:transparent; }
+
+/* one continuous lit line under each row */
+.cso-mtable tr{ background:var(--edge-line-soft) bottom left / 100% 1px no-repeat; }
+.cso-mtable tbody tr:last-child{ background:none; }
+
+/* one continuous lit line down each column boundary. The last column draws
+   none: its own left seam marks it, and the frame closes its right. */
+.cso-mtable col{ background:var(--edge-line-v) top right / 1px 100% no-repeat; }
+.cso-mtable col.after{ background:none; }
+.cso-mtable thead th{ font-size:10.5px; font-weight:800; letter-spacing:.18em;
+  text-transform:uppercase; color:var(--text-secondary); padding:15px 20px; }
+.cso-mtable tbody th{ font-weight:500; color:var(--text-primary); }
+.cso-mtable tbody td{ color:var(--text-primary); }
+/* The two figure columns are centred; only the metric name reads as a label. */
+.cso-mtable th:not(:first-child),.cso-mtable td:not(:first-child){ text-align:center; }
+
+/* THE AFTER COLUMN is the whole argument of this table, so it is the one thing
+   here that is lit — which is also why the frame around the table had to stop
+   glowing. Three parts:
+
+   1. A vertical volt-600 gradient down the column, strongest at the header and
+      thinning as it descends, so the eye enters at the label and is carried
+      down the figures.
+   2. A bright rule down its LEFT edge, drawn with an inset shadow so it is
+      continuous across every cell rather than restarting at each one. This is
+      the seam: everything right of it is the after state.
+   3. The header cell itself at full voltage with ivory type, so the column
+      reads as one object that starts at its title.
+
+   The values inside stay warm accent, which is the page's rule for a figure. */
+.cso-mtable .after{
+  background:linear-gradient(180deg,
+    rgba(var(--voltage-rgb),.30) 0%,
+    rgba(var(--voltage-rgb),.18) 45%,
+    rgba(var(--voltage-rgb),.11) 100%);
+  /* The wash is a cell background, so it paints OVER the row's own rule and
+     would break the line across this column. The inset bottom carries it
+     through at a level matched to the lit rule either side of it. */
+  box-shadow:inset 1px 0 0 rgba(var(--volt-200-rgb),.42),
+             inset 0 -1px 0 rgba(var(--volt-200-rgb),.20); }
+.cso-mtable tbody tr:last-child .after{
+  box-shadow:inset 1px 0 0 rgba(var(--volt-200-rgb),.42); }
+
+/* The seam on the header runs brighter than on the body cells. The literal rgb
+   is volt-100: the palette defines --volt-100 as a hex but never a --volt-100-rgb
+   companion, and an alpha here needs the channels. */
+.cso-mtable thead .after{ color:var(--ivory);
+  background:linear-gradient(180deg,
+    rgba(var(--voltage-rgb),.62), rgba(var(--voltage-rgb),.42));
+  box-shadow:inset 1px 0 0 rgba(229,227,254,.60),
+             inset 0 1px 0 rgba(var(--volt-200-rgb),.5); }
+.cso-mtable tbody .after{ color:var(--accent-text-strong); font-weight:700; }
+
+/* The total row closes the column: the wash steps back up so the last figure
+   sits on the strongest ground on the table. */
+.cso-mtable tr.total .after{ color:var(--accent-text-strong);
+  background:linear-gradient(180deg,
+    rgba(var(--voltage-rgb),.26), rgba(var(--voltage-rgb),.34)); }
+
+.cso-mtable tr.total th,.cso-mtable tr.total td{ font-weight:800;
+  font-size:16px; color:var(--ivory); padding-top:16px; padding-bottom:16px; }
+
+/* ---- THE RESULT BAR --------------------------------------------------- */
+/* The payoff line, and the loudest object in the section: a full voltage bar
+   carrying the house lit edge, with the deal-value glyph and a vertical cut of
+   the rule before the sentence. Its ::before is the specular ring shared with
+   the FAQ and the venn detail, so the line goes on ::after. */
+.cso-result::after{ content:""; position:absolute; z-index:2; pointer-events:none;
+  left:1px; right:1px; top:-1px; height:2px; border-radius:2px;
+  background:var(--edge-line); filter:var(--edge-halo); }
+/* Same conversion as the closing bar: off --grad-structure and onto the house
+   box. It keeps the most emphasis of any box in its section through its type
+   and its mark, not through a different fill. */
+.cso-result{ display:flex; align-items:center; justify-content:center;
+  gap:var(--space-3); max-width:1144px; margin:22px auto 0;
+  padding:24px 30px; border:1px solid transparent; border-radius:var(--r-lg);
+  background:
+    var(--edge-wash) padding-box,
+    linear-gradient(var(--obsidian),var(--obsidian)) padding-box,
+    var(--rim-edge) border-box;
+  box-shadow:var(--shadow-card); color:var(--ivory); }
+/* The payoff line's mark. NO bed: the glyph is three filled, gradient-lit bars
+   and carries itself, where a stroked icon needed a tile to sit in. All this
+   rule does is give it a little breathing room and a soft drop so the bars read
+   as sitting above the bar rather than printed into it. */
+.cso-result-ic{ flex:0 0 auto; display:grid; place-items:center;
+  filter:drop-shadow(0 3px 8px rgba(var(--volt-900-rgb),.55)); }
+
+.cso-result-rule{ flex:0 0 1px; align-self:stretch; min-height:38px;
+  background:var(--edge-line-v); }
+.sd-root .cso-result p{ margin:0; font-family:var(--fh);
+  font-size:clamp(20px,3.1vw,34px); line-height:1.15; letter-spacing:.02em;
+  text-align:left; }
+/* The figure is the value-moment: warm accent, underscored by a hairline that
+   sits clear of the baseline rather than an underline through the descenders. */
+.sd-root .cso-result p .fig{ color:var(--accent-text-strong); position:relative; }
+.cso-result .fig::after{ content:""; position:absolute; left:0; right:0; bottom:-5px;
+  height:2px; background:var(--edge-line-soft); }
+
+@media (max-width:640px){
+  .cso-result{ flex-direction:column; gap:14px; padding:22px; text-align:center; }
+  .cso-result-rule{ align-self:stretch; min-height:0; height:1px; width:100%;
+    background:var(--edge-line-soft); }
+  .sd-root .cso-result p{ text-align:center; }
+}
+
+/* THE SYSTEM HEAD. Centred, and set as a ladder rather than as two equal
+   paragraphs: the opening claim carries the weight, its second sentence
+   explains it one step quieter, and the paragraph beneath is quieter again.
+   The words are the copy doc's; only the hierarchy is new. */
+.cso-system-head{ max-width:820px; margin:52px auto 0; text-align:center; }
+.sd-root .cso-system-h{ font-family:var(--fb); font-weight:700;
+  font-size:clamp(20px,2.5vw,29px); line-height:1.3; letter-spacing:-.005em;
+  color:var(--ivory); margin:0 0 10px; text-wrap:balance; }
+.sd-root .cso-system-deck{ max-width:700px; margin:0 auto 22px;
+  font-size:clamp(15px,1.5vw,17.5px); line-height:1.6; color:var(--bone);
+  text-wrap:balance; }
+.sd-root .cso-system-p{ max-width:760px; margin:0 auto; font-size:15px;
+  line-height:1.7; color:var(--text-secondary); text-wrap:pretty; }
+
+.cso-system-diagram{ margin-top:40px; }
 
 .cso-prose{ max-width:64ch; margin:44px auto 0; text-align:left; }
 .sd-root .cso-prose p{ font-size:16px; line-height:1.75; margin:0 0 18px; color:var(--text-primary); }
@@ -1197,40 +1940,165 @@ h2.sdp-h2:not(:last-child){ margin-bottom:var(--sp-deck); }
 .cso-venn svg{ display:block; width:100%; height:auto; overflow:visible; }
 
 .vn-region{ cursor:pointer; transition:fill-opacity .28s; }
-.vn-only { fill:var(--cobalt); fill-opacity:.30; }
-.vn-only:hover{ fill-opacity:.46; }
-.vn-only.sel{ fill-opacity:.62; }
-.vn-pair { fill:var(--cobalt); fill-opacity:.58; }
-.vn-pair:hover{ fill-opacity:.76; }
+/* The fills are now almost nothing: the arcs' inner glow describes each
+   circle, and a flat wash of colour behind it flattened the whole diagram into
+   three coloured discs. What is left is enough to carry hover and selection,
+   which the glow cannot do because it is not interactive. */
+.vn-only { fill:var(--cobalt); fill-opacity:.10; }
+.vn-only:hover{ fill-opacity:.24; }
+.vn-only.sel{ fill-opacity:.38; }
+.vn-pair { fill:var(--cobalt); fill-opacity:.30; }
+.vn-pair:hover{ fill-opacity:.52; }
 .vn-pair.sel{ fill:var(--volt-700); fill-opacity:.85; }
 /* The core wedge is the diagram's payoff and the one thing in the Venn that
    should pop, so it sits at volt-700, above the background ceiling. The
    circles and overlaps around it stay in the dark range (L=0.0071 and 0.0121,
    inside the background's own band) precisely so this reads as the lit centre:
    the contrast comes from what surrounds it, not from pushing it to voltage. */
-.vn-core { fill:var(--volt-700); fill-opacity:1; }
-.vn-core:hover,.vn-core.sel{ fill:var(--volt-600); fill-opacity:1; }
+/* The lens gets NO glow of its own. Every circle already carries the same inner
+   glow along its line, and the lens is the one place where all three of those
+   arcs run close together — so the light stacks there by itself and the centre
+   comes out the brightest point on the diagram without being told to be. That
+   is also the argument the lens is making, so building it any other way would
+   be drawing the conclusion rather than showing it.
 
-.vn-ring{ fill:none; stroke:rgba(var(--voltage-rgb),.75); stroke-width:1.6; pointer-events:none;
+   Its fill sits one step above the pair regions on the same ladder, and no
+   further: the brightness is the glow's job. */
+.vn-core { fill:var(--cobalt); fill-opacity:.46; }
+.vn-core:hover,.vn-core.sel{ fill-opacity:.62; }
+
+/* CONSISTENTLY LIT. The base ring is the light, not a dim track waiting for the
+   shine to arrive — voltage at .55 measures barely above the ground, so the
+   stretches between the pools went dark and the circles read as broken. It runs
+   volt-200 the whole way round, with a tight halo so it reads as lit rather
+   than drawn, and the masked shine adds the brighter moments ON TOP of an
+   already-lit line. */
+.vn-ring{ fill:none; stroke:rgba(var(--volt-200-rgb),.78); stroke-width:1.6; pointer-events:none;
+  filter:drop-shadow(0 0 3px rgba(var(--volt-400-rgb),.55))
+         drop-shadow(0 0 9px rgba(var(--volt-600-rgb),.40));
   transition:stroke .28s, stroke-width .28s; }
 .vn-ring.on{ stroke:var(--focus-ring); stroke-width:3; }
 
 .vn-txt{ pointer-events:none; }
-.vn-rim{ font-family:var(--fb); font-size:13px; font-weight:700; letter-spacing:.16em;
+/* 11px, from 13. The rim label's glyphs rise off its arc toward the circle's
+   middle, so their cap height eats into whatever gap the arc leaves — and the
+   longest item, "High-Ticket Conversions", was already crossing the arc by
+   1.2px at 14px before the label was even drawn. */
+.vn-rim{ font-family:var(--fb); font-size:11px; font-weight:700; letter-spacing:.14em;
   fill:var(--sand); text-transform:uppercase; }
 .vn-name{ font-family:var(--fh); font-size:38px; letter-spacing:.04em; fill:var(--ivory); text-anchor:middle; }
-.vn-item{ font-family:var(--fb); font-size:14px; font-weight:500; fill:var(--bone); text-anchor:middle; }
+/* 12.5px, from 14. Together with the smaller rim label this turns a 1.2px
+   overlap into roughly 10px of clear space on the tightest line. */
+.vn-item{ font-family:var(--fb); font-size:12.5px; font-weight:500; fill:var(--bone); text-anchor:middle; }
 .vn-pair-label{ font-family:var(--fb); font-size:15px; font-weight:800; letter-spacing:.08em;
   fill:var(--ivory); text-anchor:middle; text-transform:uppercase; }
 .vn-core-label{ font-family:var(--fh); font-size:26px; letter-spacing:.03em; fill:var(--ivory); text-anchor:middle; }
 .vn-icon{ fill:none; stroke:var(--sand); stroke-width:1.6; stroke-linecap:round; stroke-linejoin:round; }
 
 /* reserves its own height so selecting a region does not jolt the page */
-.cso-venn-panel{ max-width:680px; margin:24px auto 0; min-height:118px; display:grid; align-items:center; }
+/* ---- The dotted enclosure, the ordinals, and the summary bar ---------- */
+/* The halo says "these three are one system" before any label is read. Dotted
+   and dim on purpose: it is the only thing in the diagram that is not a region,
+   so it must never compete with one. */
+/* The dotted silhouette: three enlarged arcs, each masked to the part that
+   falls outside the other two, so together they trace the outline of the whole
+   figure. */
+/* Base pass: the dim end of the cycle. */
+.vn-halo circle{ fill:none; stroke:var(--volt-600); stroke-opacity:.72; stroke-width:1;
+  stroke-dasharray:2 7; stroke-linecap:round; }
+/* Top pass: the bright end, showing only where the cardinal-point mask lets it
+   through, so the ring reads volt-200 at 0/90/180/270 and volt-600 between. */
+.vn-halo .hot{ stroke:var(--volt-200); stroke-opacity:.95; }
+.vn-halo{ pointer-events:none; }
+
+/* THE ARC GLOW. A continuous low run just inside each circle, with brighter
+   pools at three fixed points along it, blurred together as one group. Strokes
+   straddle their path, so clipping to the circle keeps exactly the inner half:
+   a 54-wide run gives a 27-unit band hugging the arc. */
+/* THE LIT EDGE on the rings. Both passes are the ring's own 1.6 width: the
+   halo carries the blending, the core gives it a hard bright centre, and the
+   masks decide where along each arc they show. A wider pass would read as a
+   glow sitting around the ring instead of the ring going bright. */
+.vn-shine{ pointer-events:none; fill:none; }
+.vn-shine-halo{ stroke:var(--volt-50); stroke-width:1.6; }
+.vn-shine-core{ stroke:#fff; stroke-width:1.6; }
+
+.vn-glow{ pointer-events:none; }
+/* The pyramid's numbers, not new ones: a 16-wide stroke is an 8-unit band
+   hugging the arc, and the level stays low so the falloff comes from the blur
+   rather than from the width. The previous 54-wide band at .34 was three and a
+   half times the depth and reached most of the way across the small regions,
+   which is why it read as a gradient fill instead of an edge glow. */
+.vn-glow-run{ fill:none; stroke:var(--volt-600); stroke-width:22;
+  stroke-opacity:.52; }
+
+/* The ordinals sit ON the ring, so they take the ring's own ground to punch a
+   hole in it, and the WARM accent rather than voltage: they are numbering, not
+   action, and the page reserves voltage for what can be clicked. */
+/* The fill is fully opaque and the badge is painted last, so the ring's line
+   stops at its edge instead of running through it. */
+.vn-ord circle{ fill:var(--obsidian); fill-opacity:1;
+  stroke:var(--sand); stroke-width:1.2; }
+.vn-ord text{ font-family:var(--fb); font-size:10px; font-weight:800;
+  letter-spacing:.06em; fill:var(--sand); text-anchor:middle; }
+
+/* The core's mark is filled, not stroked: it sits on the one voltage surface in
+   the section and a hairline drawing would disappear into it. */
+.vn-icon-core{ fill:var(--ivory); stroke:none; }
+
+/* THE SUMMARY BAR — the diagram's claim, restated once outside it. */
+.cso-venn-sum{ position:relative; max-width:680px; margin:26px auto 0;
+  padding:22px 28px; text-align:center;
+  border:1px solid transparent; border-radius:var(--r-lg);
+  background:
+    var(--edge-wash) padding-box,
+    linear-gradient(var(--obsidian),var(--obsidian)) padding-box,
+    var(--rim-edge) border-box; }
+.cso-venn-sum::after{ content:""; position:absolute; z-index:2;
+  pointer-events:none; left:1px; right:1px; top:-1px; height:2px;
+  border-radius:2px; background:var(--edge-line); filter:var(--edge-halo); }
+
+.cso-venn-sum-eyebrow{ display:block; font-family:var(--fb); font-size:11px;
+  font-weight:800; letter-spacing:.20em; text-transform:uppercase;
+  color:var(--accent-text); margin-bottom:12px; }
+
+/* The headline is flanked by two lit rules that fill whatever space is left,
+   so the block stays centred at any width without the rules being measured. */
+.sd-root .cso-venn-sum-h{ display:flex; align-items:center; justify-content:center;
+  gap:18px; margin:0 0 12px; font-family:var(--fh);
+  font-size:clamp(24px,3.4vw,38px); line-height:1.1; letter-spacing:.02em;
+  color:var(--ivory); }
+.cso-venn-sum-h .rule{ flex:1 1 0; max-width:90px; height:1px;
+  background:var(--edge-line-soft); }
+
+.cso-venn-sum-note{ display:block; font-family:var(--fb); font-size:10.5px;
+  font-weight:700; letter-spacing:.16em; text-transform:uppercase;
+  line-height:1.6; color:var(--text-secondary); }
+
+@media (max-width:560px){
+  .cso-venn-sum{ padding:20px 18px; }
+  .cso-venn-sum-h .rule{ max-width:28px; }
+  .cso-venn-sum-note{ letter-spacing:.10em; }
+}
+
+/* No reserved height any more: with nothing selected there is nothing to hold
+   space for, and the summary bar above it is what stops the section ending on a
+   gap. */
+.cso-venn-panel{ max-width:680px; margin:24px auto 0; display:grid; align-items:center; }
+.cso-venn-panel:empty{ margin:0; }
 .sd-root .cso-venn-hint{ text-align:center; font-family:var(--fb); font-size:12.5px;
   color:var(--text-secondary); margin:0; }
-.cso-venn-detail{ background:var(--surface); border:1px solid rgba(var(--voltage-rgb),.4);
-  border-radius:var(--r-lg); padding:22px 26px; text-align:left; }
+/* Takes the house edge. Its ::before is the specular ring, so the line goes on
+   ::after, the same slot every .sdp-card uses. */
+.cso-venn-detail{ border:1px solid transparent; border-radius:var(--r-lg);
+  padding:22px 26px; text-align:left;
+  background:
+    var(--edge-wash) padding-box,
+    linear-gradient(var(--surface),var(--surface)) padding-box,
+    var(--rim-edge) border-box; }
+.cso-venn-detail::after{ content:""; position:absolute; z-index:2; pointer-events:none;
+  left:1px; right:1px; top:-1px; height:2px; border-radius:2px;
+  background:var(--edge-line); filter:var(--edge-halo); }
 .cso-venn-detail .vd-path{ display:block; font-family:var(--fb); font-size:10.5px; font-weight:800;
   letter-spacing:.18em; text-transform:uppercase; color:var(--sand); margin-bottom:8px; }
 .sd-root .cso-venn-detail h4{ font-family:var(--fh); font-size:clamp(22px,3vw,30px); letter-spacing:.03em;
@@ -1243,9 +2111,14 @@ h2.sdp-h2:not(:last-child){ margin-bottom:var(--sp-deck); }
 /* base first, THEN the breakpoint: a later same-specificity rule would
    win back over the media query and the stack would never appear */
 .cso-venn-stack{ display:none; flex-direction:column; gap:10px; max-width:520px; margin:0 auto; }
-.cso-venn-stack button{ width:100%; text-align:left; background:var(--surface); border:1px solid var(--border);
+/* Controls, not cards: they take the side stroke so they sit in the system,
+   but no lit line. A line across the top of a button says "lit panel" and
+   these are things you press. */
+.cso-venn-stack button{ width:100%; text-align:left; border:1px solid transparent;
+  background:linear-gradient(var(--surface),var(--surface)) padding-box,
+             var(--rim-edge) border-box;
   border-radius:12px; padding:15px 18px; font-family:var(--fb); font-size:14px; font-weight:700;
-  line-height:1.5; color:var(--text-primary); cursor:pointer; transition:border-color .2s, background .2s; }
+  line-height:1.5; color:var(--text-primary); cursor:pointer; transition:background .2s; }
 .cso-venn-stack button .sub{ display:block; font-weight:500; font-size:12px; letter-spacing:.12em;
   text-transform:uppercase; color:var(--text-secondary); margin-top:5px; }
 .cso-venn-stack button.sel{ border-color:var(--voltage); background:var(--surface-raised); color:var(--ivory); }
@@ -1285,7 +2158,24 @@ h2.sdp-h2:not(:last-child){ margin-bottom:var(--sp-deck); }
 .cso-spine.armed .cso-phase:not(.lit) .cso-phase-node{ background:var(--graphite); color:var(--text-secondary);
   border-color:var(--slate); box-shadow:none; }
 .cso-spine.armed .cso-phase:not(.lit) .cso-phase-card{ opacity:.5; }
-.cso-phase-card{ transition:opacity .5s ease; }
+
+/* The phases are BOXES now, on the house lit edge. They had no border at all —
+   just content floating beside the spine — so nothing tied them to the cards in
+   the rest of the funnel. Ground is obsidian like sections 2, 3 and 4: the lit
+   edge does the describing. */
+.cso-phase-card{ position:relative; padding:26px 28px;
+  border:1px solid transparent; border-radius:14px;
+  background:
+    var(--edge-wash) padding-box,
+    linear-gradient(var(--obsidian),var(--obsidian)) padding-box,
+    var(--rim-edge) border-box;
+  box-shadow:var(--shadow-card);
+  transition:opacity .5s ease; }
+.cso-phase-card::after{ content:""; position:absolute; z-index:2;
+  pointer-events:none; left:1px; right:1px; top:-1px; height:2px;
+  border-radius:2px; background:var(--edge-line); filter:var(--edge-halo); }
+/* The flare positions cycle down the spine, so no two phases light in the same
+   place — the same scatter the cards elsewhere use. */
 @media (max-width:640px){
   .cso-phase{ grid-template-columns:32px 1fr; gap:16px; }
   .cso-phase-node{ width:32px; height:32px; font-size:15px; }
@@ -1298,8 +2188,28 @@ h2.sdp-h2:not(:last-child){ margin-bottom:var(--sp-deck); }
 .cso-phase-chips{ display:flex; flex-wrap:wrap; gap:9px; margin-bottom:20px; }
 .cso-chip{ font-family:var(--fb); font-size:10.5px; font-weight:800; letter-spacing:.16em;
   text-transform:uppercase; padding:7px 13px; border-radius:6px; }
-.cso-chip.badge{ background:rgba(var(--voltage-rgb),.20); border:1px solid rgba(var(--voltage-rgb),.5); color:var(--bone); }
-.cso-chip.weeks{ background:transparent; border:1px solid var(--slate); color:var(--text-secondary); }
+/* Both chips are house lit boxes: obsidian ground, --rim-edge stroke. The badge
+   kept a voltage-tinted fill through the last pass, which is what still made it
+   read as a blue box — the stroke was ours but the fill was the old device. On
+   this page nothing carries a filled voltage panel; the edge does the work and
+   the ground stays the page's own.
+
+   They differ by TYPE, not by fill: the badge names what the phase delivers so
+   it takes ivory, the weeks chip is a timestamp so it stays muted. That is the
+   same way the funnel separates a heading from its label everywhere else.
+
+   No top line and no halo at this size: on a 30px chip the lit line lands in
+   barely a pixel and reads as noise rather than as light, so what these take
+   from the system is the stroke — bright at the top corners, dead by the
+   bottom. */
+.cso-chip.badge{ border:1px solid transparent; color:var(--ivory);
+  background:
+    linear-gradient(var(--obsidian),var(--obsidian)) padding-box,
+    var(--rim-edge) border-box; }
+.cso-chip.weeks{ border:1px solid transparent; color:var(--text-secondary);
+  background:
+    linear-gradient(var(--obsidian),var(--obsidian)) padding-box,
+    var(--rim-edge) border-box; }
 
 .cso-phase-list{ display:flex; flex-direction:column; gap:14px; margin:0 0 22px; }
 .cso-phase-list li{ display:grid; grid-template-columns:9px 1fr; gap:14px; align-items:start;
@@ -1309,10 +2219,29 @@ h2.sdp-h2:not(:last-child){ margin-bottom:var(--sp-deck); }
 .cso-phase-list b{ color:var(--ivory); font-weight:700; }
 
 .sd-root .cso-phase-note{ font-family:var(--fb); font-size:14.5px; line-height:1.75; font-style:italic;
-  color:var(--text-secondary); border-left:2px solid var(--slate); padding-left:18px; margin:0 0 24px; }
+  color:var(--text-secondary); padding-left:18px; margin:0 0 24px;
+  background:var(--edge-line-v) top left / 2px 100% no-repeat; }
 
-.cso-quote{ position:relative; border:1px solid var(--slate); border-left:3px solid var(--amber);
-  border-radius:0 var(--r) var(--r) 0; background:rgba(212,139,92,.07); padding:20px 24px; margin:4px 0 0; }
+/* A full themed lit box that KEEPS its amber bar. Two changes from before: the
+   ground drops the warm tint for obsidian, like every other box in the funnel,
+   and it gains the top lit line it was missing — so it now reads as one of the
+   system's boxes rather than as a tinted panel that happened to share a border.
+
+   The amber left rule survives because an explicit border-left colour beats the
+   border-box gradient underneath it. That bar is the quote marker and is doing
+   a different job from the lit edge, so it stays exactly as it was. */
+.cso-quote{ position:relative; border:1px solid transparent; border-left:3px solid var(--amber);
+  border-radius:0 var(--r) var(--r) 0; padding:20px 24px; margin:4px 0 0;
+  background:
+    var(--edge-wash) padding-box,
+    linear-gradient(var(--obsidian),var(--obsidian)) padding-box,
+    var(--rim-edge) border-box;
+  box-shadow:var(--shadow-card); }
+/* The lit line starts AFTER the amber bar, so the two never overlap and the bar
+   reads as the box's left edge rather than as something the line runs into. */
+.cso-quote::after{ content:""; position:absolute; z-index:2; pointer-events:none;
+  left:3px; right:1px; top:-1px; height:2px; border-radius:2px;
+  background:var(--edge-line); filter:var(--edge-halo); }
 .sd-root .cso-quote p{ font-family:var(--fb); font-size:15.5px; line-height:1.72; color:var(--bone);
   margin:0 0 12px; font-style:italic; }
 .cso-quote cite{ font-family:var(--fb); font-size:10.5px; font-weight:800; letter-spacing:.18em;
@@ -1321,9 +2250,14 @@ h2.sdp-h2:not(:last-child){ margin-bottom:var(--sp-deck); }
 /* --- the seven AI systems: a numbered ledger, trigger and consequence ---
    No column headers: naming the columns would be writing copy the client
    has not written. The source's own separators become the column rules. */
-.cso-ledger{ border-top:1px solid var(--slate); margin:0 0 24px; }
+/* The ledger's rules are the house lit rule, not flat slate hairlines. Drawn
+   as backgrounds rather than borders because a border cannot carry a gradient
+   along its length. */
+.cso-ledger{ position:relative; margin:0 0 24px; padding-top:1px;
+  background:var(--edge-line-soft) top left / 100% 1px no-repeat; }
 .cso-ledger-row{ display:grid; grid-template-columns:38px 1.15fr 1fr; gap:18px; align-items:baseline;
-  padding:15px 0; border-bottom:1px solid var(--slate); transition:background .2s; }
+  padding:15px 0 16px; transition:background .2s;
+  background:var(--edge-line-soft) bottom left / 100% 1px no-repeat; }
 .cso-ledger-row:hover{ background:rgba(var(--voltage-rgb),.06); }
 /* The ordinal is TYPE, so it takes the warm accent, not voltage: voltage
    measures 2.25:1 on obsidian and the lighter --focus-ring only 3.33:1,
@@ -1340,25 +2274,71 @@ h2.sdp-h2:not(:last-child){ margin-bottom:var(--sp-deck); }
 
 /* --- the three numbers this all moves (a compact band, deliberately a
    DIFFERENT render from the mechanism section's cards above) --- */
-.cso-numbers{ display:grid; grid-template-columns:repeat(3,1fr); gap:0; max-width:940px;
-  margin:0 auto; border:1px solid var(--slate); border-radius:var(--r-lg); overflow:hidden;
-  background:var(--graphite); }
-.cso-numbers div{ padding:30px 22px; text-align:center; border-right:1px solid var(--slate); }
-.cso-numbers div:last-child{ border-right:0; }
+/* A card in its own right, so it takes the house edge. It clips, so the line
+   sits flush at 0. */
+/* Ground is obsidian, not --graphite. It carried the lit edge already, but sat
+   on the lifted grey panel while every other box in the funnel moved to the
+   page's own colour — so it still read as a filled slab with a lit border round
+   it rather than as one of the system's boxes. Nothing else changes: the edge,
+   the column rules and the type were already right. */
+.cso-numbers{ position:relative; display:grid; grid-template-columns:repeat(3,1fr); gap:0;
+  max-width:940px; margin:0 auto; border:1px solid transparent;
+  border-radius:var(--r-lg); overflow:hidden;
+  background:
+    var(--edge-wash) padding-box,
+    linear-gradient(var(--obsidian),var(--obsidian)) padding-box,
+    var(--rim-edge) border-box; }
+.cso-numbers::after{ content:""; position:absolute; z-index:2; pointer-events:none;
+  left:0; right:0; top:0; height:2px;
+  background:var(--edge-line); filter:var(--edge-halo); }
+/* Column separators take the vertical cut of the same rule. */
+.cso-numbers div{ padding:30px 22px; text-align:center;
+  background:var(--edge-line-v) top right / 1px 100% no-repeat; }
+.cso-numbers div:last-child{ background:none; }
 .cso-numbers .n{ display:block; font-family:var(--fh); font-size:clamp(40px,6vw,60px); line-height:1;
   letter-spacing:.02em; color:var(--sand); margin-bottom:10px; }
 .cso-numbers .t{ display:block; font-family:var(--fb); font-size:14px; line-height:1.6; color:var(--text-primary); }
 @media (max-width:720px){
   .cso-numbers{ grid-template-columns:1fr; }
-  .cso-numbers div{ border-right:0; border-bottom:1px solid var(--slate); }
-  .cso-numbers div:last-child{ border-bottom:0; }
+  .cso-numbers div{ background:var(--edge-line-soft) bottom left / 100% 1px no-repeat; }
+  .cso-numbers div:last-child{ background:none; }
 }
 
-.cso-closing-bar{ max-width:940px; margin:20px auto 0; padding:26px 30px; border-radius:var(--r-lg);
-  background:var(--grad-structure); box-shadow:0 22px 50px -22px rgba(var(--voltage-rgb),.62), var(--inset-hi);
-  text-align:center; }
-.cso-closing-bar .big{ display:block; font-family:var(--fh); font-size:clamp(26px,4.4vw,44px);
+/* Was a --grad-structure slab under a 50px voltage drop-shadow: a filled blue
+   bar with a bloom, from before the funnel had a lit-edge system. It is now the
+   same box as everything else — obsidian ground, --rim-edge stroke, the top lit
+   line — so the section ends on the house treatment rather than on a device
+   nothing else uses. The type inside is untouched. */
+.cso-closing-bar{ position:relative; max-width:940px; margin:20px auto 0;
+  padding:26px 30px; border:1px solid transparent; border-radius:var(--r-lg);
+  background:
+    var(--edge-wash) padding-box,
+    linear-gradient(var(--obsidian),var(--obsidian)) padding-box,
+    var(--rim-edge) border-box;
+  box-shadow:var(--shadow-card); text-align:center; }
+.cso-closing-bar::after{ content:""; position:absolute; z-index:2;
+  pointer-events:none; left:1px; right:1px; top:-1px; height:2px;
+  border-radius:2px; background:var(--edge-line); filter:var(--edge-halo); }
+/* FLEX, not a block of inline text. Inline elements align on the BASELINE, and
+   an arrow's baseline position is nothing like a cap's — no amount of nudging
+   makes that reliable across sizes, because the offset needed changes with the
+   font size while a translate in em only approximates it. As flex items the
+   three parts align on their box centres instead, so the arrow sits on the
+   line's true middle at every breakpoint. Wraps on narrow screens. */
+.cso-closing-bar .big{ display:flex; flex-wrap:wrap; align-items:center;
+  justify-content:center; gap:.2em;
+  font-family:var(--fh); font-size:clamp(26px,4.4vw,44px);
   letter-spacing:.05em; line-height:1.15; color:var(--ivory); }
+/* Sand, matching the closing sentence under the numbers band above it: the two
+   are the same beat one after the other, so they take the same accent. */
+.cso-closing-bar .big .tail{ color:var(--sand); }
+
+/* Sized to about two thirds of the cap height, which is what a connector wants
+   against 44px display caps. Height and width are in em so it tracks the
+   clamped font size; the flex centring above does the rest, and there is no
+   transform to go stale at another breakpoint. */
+.cso-closing-bar .big .arrow{ width:1.15em; height:.58em; flex:0 0 auto;
+  color:var(--text-secondary); }
 .sd-root .cso-closing-bar p{ margin:10px 0 0; font-size:14.5px; line-height:1.65; color:rgba(254,243,232,.86); }
 
 .sd-root .cso-footnote{ max-width:820px; margin:26px auto 0; text-align:center; font-family:var(--fb);
@@ -1368,13 +2348,19 @@ h2.sdp-h2:not(:last-child){ margin-bottom:var(--sp-deck); }
 
 /* ---- Founder ---- */
 .cso-founder-head{ display:grid; grid-template-columns:300px 1fr; gap:38px; align-items:center;
-  max-width:940px; margin:0 auto 54px; }
+  max-width:940px; margin:0 auto 34px; }
 @media (max-width:820px){
   .cso-founder-head{ grid-template-columns:1fr; gap:24px; max-width:460px; text-align:center; }
 }
 .cso-portrait{ position:relative; border-radius:var(--r-lg); overflow:hidden;
-  border:1px solid rgba(var(--voltage-rgb),.35);
+  border:1px solid transparent;
+  background:linear-gradient(var(--obsidian),var(--obsidian)) padding-box,
+             var(--rim-edge) border-box;
   box-shadow:0 14px 40px -26px rgba(var(--volt-900-rgb),.9); }
+/* Clips, so the line sits flush. */
+.cso-portrait::after{ content:""; position:absolute; z-index:2; pointer-events:none;
+  left:0; right:0; top:0; height:2px;
+  background:var(--edge-line); filter:var(--edge-halo); }
 .cso-portrait img{ display:block; width:100%; height:auto; }
 .cso-founder-name{ font-family:var(--fh); font-size:clamp(30px,4.6vw,46px); letter-spacing:.03em;
   color:var(--ivory); margin:0 0 10px; }
@@ -1384,27 +2370,138 @@ h2.sdp-h2:not(:last-child){ margin-bottom:var(--sp-deck); }
 /* Numbered chapter ledger: the ORDERING is the structure, the BODIES are
    prose, so the prose stays prose. */
 .cso-chapters{ max-width:820px; margin:0 auto; text-align:left; }
-.cso-chapter{ display:grid; grid-template-columns:46px 1fr; gap:22px; padding:30px 0;
-  border-bottom:1px solid rgba(254,243,232,.12); }
-.cso-chapter:last-child{ border-bottom:0; padding-bottom:0; }
-.cso-chapter:first-child{ padding-top:0; }
-.sd-root .cso-chapter h3{ font-family:var(--fh); font-size:clamp(21px,2.8vw,29px); letter-spacing:.03em;
-  color:var(--ivory); margin:6px 0 12px; }
-.sd-root .cso-chapter p{ font-size:15.5px; line-height:1.75; margin:0 0 14px; color:var(--bone); }
-.sd-root .cso-chapter p:last-child{ margin-bottom:0; }
-@media (max-width:560px){ .cso-chapter{ grid-template-columns:1fr; gap:12px; } }
+/* Sits tight under the headline. The display line already carries its own
+   leading, so a positive margin here reads as roughly double what it says —
+   hence a negative one, pulled from -8 to -20. */
+.sd-root .cso-founder-deck{ max-width:760px; margin:-20px auto 30px; text-align:center;
+  font-family:var(--fb); font-size:11.5px; font-weight:800; letter-spacing:.20em;
+  text-transform:uppercase; line-height:1.7; color:var(--text-secondary); }
+
+/* NAME → ROLE → RULE → LINE → CHIPS, held close: they are one identity block,
+   and every gap in it is now smaller than the gap that separates the block from
+   the story below. The rule's own margins were the largest of them at 16px a
+   side, so that is where most of the tightening came from. */
+.sd-root .cso-founder-name{ margin:0 0 2px; }
+/* Full width, consistently lit end to end, with SHINE POINTS along it — the
+   same two-part construction the pyramid's outline uses. The base is the light
+   and never fades, so the rule has a job at both ends; the pools sit on top of
+   an already-lit line rather than being the only light on a dark one, which is
+   what made the earlier version's right half read as unfinished.
+
+   Three points at irregular spacing (19%, 54%, 83%) and descending strength, so
+   it reads as light caught along a rule rather than as three evenly-spaced
+   dots. Each is a radial an axis wide and a pixel tall; the flat colour is the
+   last layer, which is where a bare colour has to sit in this shorthand. */
+.cso-founder-rule{ display:block; width:100%; height:1px; margin:9px 0;
+  background:
+    radial-gradient(52px 1px at 19% 50%,
+      rgba(var(--volt-50-rgb),.95), rgba(var(--volt-50-rgb),0) 78%),
+    radial-gradient(38px 1px at 54% 50%,
+      rgba(var(--volt-100-rgb,229,227,254),.72), rgba(var(--volt-200-rgb),0) 78%),
+    radial-gradient(30px 1px at 83% 50%,
+      rgba(var(--volt-200-rgb),.58), rgba(var(--volt-200-rgb),0) 78%),
+    rgba(var(--volt-200-rgb),.62); }
+@media (min-resolution:2dppx){ .cso-founder-rule{ height:.5px; } }
+.sd-root .cso-founder-line{ margin:0 0 14px; font-size:15.5px; line-height:1.6;
+  color:var(--bone); }
+
+/* Credential chips. WIDER: they share the row equally rather than each hugging
+   its own label, so three chips of very different lengths still read as a set.
+   min-width stops the longest one collapsing to two words a line before the
+   row wraps.
+
+   The box is unchanged — the house lit stroke on the page's own ground, same
+   as every other chip in the funnel. */
+.cso-founder-chips{ display:flex; flex-wrap:wrap; gap:12px; margin:0; padding:0;
+  list-style:none; }
+.cso-founder-chips li{ display:inline-flex; align-items:center; gap:14px;
+  flex:1 1 0; min-width:196px;
+  padding:15px 18px; border-radius:10px; border:1px solid transparent;
+  background:
+    linear-gradient(var(--obsidian),var(--obsidian)) padding-box,
+    var(--rim-edge) border-box;
+  font-family:var(--fb); font-size:10.5px; font-weight:800; letter-spacing:.14em;
+  text-transform:uppercase; line-height:1.45; color:var(--bone); }
+.cso-founder-chips .ic{ flex:0 0 auto; display:grid; place-items:center; }
+/* The mark is filled and gradient-lit, so it carries a glow of its own rather
+   than inheriting a flat currentColor. */
+.cso-chip-glyph{ filter:drop-shadow(0 0 5px rgba(var(--volt-400-rgb),.55))
+                        drop-shadow(0 0 12px rgba(var(--volt-600-rgb),.35)); }
+
+/* ---- THE STORY TIMELINE, per Atul's reference render (7 Sep) ----------- */
+/* Three columns: the spine outside the card on the left, the card itself, and a
+   pull line on the right. The chronology therefore reads as one timeline down
+   the section rather than as four numbers stuck to four boxes. */
+.cso-chapter{ display:grid; grid-template-columns:64px 1fr; gap:24px;
+  align-items:start; padding:0 0 20px; position:relative; }
+.cso-chapter:last-child{ padding-bottom:0; }
+
+.cso-chapter-spine{ position:relative; display:flex; flex-direction:column;
+  align-items:center; text-align:center; gap:8px; }
+/* The node is a ring, lit like everything else, with the page's own ground so
+   the rail stops cleanly at its edge instead of running through it. */
+.cso-chapter-n{ display:grid; place-items:center; width:48px; height:48px;
+  border-radius:50%; border:1px solid transparent;
+  background:
+    linear-gradient(var(--obsidian),var(--obsidian)) padding-box,
+    var(--rim-edge) border-box;
+  font-family:var(--fh); font-size:20px; letter-spacing:.04em; color:var(--ivory);
+  box-shadow:0 0 14px -4px rgba(var(--volt-500-rgb),.55); }
+
+/* THE CHAPTER TEXT, in the house lit box. The hairline that used to separate
+   the chapters is gone: with each one boxed, its own edge already marks where
+   it starts and ends, and a rule between two bordered panels reads as a third
+   line nobody asked for. The gap between them does the separating instead. */
+.cso-chapter-card{ position:relative; padding:26px 30px;
+  border:1px solid transparent; border-radius:14px;
+  background:
+    var(--edge-wash) padding-box,
+    linear-gradient(var(--obsidian),var(--obsidian)) padding-box,
+    var(--rim-edge) border-box;
+  box-shadow:var(--shadow-card); }
+.cso-chapter-card::after{ content:""; position:absolute; z-index:2;
+  pointer-events:none; left:1px; right:1px; top:-1px; height:2px;
+  border-radius:2px; background:var(--edge-line); filter:var(--edge-halo); }
+/* Flares cycle down the section, so no two chapters light in the same place. */
+
+.sd-root .cso-chapter-card h3{ font-family:var(--fh);
+  font-size:clamp(21px,2.8vw,29px); letter-spacing:.03em; text-transform:uppercase;
+  color:var(--ivory); margin:0 0 14px; }
+.sd-root .cso-chapter-card p{ font-size:15px; line-height:1.75; margin:0 0 14px;
+  color:var(--text-primary); }
+.sd-root .cso-chapter-card p:last-child{ margin-bottom:0; }
+
+/* The pull. Tracked caps in the warm accent over a short rule, so a reader who
+   skims only the spine and the pulls still gets the whole arc. */
+
+@media (max-width:900px){
+  /* The pull moves under the card and the spine narrows: three columns cannot
+     hold at this width without the paragraphs going to four words a line. */
+  .cso-chapter{ grid-template-columns:52px 1fr; gap:18px; }
+      .cso-chapter-n{ width:40px; height:40px; font-size:17px; }
+  }
 
 /* The journey photographs. Framed as documents, ungraded and uncaptioned:
    the client supplied five images and no captions, and writing one for
    each would be inventing a story around someone else's photographs. */
 .cso-journey{ max-width:1000px; margin:54px auto 0; }
-.cso-journey-cap{ display:block; text-align:center; font-family:var(--fb); font-size:10.5px;
-  font-weight:800; letter-spacing:.22em; text-transform:uppercase; color:var(--sand); margin-bottom:20px; }
+/* Explicit auto rather than relying on the shared rule alone, so a later
+   shorthand here cannot quietly un-centre it. */
+.cso-journey-cap{ text-align:center; font-family:var(--fb); font-size:10.5px;
+  font-weight:800; letter-spacing:.22em; text-transform:uppercase;
+  color:var(--sand); margin:0 auto 20px; }
 .cso-journey-strip{ display:grid; grid-template-columns:repeat(5,1fr); gap:12px; }
 @media (max-width:860px){ .cso-journey-strip{ grid-template-columns:repeat(2,1fr); } }
+/* Its ::after is the image scrim, so the line goes on ::before here. Soft
+   strength: five frames in a row at full strength reads as a fence. */
 .cso-journey-frame{ position:relative; margin:0; aspect-ratio:4/3; border-radius:var(--r); overflow:hidden;
-  border:1px solid rgba(254,243,232,.18); background:var(--graphite);
-  transition:transform .3s cubic-bezier(.2,.8,.2,1), border-color .3s; }
+  border:1px solid transparent;
+  background:linear-gradient(var(--graphite),var(--graphite)) padding-box,
+             var(--rim-edge) border-box;
+  transition:transform .3s cubic-bezier(.2,.8,.2,1); }
+.cso-journey-frame::before{ content:""; position:absolute; z-index:2; pointer-events:none;
+  left:0; right:0; top:0; height:1.5px;
+  background:var(--edge-line-soft); filter:var(--edge-halo-soft); }
 .cso-journey-frame img{ width:100%; height:100%; object-fit:cover; display:block; }
 .cso-journey-frame::after{ content:""; position:absolute; inset:0;
   background:linear-gradient(180deg,rgba(8,8,66,.10),rgba(13,13,18,.34)); transition:opacity .3s; }
@@ -1445,7 +2542,6 @@ h2.sdp-h2:not(:last-child){ margin-bottom:var(--sp-deck); }
   [data-sdp-reveal],
   .sdp-cta,.sdp-card,.sdp-q,.sdp-q-body,.sdp-stuck,
   .cso-phase-node,.cso-phase-card,.cso-spine-fill,.cso-journey-frame{ transition:none !important; }
-  .sdp-eyebrow-pill .glowdot::before,
   .sdp-vsl-disc::after,
   /* The travelling rim stops. It does not revert to nothing: the conic holds
      wherever --vsl-spin was registered to start, so the frame keeps a lit

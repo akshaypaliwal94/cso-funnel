@@ -1,0 +1,465 @@
+/* =====================================================================
+   CHECKOUT · per-route stylesheet · /checkout
+   CSO FUNNEL · Akshay Paliwal · Sales Co-Founder
+
+   SPEC:  structure-library §10 TRANSACTION / §3 ACCUMULATION —
+          "Order-summary checkout" [EMPIRICAL] (R11), and the CHECKOUT row of
+          the VSL five-surfaces table (trust strip · two columns · form panel
+          ↔ summary card · mobile price bar).
+   SKIN:  SIGNAL & DEPTH (design-system.project.md), dark-first, plus the
+          locked LIT EDGE section. Nothing here re-derives the look: every box
+          is the same house box as the landing page —
+
+            transparent 1px border
+            var(--edge-wash) padding-box,
+            <ground> padding-box,
+            var(--rim-edge) border-box
+            + the top line on a free pseudo-element (::after)
+
+   WHY A PER-ROUTE FILE. globals.css is finished and heavily iterated, and it
+   already loads on this route (layout.tsx imports it and puts .sd-root on
+   <body>), so every token, every ramp and the whole card system are visible
+   here. This file adds ONLY the checkout's own components and reads the
+   tokens; it declares none of its own palette. There is exactly one palette on
+   this project and it lives in globals.css.
+
+   TWO DEVIATIONS FROM THE EMPIRICAL SPEC, both forced by the polarity flip:
+
+   1. "TWO COLUMNS ON A TINTED GROUND, both panels as cards." The SDP rule is
+      that a panel on the same colour as the page is not a panel, so you tint
+      the ground and float --bg cards on it. This skin has no light ground to
+      tint: obsidian IS the page. Here separation comes from the LIT EDGE
+      instead — the line, the rim stroke and the wash are what describe a panel
+      on this funnel, exactly as they do on the landing page. The ground gets a
+      masked hero-field bloom (the hero's own device, at a lower level) so the
+      panels have something to sit on rather than floating on flat black.
+
+   2. "Summary card with an ACCENT BAR across its top." On this skin the accent
+      bar across the top of a box already exists and is the house lit line. A
+      second filled voltage bar would be a filled voltage panel, which the skin
+      forbids outright. The summary is marked instead by what it holds: the lit
+      TOTAL, which is the value-moment C3 asks for.
+   ===================================================================== */
+
+/* ---------------------------------------------------------------------
+   THE GROUND
+   The body ramp in globals.css is composed for a page several thousand
+   pixels tall; on a one-screen checkout the whole cycle would compress into
+   the fold and read as banding. So this route paints its own calm ramp over
+   it, built only from values the skin permits in a background (obsidian,
+   volt-900, abyss — the entire background lives inside a 0.002 luminance band
+   of near-black and nothing in it may read as lit).
+   --------------------------------------------------------------------- */
+.co-page{
+  position:relative; min-height:100vh; display:flex; flex-direction:column;
+  background:linear-gradient(180deg,
+    var(--obsidian)  0%,
+    var(--obsidian) 18%,
+    var(--volt-900) 64%,
+    var(--abyss)   100%);
+}
+
+/* The bloom. The hero's own gradient and its own masking, held lower: this is
+   a transactional surface and the fold's job here is to be legible, not to be
+   the loudest thing on the funnel. */
+.co-page::before{
+  content:""; position:absolute; inset:0 0 auto; height:min(620px,70vh);
+  pointer-events:none; background:var(--grad-hero); opacity:.34;
+  -webkit-mask-image:radial-gradient(ellipse 92% 62% at 50% 0%,#000 0%,transparent 72%);
+  mask-image:radial-gradient(ellipse 92% 62% at 50% 0%,#000 0%,transparent 72%);
+}
+.co-page > *{ position:relative; z-index:1; }
+
+/* ---------------------------------------------------------------------
+   TOP BAR — the wordmark and the way back.
+   No nav, no step indicator: a step indicator would have to name the steps
+   after this one, and the booking surface is not built yet.
+   --------------------------------------------------------------------- */
+.co-top{ display:flex; align-items:center; justify-content:space-between;
+  gap:16px; padding:18px 0 16px; }
+.co-top-mark{ display:block; height:clamp(30px,4vw,40px); width:auto; }
+.co-back{ display:inline-flex; align-items:center; gap:9px;
+  font-family:var(--fb); font-size:11.5px; font-weight:700; letter-spacing:.14em;
+  text-transform:uppercase; color:var(--text-secondary); text-decoration:none;
+  transition:color .2s; }
+.co-back:hover{ color:var(--sand); }
+.co-back svg{ transform:rotate(180deg); }
+
+/* ---------------------------------------------------------------------
+   THE TRUST STRIP
+   The spec's charcoal announce strip. A filled charcoal band is a flat patch
+   on a gradient page (the seam problem globals.css documents at length), so it
+   is drawn as a ruled strip: the house soft rule as a BACKGROUND above and
+   below — never a border, because a border cannot carry a gradient along its
+   length — with three icon items and dot separators between them.
+   --------------------------------------------------------------------- */
+.co-strip{
+  padding:14px 0;
+  background:
+    var(--edge-line-soft) top left / 100% 1px no-repeat,
+    var(--edge-line-soft) bottom left / 100% 1px no-repeat;
+}
+@media (min-resolution:2dppx){
+  .co-strip{ background-size:100% .5px, 100% .5px; }
+}
+.co-strip-row{ display:flex; align-items:center; justify-content:center;
+  flex-wrap:wrap; gap:10px 22px; }
+.co-strip-item{ display:inline-flex; align-items:center; gap:10px;
+  font-family:var(--fb); font-size:11px; font-weight:700; letter-spacing:.14em;
+  text-transform:uppercase; color:var(--text-secondary); }
+/* THE HOUSE ICON BED, the same three values as the section-2 ticks and the
+   pyramid marks: a voltage-tinted fill, a solid --focus-ring hairline, an
+   ivory glyph. Small chips take no top line and no halo. */
+.co-ic{ flex:0 0 26px; width:26px; height:26px; border-radius:50%;
+  display:grid; place-items:center;
+  background:rgba(var(--voltage-rgb),.24); border:1.5px solid var(--focus-ring);
+  color:var(--ivory); }
+.co-strip-sep{ width:4px; height:4px; border-radius:50%; background:var(--slate); }
+@media (max-width:720px){ .co-strip-sep{ display:none; } }
+
+/* ---------------------------------------------------------------------
+   MASTHEAD
+   Reuses the page's own atoms (.sdp-head, .sdp-eyebrow.center) rather than
+   inventing a checkout voice. A checkout opens tighter than a section, because
+   the form has to be near the fold, so only the spacing and the heading are
+   restated.
+   --------------------------------------------------------------------- */
+.co-body{ padding:clamp(28px,4.5vw,52px) 0 clamp(40px,6vw,72px); }
+.sd-root .co-head{ margin-bottom:clamp(24px,3.4vw,38px); }
+/* The masthead title is an H1 — this is a page, and its heading is the thing
+   being bought. It cannot borrow `.sdp-h2`, because that rule is written
+   `h2.sdp-h2` in globals.css and matches the ELEMENT: an h1 carrying the class
+   would inherit nothing but the base heading rule and silently render at the
+   wrong size. So the h2's own values are restated here for the h1, one step
+   smaller than a section masthead, because a checkout headline sits above a
+   form rather than opening a section. */
+.sd-root .co-h1{ text-align:center; font-family:var(--fh);
+  font-size:clamp(28px,4.4vw,52px); letter-spacing:.02em; line-height:1.14;
+  color:var(--ivory); margin-block:0; }
+
+/* ---------------------------------------------------------------------
+   THE MOBILE PRICE BAR
+   The spec's "summary collapses to a price bar above the form". It is a real
+   collapse, not a duplicate: below 900px the price is stated here at the top
+   and the full summary card still follows the form, so the number is on screen
+   before the first keystroke.
+   --------------------------------------------------------------------- */
+.co-pricebar{ display:none; }
+@media (max-width:900px){
+  .co-pricebar{ display:flex; align-items:center; justify-content:space-between;
+    gap:14px; padding:14px 18px; margin-bottom:18px; }
+}
+.co-pricebar-l{ display:flex; flex-direction:column; gap:3px; min-width:0; }
+.co-pricebar-name{ font-family:var(--fb); font-size:13px; font-weight:700;
+  color:var(--ivory); line-height:1.3; }
+.co-pricebar-note{ font-family:var(--fb); font-size:10.5px; font-weight:700;
+  letter-spacing:.14em; text-transform:uppercase; color:var(--text-secondary); }
+.co-pricebar-fig{ font-family:var(--fh); font-size:32px; line-height:1;
+  letter-spacing:.02em; color:var(--accent-text-strong); }
+
+/* ---------------------------------------------------------------------
+   THE TWO COLUMNS
+   Form is the wider column: it is the one the visitor works in. The summary
+   is start-aligned so it stays beside the first fields rather than stretching
+   to the form's height and leaving a hollow.
+   --------------------------------------------------------------------- */
+.co-grid{ display:grid; grid-template-columns:minmax(0,1.32fr) minmax(0,.88fr);
+  gap:clamp(18px,2.4vw,28px); align-items:start; max-width:1060px; margin:0 auto; }
+@media (max-width:900px){
+  .co-grid{ grid-template-columns:1fr; max-width:560px; }
+}
+
+/* ---------------------------------------------------------------------
+   THE HOUSE BOX — identical to .sdp-card, spelled out here because this file
+   must not reach into globals.css to add a selector to it.
+   --------------------------------------------------------------------- */
+.co-panel{ position:relative; border:1px solid transparent; border-radius:var(--r-lg);
+  background:
+    var(--edge-wash) padding-box,
+    linear-gradient(var(--obsidian),var(--obsidian)) padding-box,
+    var(--rim-edge) border-box;
+  box-shadow:var(--shadow-card); }
+/* THE LINE. ::after, because ::before is the slot the house reserves for a
+   card's own devices. left/right 1px so it ends exactly at the corners; top
+   -1px so it sits ON the border rather than inside it. */
+.co-panel::after{ content:""; position:absolute; z-index:2; pointer-events:none;
+  left:1px; right:1px; top:-1px; height:2px; border-radius:2px;
+  background:var(--edge-line); filter:var(--edge-halo); }
+
+/* THE SCATTER. Every box on this page gets its own flare set, so no two light
+   in the same place — the stylesheet's version of the pyramid's seeded hash.
+   These positions are chosen not to repeat the sets already in globals.css. */
+.co-form-panel{ --rim-flare-a:41%; --rim-flare-b:19%; --rim-flare-c:63%; }
+.co-summary   { --rim-flare-a:73%; --rim-flare-b:51%; --rim-flare-c:27%; }
+.co-pricebar  { --rim-flare-a:19%; --rim-flare-b:63%; --rim-flare-c:47%; }
+.co-notice    { --rim-flare-a:57%; --rim-flare-b:36%; --rim-flare-c:15%; }
+.co-deliver   { --rim-flare-a:33%; --rim-flare-b:67%; --rim-flare-c:52%; }
+
+.co-form-panel{ padding:clamp(20px,2.6vw,30px); }
+.co-summary   { padding:clamp(20px,2.6vw,28px); }
+
+/* ---------------------------------------------------------------------
+   PANEL HEADS
+   The spec's form panel runs label → title → rule. On the SDP page there is no
+   masthead above the columns, so it needs both; here the page masthead carries
+   the offer's title, and a second display title inside the panel would say the
+   same sentence twice on one screen. So each panel takes ONE display label and
+   the house rule beneath it.
+   --------------------------------------------------------------------- */
+.sd-root .co-panel-title{ font-family:var(--fh); font-size:clamp(20px,2.4vw,26px);
+  letter-spacing:.06em; text-transform:uppercase; color:var(--ivory);
+  margin-block:0; }
+.co-rule{ display:block; height:1px; margin:14px 0 18px;
+  background:var(--edge-line-soft); filter:var(--edge-halo-soft); }
+@media (min-resolution:2dppx){ .co-rule{ height:.5px; } }
+/* Interior rules that repeat inside one card drop the halo: --edge-halo is a
+   filter and would bloom whatever sits next to it, and a repeated separator
+   should be the quietest line in the box. */
+.co-rule.quiet{ filter:none; margin:14px 0; }
+
+/* ---------------------------------------------------------------------
+   THE NOTICE CALLOUT (live-SDP element, not in the repo version)
+   Takes the pull-quote's marker: an amber left rule, which is doing a
+   different job from the lit edge, with the house stroke on its other three
+   sides. The lit line starts after the amber bar so the two never overlap.
+   --------------------------------------------------------------------- */
+.co-notice{ position:relative; display:flex; gap:13px; align-items:flex-start;
+  border:1px solid transparent; border-left:3px solid var(--amber);
+  border-radius:0 var(--r) var(--r) 0; padding:15px 18px; margin-bottom:20px;
+  background:
+    var(--edge-wash) padding-box,
+    linear-gradient(var(--obsidian),var(--obsidian)) padding-box,
+    var(--rim-edge) border-box;
+  box-shadow:var(--shadow-card); }
+.co-notice::after{ content:""; position:absolute; z-index:2; pointer-events:none;
+  left:3px; right:1px; top:-1px; height:2px; border-radius:2px;
+  background:var(--edge-line); filter:var(--edge-halo); }
+.sd-root .co-notice p{ margin:0; font-family:var(--fb); font-size:13.5px;
+  line-height:1.65; color:var(--bone); }
+
+/* ---------------------------------------------------------------------
+   FIELDS
+   Controls take the SIDE STROKE ONLY. A lit line across the top of a field
+   says "lit panel", and these are things you press and type into — the same
+   call the skin already makes for the venn's stack buttons.
+   --------------------------------------------------------------------- */
+.co-fields{ display:flex; flex-direction:column; gap:16px; }
+.co-row2{ display:grid; grid-template-columns:1fr 1fr; gap:14px; }
+@media (max-width:460px){ .co-row2{ grid-template-columns:1fr; } }
+
+.co-field{ display:flex; flex-direction:column; gap:7px; }
+.sd-root .co-label{ font-family:var(--fb); font-size:10.5px; font-weight:800;
+  letter-spacing:.16em; text-transform:uppercase; color:var(--text-secondary); }
+.co-req{ color:var(--amber); }
+
+.co-input{
+  width:100%; padding:13px 15px; border:1px solid transparent;
+  border-radius:var(--r-sm);
+  background:
+    linear-gradient(var(--slate-900),var(--slate-900)) padding-box,
+    var(--rim-edge) border-box;
+  box-shadow:inset 0 1px 2px rgba(0,0,0,.55);
+  font-family:var(--fb); font-size:15px; line-height:1.4; color:var(--ivory);
+  transition:box-shadow .18s; }
+.co-input::placeholder{ color:var(--text-muted); }
+.co-input:focus{ box-shadow:inset 0 1px 2px rgba(0,0,0,.55),
+  0 0 0 1px rgba(var(--volt-400-rgb),.55); }
+/* Each field gets its own flare set for the same reason the panels do: eight
+   identical strokes stacked down one column would read as a fence. Set by
+   name rather than by nth-child, so re-ordering the fields cannot silently
+   pair two neighbours on the same arrangement. */
+.co-f-first{ --rim-flare-a:28%; --rim-flare-b:71%; --rim-flare-c:44%; }
+.co-f-last { --rim-flare-a:66%; --rim-flare-b:23%; --rim-flare-c:58%; }
+.co-f-email{ --rim-flare-a:45%; --rim-flare-b:82%; --rim-flare-c:31%; }
+.co-f-city { --rim-flare-a:74%; --rim-flare-b:38%; --rim-flare-c:61%; }
+
+/* The phone field. It carries .co-input as well, so the frame, the stroke and
+   the inset well are the same control everything else uses; this only turns it
+   into a row and moves the padding onto the pieces inside it.
+
+   The country code is part of that one control, and the divider between the
+   code and the input is the house VERTICAL rule drawn as a background on its
+   own 1px element — a border cannot carry a gradient along its length. */
+.co-phone{ display:flex; align-items:stretch; padding:0; overflow:hidden;
+  --rim-flare-a:52%; --rim-flare-b:14%; --rim-flare-c:69%; }
+.co-phone-cc{ display:inline-flex; align-items:center; padding:0 13px 0 15px;
+  font-family:var(--fb); font-size:15px; font-weight:700; color:var(--sand);
+  white-space:nowrap; }
+.co-phone-cut{ flex:0 0 1px; align-self:stretch; margin:8px 0;
+  background:var(--edge-line-v); }
+.co-phone .co-phone-input{ flex:1 1 auto; min-width:0; border:0; background:transparent;
+  box-shadow:none; padding:13px 15px 13px 13px;
+  font-family:var(--fb); font-size:15px; color:var(--ivory); }
+.co-phone .co-phone-input:focus{ outline:none; box-shadow:none; }
+/* The frame lights when the control inside it has focus, so the composite
+   still behaves like one field. */
+.co-phone:focus-within{ box-shadow:inset 0 1px 2px rgba(0,0,0,.55),
+  0 0 0 1px rgba(var(--volt-400-rgb),.55); }
+
+/* ---- The acknowledgement ---- */
+.co-ack{ display:flex; align-items:flex-start; gap:12px; margin-top:4px;
+  font-family:var(--fb); font-size:12.5px; line-height:1.6;
+  color:var(--text-secondary); cursor:pointer; }
+/* The box is the house icon bed at control size: the voltage tint, the
+   --focus-ring hairline, an ivory glyph.
+
+   The tick is a BACKGROUND IMAGE, not a ::after. A checkbox is a replaced
+   element and Safari does not reliably render pseudo-elements on one even
+   after appearance:none, so a ::after tick is a check that silently never
+   appears on a third of Indian iPhone traffic. A background image is drawn by
+   every engine. It is the same path as CheckGlyph, in --ivory (#FEF3E8),
+   URL-encoded. */
+.co-ack-box{ flex:0 0 20px; width:20px; height:20px; margin-top:1px;
+  appearance:none; -webkit-appearance:none; cursor:pointer;
+  border:1.5px solid var(--focus-ring); border-radius:5px;
+  background-color:rgba(var(--voltage-rgb),.16);
+  background-repeat:no-repeat; background-position:center; background-size:12px 12px;
+  transition:background-color .18s; }
+.co-ack-box:checked{ background-color:rgba(var(--voltage-rgb),.62);
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23FEF3E8' stroke-width='3.2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M5 13l4.5 4.5L19 7'/%3E%3C/svg%3E"); }
+.co-ack a{ color:var(--sand); text-decoration:underline; text-underline-offset:3px; }
+
+/* ---- The pay button ----
+   The page's own .sdp-cta, forced full width. One focal action on the surface:
+   there is no second button anywhere on this route. */
+.co-pay{ width:100%; min-width:0; margin-top:22px; cursor:pointer; }
+/* On a narrow phone the button's own 44px side padding leaves under 200px for
+   a label that needs about 285px, so it wraps to two lines inside the pill.
+   Pulling the padding in and the type down one step keeps it on one line at
+   360px. checkout.css loads after globals.css (layout imports one, the page
+   imports the other), so these win the tie on .sdp-cta without !important. */
+@media (max-width:520px){
+  .co-pay{ padding-left:18px; padding-right:18px; font-size:16px; }
+}
+/* The price is the token in the label that decides, so it gets a little size,
+   NOT a colour: on a voltage fill only ivory is a full-strength text colour
+   (7.90:1). Sand would pass at 4.58:1 but reads dimmer than the words around
+   it, and amber on voltage is 3.15:1 — large text only, by the client's own
+   measured table. */
+.co-pay-price{ font-size:1.07em; letter-spacing:.04em; }
+
+/* The state message. Deliberately loud in the console AND on screen: a
+   checkout whose handler is not wired must never look finished. */
+.co-say{ margin-top:14px; padding:12px 15px; border-radius:var(--r-sm);
+  border:1px dashed rgba(var(--volt-300-rgb),.55);
+  background:rgba(var(--volt-600-rgb),.10);
+  font-family:var(--fb); font-size:12.5px; line-height:1.6; color:var(--bone); }
+.co-say b{ color:var(--ivory); }
+
+/* ---- THE METHOD TILES, welded under the button ------------------------
+   R11 asks for payment methods as tiles. There are no payment-brand logo
+   files on this project, and R11's own "avoid" list forbids recolouring brand
+   marks anyway, so these are TYPE tiles — the same call the landing page makes
+   for the press row, and swapping real artwork in later is a straight
+   substitution inside the same row.
+
+   They are small chips: they take the house side stroke and NO top line and no
+   halo, because a 1px lit line across a 70px chip is noise rather than light.
+   --------------------------------------------------------------------- */
+.co-methods{ margin-top:18px; }
+.co-methods-cap{ display:flex; align-items:center; justify-content:center;
+  gap:9px; font-family:var(--fb); font-size:10.5px; font-weight:700;
+  letter-spacing:.16em; text-transform:uppercase; color:var(--text-muted); }
+.co-methods-cap .co-ic{ flex:0 0 20px; width:20px; height:20px; }
+.co-methods-row{ display:flex; align-items:center; justify-content:center;
+  flex-wrap:wrap; gap:8px; margin-top:12px; }
+.co-methods-row li{ border:1px solid transparent; border-radius:6px;
+  padding:7px 12px;
+  background:
+    linear-gradient(var(--obsidian),var(--obsidian)) padding-box,
+    var(--rim-edge) border-box;
+  font-family:var(--fb); font-size:10.5px; font-weight:800; letter-spacing:.14em;
+  text-transform:uppercase; color:var(--text-secondary); }
+/* No two chips light in the same place. */
+.co-methods-row li:nth-child(2){ --rim-flare-a:62%; --rim-flare-b:27%; --rim-flare-c:71%; }
+.co-methods-row li:nth-child(3){ --rim-flare-a:21%; --rim-flare-b:78%; --rim-flare-c:36%; }
+.co-methods-row li:nth-child(4){ --rim-flare-a:49%; --rim-flare-b:16%; --rim-flare-c:59%; }
+
+/* ---------------------------------------------------------------------
+   THE ORDER SUMMARY
+   Ledger rows, then the Total as the lit value-moment. Every rule is drawn
+   ONCE PER ROW as a background, never per cell: --edge-line-soft fades to
+   nothing at both ends by design, so split across cells it restarts and
+   tapers at every boundary and a row reads as a set of dashes.
+   --------------------------------------------------------------------- */
+.co-sum-product{ display:flex; flex-direction:column; gap:5px; }
+.sd-root .co-sum-name{ font-family:var(--fh); font-size:clamp(22px,2.6vw,30px);
+  letter-spacing:.03em; color:var(--ivory); line-height:1.12; margin-block:0; }
+.co-sum-by{ font-family:var(--fb); font-size:12px; font-weight:700;
+  letter-spacing:.13em; text-transform:uppercase; color:var(--accent-text); }
+
+/* NO LEDGER ROWS ARE DEFINED HERE, on purpose. The offer is one line item and
+   the source states no per-item value copy, so a ticked "what's included"
+   stack would repeat the product name and the figure directly under
+   themselves. Rules for a component that is not on the page are how a
+   stylesheet starts to rot, so they are not written until there is copy for
+   them; page.tsx marks the exact slot they go back into.
+
+   When that copy arrives the rows are the house pattern and nothing else:
+   a <ul> whose rules are drawn ONCE PER ROW as a background
+   (`li + li{ background:var(--edge-line-soft) top left / 100% 1px no-repeat }`),
+   never per cell. */
+
+/* THE TOTAL — the value-moment (C3). Amber is the client's own pricing colour
+   and measures 7.0:1 on obsidian, so it carries a figure at any size. Nothing
+   else in this panel is lit, which is what makes this read as the number. */
+.co-total{ display:flex; align-items:baseline; justify-content:space-between; gap:16px; }
+.co-total-l{ font-family:var(--fb); font-size:11px; font-weight:800;
+  letter-spacing:.18em; text-transform:uppercase; color:var(--text-secondary); }
+.co-total-fig{ position:relative; font-family:var(--fh);
+  font-size:clamp(34px,4.4vw,46px); line-height:1; letter-spacing:.02em;
+  color:var(--accent-text-strong); }
+/* The hairline sits clear of the baseline rather than running through the
+   descenders, the same way the result bar's figure is underscored. */
+.co-total-fig::after{ content:""; position:absolute; left:0; right:0; bottom:-6px;
+  height:2px; background:var(--edge-line-soft); }
+
+/* ---- The refund seal line ---- */
+.co-seal{ display:flex; align-items:flex-start; gap:11px; margin-top:16px; }
+.sd-root .co-seal p{ margin:0; font-family:var(--fb); font-size:12.5px;
+  line-height:1.6; color:var(--bone); }
+.co-seal .co-ic{ flex:0 0 24px; width:24px; height:24px; margin-top:1px; }
+
+/* ---- Who delivers it ---- */
+.co-deliver{ display:flex; align-items:center; gap:13px;
+  border:1px solid transparent; border-radius:var(--r); padding:12px 14px;
+  background:
+    var(--edge-wash) padding-box,
+    linear-gradient(var(--obsidian),var(--obsidian)) padding-box,
+    var(--rim-edge) border-box; }
+/* Chips and small boxes take the stroke but NO top line and no halo: a 1px
+   lit line across a 60px box is noise, not light. */
+.co-deliver-face{ flex:0 0 46px; width:46px; height:46px; border-radius:50%;
+  object-fit:cover; object-position:50% 28%;
+  border:1px solid rgba(var(--volt-200-rgb),.35); }
+.co-deliver-txt{ display:flex; flex-direction:column; gap:2px; min-width:0; }
+.co-deliver-name{ font-family:var(--fb); font-size:13.5px; font-weight:800;
+  color:var(--ivory); letter-spacing:.01em; }
+.co-deliver-role{ font-family:var(--fb); font-size:10.5px; font-weight:700;
+  letter-spacing:.14em; text-transform:uppercase; color:var(--text-secondary); }
+
+/* ---------------------------------------------------------------------
+   FOOT
+   The identity line only. The compliance footer (registered name, full postal
+   address, phone, email + the three legal links) is the LAUNCH agent's, and
+   none of those four facts exist in content.ts — inventing an address on a
+   payment page is the one thing a checkout must never do.
+   --------------------------------------------------------------------- */
+.co-foot{ margin-top:auto; padding:26px 0 34px; position:relative; }
+.co-foot::before{ content:""; position:absolute; top:0; left:50%;
+  transform:translateX(-50%); width:min(420px,80%); height:1px;
+  background:linear-gradient(90deg,
+    rgba(var(--volt-400-rgb),0),rgba(var(--volt-400-rgb),.42),rgba(var(--volt-400-rgb),0)); }
+.co-foot-line{ display:flex; align-items:center; flex-wrap:wrap;
+  justify-content:center; gap:12px; font-family:var(--fb); font-size:11.5px;
+  letter-spacing:.12em; text-transform:uppercase; color:var(--text-secondary); }
+.co-foot-line .star{ color:var(--amber); }
+
+/* ---------------------------------------------------------------------
+   REDUCED MOTION (C7). Nothing on this surface animates on arrival — a
+   checkout has to be readable the instant it paints, so there is no reveal
+   choreography here at all. These are the hover/focus transitions only.
+   --------------------------------------------------------------------- */
+@media (prefers-reduced-motion:reduce){
+  .co-input,.co-ack-box,.co-back{ transition:none; }
+}
