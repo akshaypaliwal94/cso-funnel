@@ -133,3 +133,125 @@ for a brand that has not chosen them.
    page a white PNG would be a hole. So the Venn is **rebuilt as SVG in these
    tokens** rather than dropped in as an image, and the install PDF's content is
    rebuilt as page sections. The originals stay as content references.
+
+---
+
+## THE LIT EDGE — the house treatment for every card and every divider
+
+**Locked, 2026-09-05.** Every card, panel and rule on this funnel carries one
+edge treatment. It is not a per-section decision any more: a card that opts out
+reads as the unfinished one.
+
+**It was measured off the client's reference render, not estimated,** and the
+measurements are the reason it works. Four facts, all of which earlier attempts
+got wrong:
+
+1. **The line is lit along its whole width.** It cuts on at full strength right
+   at the corner and never fades in. Fading both ends to nothing (the way the
+   rule above "Featured in" does) lights only the middle third, and that is the
+   failure mode this replaced.
+2. **It ends at the corners.** No overhang. A pixel outside the card measures
+   the bare ground.
+3. **Brightness runs blue → WHITE → blue:** a pure-white nucleus at 50%, a
+   secondary flare at 19%, a long dim tail down the right half. That asymmetry
+   is the difference between a reflection and a decal, so it is reproduced
+   rather than averaged out.
+4. **The core is 2px and the halo is gone by 14px.** A hard thin line with a
+   tight bloom. Never a soft bar, and never a glow ringing the whole box.
+
+**Glow is not shine.** Spreading light around all four sides of a card is the
+bloom this system explicitly replaced. The light belongs on the top edge, and
+it comes off that edge upward.
+
+### The tokens (in `app/globals.css`, use them, never re-derive)
+
+| Token | What it is |
+|---|---|
+| `--edge-line` | the 90° measured profile: the line across a card's top edge |
+| `--edge-halo` | the drop-shadow pair applied **to the line**, so the halo inherits the line's own alpha: brightest under the nucleus, absent under the tail. No hand-placed second gradient tracks that. |
+| `--edge-line-soft` | same profile, ~half strength, no pure white. For rules INSIDE a card, for stacked rows, and for section dividers. |
+| `--edge-halo-soft` | its halo |
+| `--edge-line-v` | the vertical cut, for column separators and left rules |
+| `--rim-edge` | the side stroke: `volt-100` at the top corners → dead by the bottom edge. **Never a saturated blue at the top** — volt-400/600 there puts a bright band down the first fifth of each side that competes with the line. |
+| `--edge-wash` | the light landing inside the panel, gone by a third of the way down. Without it the line floats on a flat panel and stops looking like it is lighting anything. |
+
+### How to apply it
+
+- **Any card:** give it `.sdp-card`. It carries everything. Change the fill with
+  `--card-ground` (the fit boxes set it to obsidian); change nothing else.
+- **A card that is not an `.sdp-card`:** transparent 1px border, then
+  `var(--edge-wash) padding-box, <ground> padding-box, var(--rim-edge) border-box`,
+  and the line on a free pseudo-element.
+- **The line's slot is `::after`**, because `::before` is spoken for on the
+  cards that draw their own devices there. Where `::after` is taken
+  (`.cso-journey-frame`), use `::before` and say so in a comment.
+- **A card that clips** (`overflow:hidden`) cannot hang the line over its
+  border: set `top:0` instead of `top:-1px`.
+- **A divider** is `--edge-line-soft` as a *background*, not a border: a border
+  cannot carry a gradient along its length. Size it `100% 1px` and position it
+  `top`/`bottom`; vertical rules take `--edge-line-v` at `1px 100%`.
+- **Hover brightens the LINE**, it does not ring the card.
+- **Repeated elements drop to soft.** Eight FAQ rows or five journey frames at
+  full strength read as a ladder or a fence. Full strength is for a card that
+  stands alone; the open FAQ row takes the full line because that IS the marker.
+
+### What deliberately does NOT take it
+
+- **Small chips and pills.** A 1px lit stroke on a 28px pill is noise.
+- **Controls** (the mobile venn stack buttons) take the side stroke only. A lit
+  line across the top of a button says "lit panel", and these are things you
+  press.
+- **The pull quote keeps its amber left rule.** That marker is doing a different
+  job; its other three sides take the house stroke.
+
+### The pyramid's outline (THIS SHAPE ONLY)
+
+**Locked, 2026-09-06. Scope: the mechanism section's pyramid in this funnel, and
+nothing else.** It is NOT a general rule for shapes, and it does not change how
+the lit edge works on cards, dividers or any other component — those stay
+exactly as specified above. If another shape ever wants this treatment, that is
+a fresh decision, not an inheritance.
+
+Around this shape the outline's value must **change as it travels**. A single
+ramp — top bright, bottom dim — reads as a printed outline, not a lit one.
+
+Two parts, and the split is the rule:
+
+1. **The corners are mandatory.** Light pools where a surface turns. Every
+   corner of every tier carries a lit run, and they are the strongest points on
+   the outline. This is not optional and not decorative: without it the shape
+   stops reading as lit.
+2. **The straight runs are dynamic.** Between the corners the shine is
+   scattered — smaller flares, varying length and level, placed by a hash of the
+   shape's own coordinates. Only edges long enough to carry one get one.
+
+**Seeded, never `Math.random()`.** Random numbers differ between the server and
+the client, which throws a hydration mismatch, and the highlights jump to new
+positions on every reload. Seed from the geometry so it looks scattered and
+stays put.
+
+**Every lit run must ramp in and out.** A dash carries one opacity for its whole
+length, so on its own it switches on and off at its ends and reads as a painted
+segment. Build each run from four nested dashes on the same centre — longest and
+faintest first, `[2.4, .14] [1.8, .30] [1.35, .56] [1.0, 1.0]` — so the value
+climbs to the middle and falls away symmetrically. Round caps on all of them.
+
+**Weighting.** Where shapes stack, the underside of each is the lit edge and its
+top edge sits in the shadow of the one above: top corners at roughly a fifth of
+the strength of the bottom ones, and the continuous inner run ramps the same way
+down the shape.
+
+**The inner glow is separate from the outline** and follows the same modulation:
+a faint continuous run just inside the edge plus a bloom pooled at each corner,
+blurred together so it reads as one band whose level rises and falls. One colour
+only (currently `volt-600`) — the level changes, never the hue.
+
+**What not to do**, all learned the hard way on this build:
+- Do not fill the shape. The interior sits within a few luma of the page.
+- Do not widen the inner glow to carry the falloff. A stroke is a flat slab: at
+  104 units wide it covered whole tiers (they are ~104 units tall) and the
+  inside went solid blue. Keep the slab narrow and let the blur do the falloff.
+- Do not add a wide, strong outer bloom near the edge. It washes out the
+  contrast at the line and the border reads blurry.
+- Do not let the ramp walk into saturated blue. Hold the pale end and drop the
+  level, or the outline reads as silver on top and blue underneath.
