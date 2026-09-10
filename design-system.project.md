@@ -204,7 +204,16 @@ it comes off that edge upward.
 - **The pull quote keeps its amber left rule.** That marker is doing a different
   job; its other three sides take the house stroke.
 
-### The pyramid's outline (THIS SHAPE ONLY)
+### The pyramid's outline (THIS SHAPE ONLY) — RETIRED 2026-09-10
+
+**The pyramid was removed from the mechanism section on 2026-09-10 (Atul): it
+and the drivers list beside it stated the same three drivers twice, so the
+shape went and its +50% figures moved onto the driver rows. Nothing on the page
+uses the rule below any more.**
+
+It is left on record rather than deleted because it is the only written account
+of how the travelling outline was measured, and that method (measure the
+reference render with PIL, then build) is the general lesson worth keeping.
 
 **Locked, 2026-09-06. Scope: the mechanism section's pyramid in this funnel, and
 nothing else.** It is NOT a general rule for shapes, and it does not change how

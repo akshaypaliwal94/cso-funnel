@@ -1,72 +1,78 @@
 "use client";
 
 import { useRef, useState } from "react";
-import { asset } from "./asset-version";
-import { missing } from "./content";
 
 /**
  * The hero's focal object (§8 focal media, blueprint beat 1).
  *
- * No VSL asset has been supplied. Rather than fake a play disc that does
- * nothing, the frame renders a labelled placeholder AT THE FINAL 16:9 RATIO, so
- * when the video lands nothing on the page moves.
+ * Self-hosted from Cloudflare R2 as a native <video>. It replaced a Loom
+ * embed on 2026-09-10: an <iframe> brought Loom's chrome, its branding and
+ * its cookies onto the hero, and a file we own brings none of them.
  *
- * To go live: set VIDEO_SRC (and POSTER_SRC if there is one). The component
- * then renders the real SDP VSL frame, poster plus ripple play disc, swapping
- * to a native <video> on click. Nothing else changes.
+ * ── ONE TAP, NOT TWO (2026-09-10, Atul) ───────────────────────────────────
+ * `<video controls>` draws its own large centre play button AND a control bar
+ * with a second play button in it. That is the double tap: the browser's big
+ * button starts nothing until the element is ready, and the reader ends up
+ * hunting for the small one.
+ *
+ * So `controls` is NOT set until the film is running. Before the click the
+ * video is a bare surface with no native affordance on it, and the only thing
+ * to press is the skin's own voltage disc. The click does all three jobs at
+ * once: flips the state (which hides the disc and turns `controls` on) and
+ * calls play() inside the same user gesture, which is what keeps autoplay
+ * policy happy with sound on.
+ *
+ * After that the native bar is the right control and ours is gone: a themed
+ * overlay sitting on top of a playing film would cover the scrubber.
+ *
+ * The button is a real <button>, so Enter and Space work and it takes focus
+ * in order. It is the frame's only control, so it fills the frame: the disc
+ * is what it looks like, the whole stage is what you can hit.
  */
-const VIDEO_SRC: string | null = null;
+
+/** The R2 public bucket origin, client-supplied 2026-09-10. */
+const R2_ORIGIN = "https://pub-ad7f214986d245689e13bb48b2f2819e.r2.dev";
+
+/** The object key inside that bucket. Client-supplied 2026-09-10.
+ *  Kept apart from the origin: the bucket is infrastructure and the file is
+ *  content, so a new cut of the film is one filename to edit. */
+const VSL_FILE = "cso-vsl.mp4";
+
+/** Optional poster frame, once one exists. Until then the browser shows the
+ *  film's own first frame under the disc. */
 const POSTER_SRC: string | null = null;
 
 export function VSLFrame() {
   const [playing, setPlaying] = useState(false);
   const vid = useRef<HTMLVideoElement>(null);
 
-  if (!VIDEO_SRC) {
-    return (
-      <div className="sdp-vsl" id="vsl" aria-label="Video sales letter, not yet supplied">
-        <div className="cso-ph" style={{ position: "absolute", inset: 0, border: 0, borderRadius: 0 }}>
-          <div>
-            <span className="cso-ph-tag">
-              <span
-                aria-hidden
-                style={{ width: 6, height: 6, borderRadius: "50%", background: "currentColor", display: "inline-block" }}
-              />
-              {missing.vslVideo.label}
-            </span>
-            <p className="cso-ph-what">{missing.vslVideo.what}</p>
-          </div>
-        </div>
-      </div>
-    );
-  }
+  const start = () => {
+    setPlaying(true);
+    /* Called in the gesture, not in an effect after the re-render: a play()
+       that lands outside the user gesture is what gets blocked. */
+    vid.current?.play();
+  };
 
   return (
-    <div className={`sdp-vsl${playing ? " playing" : ""}`} id="vsl">
+    <div className={`sdp-vsl is-file${playing ? " playing" : ""}`} id="vsl">
       <video
         ref={vid}
-        className="sdp-vsl-video"
-        src={asset(VIDEO_SRC)}
-        poster={POSTER_SRC ? asset(POSTER_SRC) : undefined}
+        src={`${R2_ORIGIN}/${VSL_FILE}`}
+        poster={POSTER_SRC ?? undefined}
         controls={playing}
         playsInline
         preload="metadata"
       />
-      <button
-        className="sdp-vsl-play"
-        type="button"
-        aria-label="Play the video"
-        onClick={() => {
-          setPlaying(true);
-          vid.current?.play();
-        }}
-      >
-        <span className="sdp-vsl-disc" aria-hidden>
-          <svg width="26" height="26" viewBox="0 0 24 24" fill="currentColor">
-            <path d="M8 5.5v13l11-6.5-11-6.5z" />
-          </svg>
-        </span>
-      </button>
+
+      {!playing && (
+        <button className="sdp-vsl-play" type="button" onClick={start} aria-label="Play the video">
+          <span className="sdp-vsl-disc" aria-hidden>
+            <svg width="26" height="26" viewBox="0 0 24 24" fill="currentColor">
+              <path d="M8 5.5v13l11-6.5-11-6.5z" />
+            </svg>
+          </span>
+        </button>
+      )}
     </div>
   );
 }

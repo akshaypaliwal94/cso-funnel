@@ -9,6 +9,8 @@ import { Process60 } from "./_landing/Process60";
 import { RevealRoot } from "./_landing/Reveal";
 import { StickyCta } from "./_landing/StickyCta";
 import { SuccessStories } from "./_landing/SuccessStories";
+import FunnelTracker from "@/components/FunnelTracker";
+import SiteFooter from "@/components/SiteFooter";
 
 /**
  * Section order is the COPY SOURCE'S order, not the blueprint's default.
@@ -38,8 +40,21 @@ export default function Page() {
       <Faq />
       <FinalCta />
 
+      {/* The compliance rail, BELOW the finale rather than instead of it.
+
+          The house rule on this funnel is that the finale is the premium peak
+          and carries its own colophon, so there is no second closing beat
+          here. This is a thin bottom edge: operator identity, the two
+          disclaimers and the three policy links, which Razorpay's merchant
+          review expects to find on the site itself. */}
+      <SiteFooter />
+
       <StickyCta />
       <RevealRoot />
+
+      {/* ViewContent, once per session. Renders nothing. See the note in the
+          component for why AddToCart is NOT fired from this page. */}
+      <FunnelTracker />
     </main>
   );
 }

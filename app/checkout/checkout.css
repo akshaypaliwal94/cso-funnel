@@ -1,6 +1,6 @@
 /* =====================================================================
    CHECKOUT · per-route stylesheet · /checkout
-   CSO FUNNEL · Akshay Paliwal · Sales Co-Founder
+   CSO FUNNEL · Akshay Paliwal · Fractional Sales Co-Founder
 
    SPEC:  structure-library §10 TRANSACTION / §3 ACCUMULATION —
           "Order-summary checkout" [EMPIRICAL] (R11), and the CHECKOUT row of
@@ -323,6 +323,18 @@
    The page's own .sdp-cta, forced full width. One focal action on the surface:
    there is no second button anywhere on this route. */
 .co-pay{ width:100%; min-width:0; margin-top:22px; cursor:pointer; }
+/* WHILE THE SHEET IS OPENING. The button is disabled between the tap and
+   Razorpay's iframe painting, which on a slow connection is a second or two of
+   nothing happening: without a state here the buyer taps again, and a second
+   tap would create a second order.
+
+   It dims and loses its lift, but keeps its fill and its rim. A disabled CTA
+   that goes grey reads as broken; this one reads as working. The hover
+   transform and the sheen sweep are both cancelled, because a button that
+   still animates under the cursor is saying it is ready when it is not. */
+.co-pay:disabled{ cursor:progress; opacity:.62; filter:saturate(.85); }
+.co-pay:disabled:hover{ transform:none; filter:saturate(.85); }
+.co-pay:disabled:hover::after{ left:-60%; }
 /* On a narrow phone the button's own 44px side padding leaves under 200px for
    a label that needs about 285px, so it wraps to two lines inside the pill.
    Pulling the padding in and the type down one step keeps it on one line at
@@ -330,6 +342,14 @@
    imports the other), so these win the tie on .sdp-cta without !important. */
 @media (max-width:520px){
   .co-pay{ padding-left:18px; padding-right:18px; font-size:16px; }
+  /* Every field clears the 44px tap floor, and the inputs sit at 16px so iOS
+     does not zoom the viewport on focus — below 16px it always does, and the
+     page never zooms back out afterwards. */
+  .co-field input,.co-field select{ min-height:50px; font-size:16px; }
+  .co-check{ min-height:44px; }
+  .co-pay{ min-height:54px; }
+  /* Panels lose the padding sized for a desktop column. */
+  .co-panel,.co-summary{ padding:20px 16px; }
 }
 /* The price is the token in the label that decides, so it gets a little size,
    NOT a colour: on a voltage fill only ivory is a full-strength text colour

@@ -1,0 +1,92 @@
+/* ═══════════════════════════════════════════════════════════════════════
+   CSO FUNNEL · book-a-call.css · scope: .cso-book
+
+   The booking step, between the payment and the confirmation.
+
+   TOKEN-ONLY. The one thing this page cannot theme is the calendar itself:
+   it renders inside Cal's own iframe, so its type and chrome are Cal's. The
+   page FRAMES the embed rather than restyling it, which is the house rule
+   for any third-party UI.
+   ═══════════════════════════════════════════════════════════════════════ */
+
+.cso-book,
+.cso-book *,
+.cso-book *::before,
+.cso-book *::after { box-sizing:border-box; }
+
+.cso-book{ background:var(--obsidian); color:var(--text-primary);
+  font-family:var(--fb); line-height:1.6; min-height:100vh;
+  display:flex; flex-direction:column; }
+.cso-book .bk-body{ flex:1; padding:var(--sp-sec) 0; }
+
+/* ── the receipt strip ───────────────────────────────────────────── */
+.cso-book .bk-strip{
+  display:flex; align-items:center; justify-content:center; flex-wrap:wrap; gap:8px;
+  padding:11px 18px; background:var(--graphite);
+  border-bottom:1px solid transparent;
+  background-image:linear-gradient(var(--graphite),var(--graphite));
+  font-family:var(--fb); font-size:11px; font-weight:800;
+  letter-spacing:.18em; text-transform:uppercase; color:var(--bone); }
+.cso-book .bk-tick{ color:var(--voltage-text,var(--sand)); }
+.cso-book .bk-sep{ opacity:.45; }
+
+/* ── masthead ────────────────────────────────────────────────────── */
+.cso-book .bk-mast{ max-width:720px; margin:0 auto var(--sp-body); text-align:center; }
+.cso-book .bk-pill{
+  display:inline-block; font-family:var(--fb); font-size:10.5px; font-weight:800;
+  letter-spacing:.2em; text-transform:uppercase; color:var(--amber);
+  border:1px solid transparent; border-radius:999px; padding:6px 14px;
+  margin-bottom:16px;
+  background:linear-gradient(var(--obsidian),var(--obsidian)) padding-box,
+             var(--rim-edge) border-box; }
+.cso-book .bk-mast h1{
+  font-family:var(--fh); font-size:clamp(34px,5.6vw,64px); line-height:1.02;
+  letter-spacing:.02em; color:var(--ivory); margin:0 0 14px; }
+.cso-book .bk-mast h1 em{ font-style:normal; color:var(--sand); }
+.cso-book .bk-deck{ font-size:15.5px; line-height:1.7; color:var(--text-secondary);
+  max-width:560px; margin:0 auto; }
+
+/* ── the embed, framed ───────────────────────────────────────────── */
+.cso-book .bk-card{
+  max-width:860px; margin:0 auto; padding:14px 14px 4px;
+  border:1px solid transparent; border-radius:var(--r-lg);
+  background:
+    var(--edge-wash) padding-box,
+    linear-gradient(var(--obsidian),var(--obsidian)) padding-box,
+    var(--rim-edge) border-box;
+  box-shadow:var(--shadow-card); position:relative; }
+.cso-book .bk-card::after{ content:""; position:absolute; z-index:2;
+  pointer-events:none; left:1px; right:1px; top:-1px; height:2px;
+  border-radius:2px; background:var(--edge-line); filter:var(--edge-halo); }
+
+/* A neutral LIGHT inset: Cal renders its own light UI, and dropping it
+   straight onto obsidian leaves a white slab with no edge. */
+.cso-book .bk-cal-inset{
+  background:#fff; border-radius:var(--r); overflow:hidden; min-height:620px; }
+.cso-book .bk-cal{ width:100%; min-height:620px; overflow:auto; }
+.cso-book .bk-cal iframe{ width:100%; border:0; display:block; }
+
+.cso-book .bk-note{
+  font-family:var(--fb); font-size:12.5px; color:var(--slate);
+  text-align:center; padding:26px 16px 0; margin:0; }
+/* Failure speaks in the warm accent, not red: nothing has gone wrong with the
+   payment, only with an embed. */
+.cso-book .bk-note.failed{
+  color:var(--obsidian); background:rgba(255,196,120,.22);
+  border-left:4px solid var(--amber); border-radius:var(--r-sm);
+  text-align:left; font-size:14px; line-height:1.6; padding:14px 16px; margin:14px; }
+
+.cso-book .bk-direct{ font-size:13px; color:var(--text-secondary);
+  text-align:center; padding:14px 8px 10px; margin:0; }
+.cso-book .bk-direct a{ color:var(--sand); border-bottom:1px solid rgba(236,176,137,.4); }
+.cso-book .bk-direct a:hover{ border-bottom-color:var(--sand); }
+
+/* The prep list and the support line were both removed from this page on
+   2026-09-10 (Atul), and their rules went with them: .bk-ready, .bk-ready-cap
+   and .bk-help. Below the calendar card there is nothing. */
+@media (max-width:640px){
+  .cso-book .bk-strip{ font-size:10px; letter-spacing:.12em; }
+  .cso-book .bk-card{ padding:8px 8px 2px; }
+  .cso-book .bk-cal-inset,
+  .cso-book .bk-cal{ min-height:560px; }
+}

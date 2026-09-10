@@ -3,7 +3,7 @@
 @tailwind utilities;
 
 /* =====================================================================
-   CSO FUNNEL · Akshay Paliwal · Sales Co-Founder
+   CSO FUNNEL · Akshay Paliwal · Fractional Sales Co-Founder
    SKIN: SIGNAL & DEPTH (project override) —
    /workspace/cso-funnel/design-system.project.md
 
@@ -382,41 +382,47 @@
      --rim-flare-a / -b are the positions of the two run flares. They default
      here and are overridden per card below, so no two adjacent borders light in
      the same place — the CSS equivalent of the pyramid's seeded scatter. */
-  /* Where the run flares sit. Three of them, and they are what stops every box
-     lighting identically — see the scatter block further down. */
+  /* Where the run flares sit, and HOW BIG they are. The sizes are variables so
+     a narrow viewport can shrink them: they are absolute lengths, so on a
+     340px card the 86px top flare already covers a quarter of the edge and on
+     a 150px chip well over half. Overridden under 640px, below. */
   --rim-flare-a: 34%;   /* top edge   */
   --rim-flare-b: 68%;   /* bottom edge */
   --rim-flare-c: 42%;   /* the sides   */
+  --rim-pool-w: 34px;  --rim-pool-h: 30px;   /* the four corner pools */
+  --rim-fa-w: 86px;    --rim-fa-h: 32px;     /* top flare, primary   */
+  --rim-fb-w: 58px;    --rim-fb-h: 28px;     /* top flare, secondary */
+  --rim-fc-w: 74px;    --rim-fc-h: 28px;     /* bottom flare, primary   */
+  --rim-fd-w: 52px;    --rim-fd-h: 26px;     /* bottom flare, secondary */
+  --rim-fs-w: 28px;    --rim-fs-h: 68px;     /* side flares */
   --rim-edge:
     /* the four corner pools — mandatory, light gathers where a surface turns */
-    radial-gradient(34px 30px at 0 0,
+    radial-gradient(var(--rim-pool-w) var(--rim-pool-h) at 0 0,
       rgba(var(--volt-50-rgb),.95), rgba(var(--volt-50-rgb),0) 74%),
-    radial-gradient(34px 30px at 100% 0,
+    radial-gradient(var(--rim-pool-w) var(--rim-pool-h) at 100% 0,
       rgba(var(--volt-50-rgb),.95), rgba(var(--volt-50-rgb),0) 74%),
-    radial-gradient(34px 30px at 0 100%,
+    radial-gradient(var(--rim-pool-w) var(--rim-pool-h) at 0 100%,
       rgba(var(--volt-200-rgb),.78), rgba(var(--volt-200-rgb),0) 74%),
-    radial-gradient(34px 30px at 100% 100%,
+    radial-gradient(var(--rim-pool-w) var(--rim-pool-h) at 100% 100%,
       rgba(var(--volt-200-rgb),.78), rgba(var(--volt-200-rgb),0) 74%),
-    /* flares along the runs: TWO on each long edge and one on each side, at
+    /* flares along the runs: two on each long edge and one on each side, at
        positions that never line up with each other. One flare per edge was the
        bug — it put a single bright point in the middle of the bottom of every
        box on the page, which is the opposite of scattered.
 
        Levels are set for EIGHT flares, not one. Splitting the light eight ways
-       at the old alphas left every point faint; each is now roughly 1.8x what
-       it was, and the two bottom corners come up from .50 to .78 so they match
-       the top pair rather than trailing them. */
-    radial-gradient(86px 32px at var(--rim-flare-a) 0,
+       at the old alphas left every point faint. */
+    radial-gradient(var(--rim-fa-w) var(--rim-fa-h) at var(--rim-flare-a) 0,
       rgba(var(--volt-50-rgb),.78), rgba(var(--volt-50-rgb),0) 80%),
-    radial-gradient(58px 28px at calc(var(--rim-flare-a) + 41%) 0,
+    radial-gradient(var(--rim-fb-w) var(--rim-fb-h) at calc(var(--rim-flare-a) + 41%) 0,
       rgba(var(--volt-200-rgb),.52), rgba(var(--volt-200-rgb),0) 80%),
-    radial-gradient(74px 28px at var(--rim-flare-b) 100%,
+    radial-gradient(var(--rim-fc-w) var(--rim-fc-h) at var(--rim-flare-b) 100%,
       rgba(var(--volt-200-rgb),.58), rgba(var(--volt-200-rgb),0) 80%),
-    radial-gradient(52px 26px at calc(var(--rim-flare-b) - 37%) 100%,
+    radial-gradient(var(--rim-fd-w) var(--rim-fd-h) at calc(var(--rim-flare-b) - 37%) 100%,
       rgba(var(--volt-200-rgb),.42), rgba(var(--volt-200-rgb),0) 80%),
-    radial-gradient(28px 68px at 0 var(--rim-flare-c),
+    radial-gradient(var(--rim-fs-w) var(--rim-fs-h) at 0 var(--rim-flare-c),
       rgba(var(--volt-200-rgb),.48), rgba(var(--volt-200-rgb),0) 80%),
-    radial-gradient(28px 60px at 100% calc(100% - var(--rim-flare-c)),
+    radial-gradient(var(--rim-fs-w) calc(var(--rim-fs-h) * .88) at 100% calc(100% - var(--rim-flare-c)),
       rgba(var(--volt-200-rgb),.40), rgba(var(--volt-200-rgb),0) 80%),
     /* the ramp underneath, carrying the falloff */
     linear-gradient(180deg,
@@ -827,7 +833,22 @@ h2.sdp-h2:not(:last-child){ margin-bottom:var(--space-1); }
     0 -3px 10px -3px rgba(var(--volt-400-rgb),.52); }
 .sdp-cta:hover::after{ left:120%; }
 .sdp-cta > *{ position:relative; z-index:1; }
-.sdp-cta-main{ display:inline-flex; align-items:center; justify-content:center; gap:14px; flex-wrap:wrap; }
+/* NOWRAP, from 2026-09-10 (Atul: the arrow belongs on the same line as the
+   text). It was `flex-wrap:wrap`, and measured, that wrapped on every phone:
+   the label plus the gap plus the disc needs 472px, and the button's inner
+   width is 228px at 360, 258px at 390 and 298px at 430. It only fitted from
+   about 768px up, so on every handset the arrow dropped to a line of its own
+   under the label and read as a second, smaller button.
+
+   With nowrap the LABEL wraps instead, inside its own box, and the disc stays
+   beside it centred against the block. `min-width:0` is what allows that: a
+   flex child's min-width is `auto`, which resolves to its min-content width,
+   and without overriding it the label refuses to shrink and pushes the disc
+   out exactly as before. The disc keeps `flex:0 0 26px` so it never shrinks
+   to make room. */
+.sdp-cta-main{ display:inline-flex; align-items:center; justify-content:center;
+  gap:14px; flex-wrap:nowrap; }
+.sdp-cta .cta-label{ min-width:0; }
 .sdp-cta .arrow{ width:26px; height:26px; border-radius:50%; background:rgba(var(--volt-200-rgb),.28);
   display:grid; place-items:center; color:var(--cta-ink); flex:0 0 26px; }
 .sdp-cta .cta-sub{ font-family:var(--fb); font-size:11px; font-weight:600; letter-spacing:.05em;
@@ -903,6 +924,31 @@ h2.sdp-h2:not(:last-child){ margin-bottom:var(--space-1); }
   box-shadow:var(--shadow-card);
   transition:transform .2s, box-shadow .2s; }
 
+/* MOBILE: the pools and flares come down with the boxes. They are absolute
+   lengths, so on a phone a card is a third of its desktop width while its
+   highlights are not — at 360px the primary top flare covered a quarter of the
+   edge and the corner pools a tenth each, which merges them into one bright
+   band instead of separate points. Roughly 60% at tablet and 45% on a phone
+   keeps them reading as the same treatment at the same proportion. */
+@media (max-width:900px){
+  .sd-root{
+    --rim-pool-w:24px; --rim-pool-h:22px;
+    --rim-fa-w:58px;   --rim-fa-h:24px;
+    --rim-fb-w:40px;   --rim-fb-h:22px;
+    --rim-fc-w:50px;   --rim-fc-h:22px;
+    --rim-fd-w:36px;   --rim-fd-h:20px;
+    --rim-fs-w:22px;   --rim-fs-h:48px; }
+}
+@media (max-width:520px){
+  .sd-root{
+    --rim-pool-w:18px; --rim-pool-h:16px;
+    --rim-fa-w:40px;   --rim-fa-h:18px;
+    --rim-fb-w:28px;   --rim-fb-h:16px;
+    --rim-fc-w:34px;   --rim-fc-h:16px;
+    --rim-fd-w:26px;   --rim-fd-h:15px;
+    --rim-fs-w:16px;   --rim-fs-h:34px; }
+}
+
 /* THE SCATTER. The pyramid hashes its own geometry so no two edges light in the
    same place. A stylesheet has no hash, so this uses position — but the earlier
    version cycled on nth-child only, which meant a card that is the ONLY child of
@@ -937,7 +983,7 @@ h2.sdp-h2:not(:last-child){ margin-bottom:var(--space-1); }
    inherit the default set. */
 #results .cso-mtable-wrap,#system .cso-venn-sum,.cso-result{
   --rim-flare-a:64%; --rim-flare-b:26%; --rim-flare-c:70%; }
-.cso-closing-bar,.cso-numbers,.cso-quote{
+.cso-quote{
   --rim-flare-a:29%; --rim-flare-b:72%; --rim-flare-c:35%; }
 .cso-founder-chips li:nth-child(2){ --rim-flare-a:66%; --rim-flare-b:24%; --rim-flare-c:60%; }
 .cso-founder-chips li:nth-child(3){ --rim-flare-a:25%; --rim-flare-b:70%; --rim-flare-c:34%; }
@@ -1070,55 +1116,10 @@ h2.sdp-h2:not(:last-child){ margin-bottom:var(--space-1); }
    above it, but it is a BAR rather than a fourth box: one row, the width of
    the whole grid, icon and copy side by side. The ground is obsidian like the
    boxes, not the slate panel. */
-/* Narrower than the grid above it (1144px), and centred under it. Matching the
-   grid made it read as a fourth cell in the row; pulled in, it reads as a coda
-   to the three, which is what it is. 800px is about the floor: the longer of
-   the two lines runs ~70 characters, which needs roughly 600px at 16.5px, and
-   what is left after the padding, the 52px mark, the two gaps and the rule is
-   ~650px. Below this it starts wrapping and the two-line lockup breaks. */
-.fit-note{ position:relative; display:flex; align-items:center; gap:var(--space-3);
-  max-width:800px; margin:var(--space-3) auto 0;
-  border:1px solid transparent; border-radius:14px;
-  padding:22px var(--space-3);
-  background:
-    var(--edge-wash) padding-box,
-    linear-gradient(var(--obsidian),var(--obsidian)) padding-box,
-    var(--rim-edge) border-box;
-  box-shadow:var(--shadow-card); }
-.fit-note::after{ content:""; position:absolute; z-index:2; pointer-events:none;
-  left:1px; right:1px; top:-1px; height:2px; border-radius:2px;
-  background:var(--edge-line); filter:var(--edge-halo); }
-
-/* The mark takes the WARM accent, not voltage. Voltage on this page is the
-   action colour and this bar is the one place that is telling you NOT to act;
-   sand also matches the turn line it introduces. No bed behind it: the three
-   box icons sit in tinted tiles because they label a card, this one is a
-   standalone mark. */
-.fit-note-ic{ flex:0 0 auto; display:grid; place-items:center; color:var(--sand); }
-
-/* The vertical cut of the house rule, sized to the copy beside it. */
-/* Sized to the copy block, which is also what the mark is sized to: the three
-   objects in this row now share one height. */
-.fit-note-rule{ flex:0 0 1px; align-self:stretch; min-height:52px;
-  background:var(--edge-line-v); }
-
-.sd-root .fit-note-copy{ margin:0; display:flex; flex-direction:column; gap:4px;
-  text-align:left; }
-/* Two lines, always broken. The first is the exclusion, the second is the
-   turn, and the turn only lands if it starts on its own line. */
-.fit-note-lead{ font-family:var(--fb); font-size:clamp(15px,1.5vw,16.5px);
-  font-weight:700; line-height:1.5; color:var(--ivory); }
-.fit-note-turn{ font-family:var(--fb); font-size:clamp(15px,1.5vw,16.5px);
-  font-weight:500; line-height:1.5; color:var(--sand); }
-
-@media (max-width:640px){
-  .fit-note{ flex-direction:column; align-items:flex-start; gap:16px;
-    max-width:560px; padding:22px; }
-  /* Stacked, the divider turns with the layout: a vertical rule between things
-     that are no longer side by side reads as a stray mark. */
-  .fit-note-rule{ flex:0 0 1px; align-self:stretch; min-height:0; height:1px;
-    width:100%; background:var(--edge-line-soft); }
-}
+/* The disqualifier bar was removed from this beat on 2026-09-10 (Atul), and
+   its rules (.fit-note and friends) went with it rather than being left to
+   style markup that no longer exists. Its copy survives, unrendered, at
+   `forYouIf.note` in content.ts. */
 
 .fit-box-points .ck{ flex:0 0 22px; width:22px; height:22px; border-radius:50%;
   background:rgba(var(--voltage-rgb),.24); border:1.5px solid var(--focus-ring);
@@ -1403,7 +1404,50 @@ h2.sdp-h2:not(:last-child){ margin-bottom:var(--space-1); }
     0 0 56px 16px rgba(var(--volt-600-rgb),.22); }
 .cso-trust-cap{ display:block; text-align:center; font-family:var(--fb); font-size:10.5px;
   font-weight:700; letter-spacing:.2em; text-transform:uppercase; color:var(--text-secondary); margin-bottom:16px; }
-.cso-trust-row{ display:flex; align-items:center; justify-content:center; flex-wrap:wrap; gap:10px 26px; }
+/* The ROW is the viewport, the TRACK is the layout. On desktop the track is
+   the static centred strip this has always been and the second copy is not
+   rendered at all; on a phone the row clips, the track slides, and the copy
+   is what makes the loop seamless. */
+.cso-trust-row{ display:flex; justify-content:center; }
+.cso-trust-track{ display:flex; align-items:center; justify-content:center;
+  flex-wrap:wrap; gap:18px 44px; }
+/* Desktop: the duplicate has no job. display:none rather than visibility so it
+   takes no space in the wrap calculation. */
+.cso-trust-logo[data-copy="1"]{ display:none; }
+/* THE PRESS LOGOS.
+
+   HEIGHT DRIVES, width follows. Every file is trimmed tight to its mark, so
+   the flex gap above is the actual space between two logos rather than the
+   space between two canvases. That is the fix for the uneven spacing: a
+   stacked lockup on a shared canvas carried far more empty pixels than a long
+   wordmark, so one gap value produced four different-looking gaps.
+
+   --logo-h is set per image from content.ts. It has to be per logo: at one
+   shared height the Google News lockup's type would be half the size of the
+   wordmarks beside it. Equal optical weight, not equal height.
+
+   Opacity and hover are carried over from the type row this replaced: quiet by
+   default, full on hover, because a press strip is authority and not a call to
+   look at it. */
+.cso-trust-logo{
+  display:block; flex:0 0 auto;
+  height:var(--logo-h); width:auto;
+  opacity:.78; transition:opacity .25s;
+}
+.cso-trust-logo:hover{ opacity:1; }
+/* Scaled as a set, so the balance between them is preserved at every width. */
+@media (max-width:860px){
+  .cso-trust-row{ gap:16px 34px; }
+  .cso-trust-logo{ height:calc(var(--logo-h) * .82); }
+}
+@media (max-width:640px){
+  .cso-trust-row{ gap:14px 26px; }
+  .cso-trust-logo{ height:calc(var(--logo-h) * .70); }
+}
+@media (max-width:380px){
+  .cso-trust-row{ gap:12px 20px; }
+  .cso-trust-logo{ height:calc(var(--logo-h) * .60); }
+}
 .cso-trust-item{ font-family:var(--fh); font-size:clamp(19px,2.4vw,26px); letter-spacing:.04em;
   color:var(--bone); opacity:.6; transition:opacity .25s, color .25s; }
 .cso-trust-item:hover{ opacity:1; color:var(--sand); }
@@ -1562,9 +1606,14 @@ h2.sdp-h2:not(:last-child){ margin-bottom:var(--space-1); }
 /* ---- MECHANISM — per Atul's reference render, 6 Sep ------------------- */
 /* Two panels: the drivers stated on the left, the same three shown stacking on
    the right. Then the maths as a before/after table, then the result bar. */
-.cso-engine{ display:grid; grid-template-columns:1fr 1.15fr; gap:18px;
-  max-width:1144px; margin:0 auto 40px; align-items:stretch; }
-@media (max-width:900px){ .cso-engine{ grid-template-columns:1fr; max-width:560px; } }
+/* ONE panel, from 2026-09-10 (Atul). This was a two-column grid: drivers on
+   the left, a sliced pyramid on the right carrying a +50% on each band. They
+   were the same three drivers twice, so the pyramid went and its figures moved
+   onto the rows. The panel keeps roughly the width the PAIR had rather than
+   shrinking back to the left column's share: it is the section's whole
+   statement now, and a narrow card in the middle of a wide band reads as the
+   leftover half of something. */
+.cso-engine{ max-width:940px; margin:0 auto 40px; }
 
 /* Same as sections 2 and 3: no panel fill, the lit edge does the describing. */
 .cso-engine-card{ display:flex; flex-direction:column; text-align:left;
@@ -1580,8 +1629,12 @@ h2.sdp-h2:not(:last-child){ margin-bottom:var(--space-1); }
 
 .cso-drivers{ display:flex; flex-direction:column; gap:0; margin:0; padding:0;
   list-style:none; }
-.cso-drivers li{ display:flex; align-items:flex-start; gap:16px;
-  padding:var(--space-2) 0; }
+/* Three columns now: mark, copy, figure. The figure is its own column rather
+   than sitting inside the copy, so all three land on one right edge and the
+   reader can run down the numbers without reading the names. */
+.cso-drivers li{ display:grid; grid-template-columns:44px 1fr auto;
+  align-items:center; gap:20px;
+  padding:var(--space-3) 0; }
 .cso-drivers li:first-child{ padding-top:0; }
 /* The last row keeps no padding under it: the rule below already owns that
    gap, and the two were stacking to 40px where every gap between the rows is
@@ -1608,6 +1661,16 @@ h2.sdp-h2:not(:last-child){ margin-bottom:var(--space-1); }
    smudge rather than a symbol. */
 .cso-driver-ic svg{ stroke-width:2.2; }
 
+/* THE FIGURE. It carries the pyramid's old treatment, unchanged: the display
+   face at display scale in the strong accent, so what was the loudest thing on
+   the removed shape stays the loudest thing on the row that replaced it.
+
+   Tabular figures, because three +50%s stacked must align on the digit. */
+.cso-driver-pct{ font-family:var(--fh); font-size:clamp(26px,3.4vw,38px);
+  line-height:1.05; letter-spacing:.02em; white-space:nowrap;
+  font-variant-numeric:tabular-nums;
+  color:var(--accent-text-strong); }
+
 /* Name over gloss. The name is the louder of the two by weight and colour, not
    by size: at two different sizes the pair starts reading as a heading and a
    caption rather than as one item. */
@@ -1630,16 +1693,6 @@ h2.sdp-h2:not(:last-child){ margin-bottom:var(--space-1); }
   color:var(--ivory); }
 .cso-multiply .em-word{ font-style:normal; color:var(--accent-text-strong); }
 
-/* The three-numbers line under the band. Centred, and overriding the shared
-   rule's `margin:auto 0 0` — that value pins the line to the BOTTOM of the
-   mechanism card it was written for, and left here it would also stop the
-   auto-centring. */
-.sd-root .cso-multiply-center{ margin:28px auto 0; text-align:center;
-  max-width:940px; }
-/* Sand, the theme's beige. It is the warm accent the page already uses for a
-   value-moment, so this reads as the same device as the lit figures elsewhere
-   rather than as a new colour. */
-.cso-multiply-center .tail{ color:var(--sand); }
 
 /* ---- THE PYRAMID ------------------------------------------------------ */
 /* Drawn in SVG on the measured geometry. Two things the first attempt got
@@ -1761,7 +1814,10 @@ h2.sdp-h2:not(:last-child){ margin-bottom:var(--space-1); }
   .cso-tier-ic{ width:50px; height:50px; }
 }
 @media (max-width:520px){
-  .cso-tier-label{ font-size:8.8px; letter-spacing:.05em; }
+  /* 8.8px tracked caps is past legible on a phone. The tier's own box cannot
+     grow — it is a slice of a fixed triangle — so the label comes back up and
+     the tracking comes off to buy the width back. */
+  .cso-tier-label{ font-size:10px; letter-spacing:.02em; }
   .cso-tier-pct{ font-size:26px; }
   .cso-tier-ic{ width:36px; height:36px; }
   .cso-tier-1 .cso-tier-ic{ width:30px; height:30px; }
@@ -1789,7 +1845,18 @@ h2.sdp-h2:not(:last-child){ margin-bottom:var(--space-1); }
 .cso-mtable-wrap::after{ content:""; position:absolute; z-index:2;
   pointer-events:none; left:1px; right:1px; top:0; height:2px;
   background:var(--edge-line); filter:var(--edge-halo); }
-.cso-mtable-scroll{ overflow-x:auto; }
+/* The table is 520px at its narrowest, so on a phone it scrolls inside itself
+   rather than pushing the page wide. A fade on the right edge is the only cue
+   a reader gets that there is more of it — without one, a cut-off column just
+   looks broken. It is masked away once the table fits. */
+.cso-mtable-scroll{ overflow-x:auto; -webkit-overflow-scrolling:touch; }
+@media (max-width:820px){
+  .cso-mtable-wrap{ position:relative; }
+  .cso-mtable-wrap::before{ content:""; position:absolute; z-index:3;
+    top:1px; bottom:1px; right:1px; width:44px; pointer-events:none;
+    background:linear-gradient(90deg,
+      rgba(var(--obsidian-rgb),0), rgba(var(--obsidian-rgb),.92)); }
+}
 .cso-mtable{ width:100%; min-width:520px; border-collapse:separate;
   border-spacing:0; text-align:left; }
 
@@ -1934,8 +2001,9 @@ h2.sdp-h2:not(:last-child){ margin-bottom:var(--space-1); }
    Voltage is used as a SURFACE here (never as type), and the centre is
    the one voltage fill in the section: it is the payoff.
    ===================================================================== */
-.cso-venn-cap{ display:block; width:100%; text-align:center; font-family:var(--fb); font-size:13px;
-  color:var(--text-secondary); margin:0 auto 20px; }
+/* The instruction line above the diagram was removed on 2026-09-10 (Atul),
+   and its rules went with it. Its copy survives, unrendered, at
+   `mechanism.vennInstruction` in content.ts. */
 .cso-venn{ position:relative; width:100%; max-width:680px; margin:0 auto; }
 .cso-venn svg{ display:block; width:100%; height:auto; overflow:visible; }
 
@@ -1992,7 +2060,25 @@ h2.sdp-h2:not(:last-child){ margin-bottom:var(--space-1); }
 .vn-item{ font-family:var(--fb); font-size:12.5px; font-weight:500; fill:var(--bone); text-anchor:middle; }
 .vn-pair-label{ font-family:var(--fb); font-size:15px; font-weight:800; letter-spacing:.08em;
   fill:var(--ivory); text-anchor:middle; text-transform:uppercase; }
-.vn-core-label{ font-family:var(--fh); font-size:26px; letter-spacing:.03em; fill:var(--ivory); text-anchor:middle; }
+/* THE CORE PAYOFF, in the pair labels' face (2026-09-10, Atul: keep that font
+   for 50% and 3X REVENUE too). It was Bebas at 26.
+
+   MANROPE IS ABOUT 27% WIDER THAN BEBAS AT THE SAME SIZE, and this text sits
+   in the three-circle wedge, which is the tightest region in the diagram.
+   Measured across its height, the wedge is 136u at y=367 where the first line
+   used to sit, peaks at 159u around y=410, then closes to nothing by y=440.
+
+   Two changes buy the room the wider face needs:
+     the lines moved down to 385 and 412, into the widest band
+     tracking dropped from the pair labels' .08em to .02em, which on a
+     ten-character line returns about 11u
+   At 22u "3X REVENUE" measures ~126u against ~137u of usable width there.
+
+   22 rather than the pair labels' 20 keeps the centre the largest thing in
+   the diagram, which is what it is: the payoff. It cannot go higher without
+   leaving the wedge. */
+.vn-core-label{ font-family:var(--fb); font-size:22px; font-weight:800;
+  letter-spacing:.02em; text-transform:uppercase; fill:var(--ivory); text-anchor:middle; }
 .vn-icon{ fill:none; stroke:var(--sand); stroke-width:1.6; stroke-linecap:round; stroke-linejoin:round; }
 
 /* reserves its own height so selecting a region does not jolt the page */
@@ -2108,26 +2194,14 @@ h2.sdp-h2:not(:last-child){ margin-bottom:var(--space-1); }
   color:var(--bone); background:rgba(var(--voltage-rgb),.14); border:1px solid rgba(var(--voltage-rgb),.32);
   border-radius:999px; padding:7px 14px; }
 
-/* base first, THEN the breakpoint: a later same-specificity rule would
-   win back over the media query and the stack would never appear */
-.cso-venn-stack{ display:none; flex-direction:column; gap:10px; max-width:520px; margin:0 auto; }
-/* Controls, not cards: they take the side stroke so they sit in the system,
-   but no lit line. A line across the top of a button says "lit panel" and
-   these are things you press. */
-.cso-venn-stack button{ width:100%; text-align:left; border:1px solid transparent;
-  background:linear-gradient(var(--surface),var(--surface)) padding-box,
-             var(--rim-edge) border-box;
-  border-radius:12px; padding:15px 18px; font-family:var(--fb); font-size:14px; font-weight:700;
-  line-height:1.5; color:var(--text-primary); cursor:pointer; transition:background .2s; }
-.cso-venn-stack button .sub{ display:block; font-weight:500; font-size:12px; letter-spacing:.12em;
-  text-transform:uppercase; color:var(--text-secondary); margin-top:5px; }
-.cso-venn-stack button.sel{ border-color:var(--voltage); background:var(--surface-raised); color:var(--ivory); }
-.cso-venn-stack button.core{ background:var(--grad-cta); border-color:var(--voltage); color:var(--cta-ink); }
-.cso-venn-stack button.core .sub{ color:var(--cta-ink-soft); }
-@media (max-width:640px){
-  .cso-venn{ display:none; }
-  .cso-venn-stack{ display:flex; }
-}
+/* The mobile button stack was removed on 2026-09-10 (Atul), and its rules
+   with it. The 640px block that came with it went too: its other half hid the
+   diagram on mobile, which a later rule had already reversed when the diagram
+   was brought back, so it was a dead line that read as a live one.
+
+   The venn now shows on every width and the stack no longer exists, so the
+   detail panel is reachable only where a region is tappable. See the note in
+   the mobile venn block further down. */
 
 /* =====================================================================
    THE 60-DAY INSTALL — the page's process spine and its ONE heavy
@@ -2211,7 +2285,7 @@ h2.sdp-h2:not(:last-child){ margin-bottom:var(--space-1); }
     linear-gradient(var(--obsidian),var(--obsidian)) padding-box,
     var(--rim-edge) border-box; }
 
-.cso-phase-list{ display:flex; flex-direction:column; gap:14px; margin:0 0 22px; }
+.cso-phase-list{ display:flex; flex-direction:column; gap:14px; margin:0; }
 .cso-phase-list li{ display:grid; grid-template-columns:9px 1fr; gap:14px; align-items:start;
   font-family:var(--fb); font-size:15px; line-height:1.7; color:var(--text-primary); }
 .cso-phase-list li::before{ content:""; width:7px; height:7px; margin-top:10px; border-radius:2px;
@@ -2230,13 +2304,32 @@ h2.sdp-h2:not(:last-child){ margin-bottom:var(--space-1); }
    The amber left rule survives because an explicit border-left colour beats the
    border-box gradient underneath it. That bar is the quote marker and is doing
    a different job from the lit edge, so it stays exactly as it was. */
+/* THE GAP ABOVE THE QUOTE IS OWNED HERE (2026-09-10, Atul: "the gap between
+   the bottom quote and the last bullet point is too less").
+
+   It used to belong to whatever came before: the bullet list carried 22px
+   under it, the ledger 24px, and the quote added 4px of its own. That looked
+   even in the stylesheet and was not, because the LEDGER'S LAST ROW CARRIES
+   16px OF INTERNAL PADDING and the bullet list carries none. Measured from
+   the last line of text to the top of the quote, phase 3 had about 44px and
+   phases 1, 2 and 4 had 26.
+
+   So the two preceding blocks now end flush, and the quote sets the distance
+   against whichever one it follows. Both land the last line of text 34px from
+   the quote:
+     after bullets  34px, text sits on the list's own edge
+     after ledger   18px, plus the 16px the last row already holds
+   The base value covers a card with neither. */
 .cso-quote{ position:relative; border:1px solid transparent; border-left:3px solid var(--amber);
-  border-radius:0 var(--r) var(--r) 0; padding:20px 24px; margin:4px 0 0;
+  border-radius:0 var(--r) var(--r) 0; padding:20px 24px; margin:34px 0 0;
   background:
     var(--edge-wash) padding-box,
     linear-gradient(var(--obsidian),var(--obsidian)) padding-box,
     var(--rim-edge) border-box;
   box-shadow:var(--shadow-card); }
+.cso-phase-list + .cso-quote{ margin-top:34px; }
+.cso-ledger + .cso-quote{ margin-top:18px; }
+
 /* The lit line starts AFTER the amber bar, so the two never overlap and the bar
    reads as the box's left edge rather than as something the line runs into. */
 .cso-quote::after{ content:""; position:absolute; z-index:2; pointer-events:none;
@@ -2253,7 +2346,7 @@ h2.sdp-h2:not(:last-child){ margin-bottom:var(--space-1); }
 /* The ledger's rules are the house lit rule, not flat slate hairlines. Drawn
    as backgrounds rather than borders because a border cannot carry a gradient
    along its length. */
-.cso-ledger{ position:relative; margin:0 0 24px; padding-top:1px;
+.cso-ledger{ position:relative; margin:0; padding-top:1px;
   background:var(--edge-line-soft) top left / 100% 1px no-repeat; }
 .cso-ledger-row{ display:grid; grid-template-columns:38px 1.15fr 1fr; gap:18px; align-items:baseline;
   padding:15px 0 16px; transition:background .2s;
@@ -2276,78 +2369,28 @@ h2.sdp-h2:not(:last-child){ margin-bottom:var(--space-1); }
    DIFFERENT render from the mechanism section's cards above) --- */
 /* A card in its own right, so it takes the house edge. It clips, so the line
    sits flush at 0. */
-/* Ground is obsidian, not --graphite. It carried the lit edge already, but sat
-   on the lifted grey panel while every other box in the funnel moved to the
-   page's own colour — so it still read as a filled slab with a lit border round
-   it rather than as one of the system's boxes. Nothing else changes: the edge,
-   the column rules and the type were already right. */
-.cso-numbers{ position:relative; display:grid; grid-template-columns:repeat(3,1fr); gap:0;
-  max-width:940px; margin:0 auto; border:1px solid transparent;
-  border-radius:var(--r-lg); overflow:hidden;
-  background:
-    var(--edge-wash) padding-box,
-    linear-gradient(var(--obsidian),var(--obsidian)) padding-box,
-    var(--rim-edge) border-box; }
-.cso-numbers::after{ content:""; position:absolute; z-index:2; pointer-events:none;
-  left:0; right:0; top:0; height:2px;
-  background:var(--edge-line); filter:var(--edge-halo); }
-/* Column separators take the vertical cut of the same rule. */
-.cso-numbers div{ padding:30px 22px; text-align:center;
-  background:var(--edge-line-v) top right / 1px 100% no-repeat; }
-.cso-numbers div:last-child{ background:none; }
-.cso-numbers .n{ display:block; font-family:var(--fh); font-size:clamp(40px,6vw,60px); line-height:1;
-  letter-spacing:.02em; color:var(--sand); margin-bottom:10px; }
-.cso-numbers .t{ display:block; font-family:var(--fb); font-size:14px; line-height:1.6; color:var(--text-primary); }
-@media (max-width:720px){
-  .cso-numbers{ grid-template-columns:1fr; }
-  .cso-numbers div{ background:var(--edge-line-soft) bottom left / 100% 1px no-repeat; }
-  .cso-numbers div:last-child{ background:none; }
-}
-
-/* Was a --grad-structure slab under a 50px voltage drop-shadow: a filled blue
-   bar with a bloom, from before the funnel had a lit-edge system. It is now the
-   same box as everything else — obsidian ground, --rim-edge stroke, the top lit
-   line — so the section ends on the house treatment rather than on a device
-   nothing else uses. The type inside is untouched. */
-.cso-closing-bar{ position:relative; max-width:940px; margin:20px auto 0;
-  padding:26px 30px; border:1px solid transparent; border-radius:var(--r-lg);
-  background:
-    var(--edge-wash) padding-box,
-    linear-gradient(var(--obsidian),var(--obsidian)) padding-box,
-    var(--rim-edge) border-box;
-  box-shadow:var(--shadow-card); text-align:center; }
-.cso-closing-bar::after{ content:""; position:absolute; z-index:2;
-  pointer-events:none; left:1px; right:1px; top:-1px; height:2px;
-  border-radius:2px; background:var(--edge-line); filter:var(--edge-halo); }
-/* FLEX, not a block of inline text. Inline elements align on the BASELINE, and
-   an arrow's baseline position is nothing like a cap's — no amount of nudging
-   makes that reliable across sizes, because the offset needed changes with the
-   font size while a translate in em only approximates it. As flex items the
-   three parts align on their box centres instead, so the arrow sits on the
-   line's true middle at every breakpoint. Wraps on narrow screens. */
-.cso-closing-bar .big{ display:flex; flex-wrap:wrap; align-items:center;
-  justify-content:center; gap:.2em;
-  font-family:var(--fh); font-size:clamp(26px,4.4vw,44px);
-  letter-spacing:.05em; line-height:1.15; color:var(--ivory); }
-/* Sand, matching the closing sentence under the numbers band above it: the two
-   are the same beat one after the other, so they take the same accent. */
-.cso-closing-bar .big .tail{ color:var(--sand); }
-
-/* Sized to about two thirds of the cap height, which is what a connector wants
-   against 44px display caps. Height and width are in em so it tracks the
-   clamped font size; the flex centring above does the rest, and there is no
-   transform to go stale at another breakpoint. */
-.cso-closing-bar .big .arrow{ width:1.15em; height:.58em; flex:0 0 auto;
-  color:var(--text-secondary); }
-.sd-root .cso-closing-bar p{ margin:10px 0 0; font-size:14.5px; line-height:1.65; color:rgba(254,243,232,.86); }
-
-.sd-root .cso-footnote{ max-width:820px; margin:26px auto 0; text-align:center; font-family:var(--fb);
-  font-size:13.5px; line-height:1.75; color:var(--text-secondary); }
-.cso-signature{ display:block; text-align:center; margin-top:18px; font-family:var(--fb);
-  font-size:11px; font-weight:800; letter-spacing:.22em; text-transform:uppercase; color:var(--amber); }
+/* The section's closing run was removed on 2026-09-10 (Atul): the 50/50/50
+   number grid, the DAY 60 bar, the footnote and the signature all went, and
+   their rules with them. `.cso-maths-cap` is NOT removed here: the mechanism
+   section still uses it. Their copy survives, unrendered, in `process60`. */
 
 /* ---- Founder ---- */
-.cso-founder-head{ display:grid; grid-template-columns:300px 1fr; gap:38px; align-items:center;
+/* PORTRAIT COLUMN 360, from 300 (2026-09-10, Atul: make the photo fit the
+   name and credibility block beside it).
+
+   TWO CHANGES, and the second is the one that actually makes it fit. Widening
+   the column alone would have got close and then drifted: the photo is 4:3, so
+   at 360 wide it is 270 tall, while the right column's height is whatever the
+   name, role, rule, line and chips happen to add up to, and the chips rewrap
+   at different widths. Any fixed pairing is right at one width and wrong at
+   the next.
+
+   `align-items:stretch` makes the row's two cells the same height by
+   definition, and the image covers whatever that turns out to be. The photo
+   then tracks the block beside it at every width, including after a copy
+   change. */
+.cso-founder-head{ display:grid; grid-template-columns:360px 1fr; gap:38px;
+  align-items:stretch;
   max-width:940px; margin:0 auto 34px; }
 @media (max-width:820px){
   .cso-founder-head{ grid-template-columns:1fr; gap:24px; max-width:460px; text-align:center; }
@@ -2362,6 +2405,15 @@ h2.sdp-h2:not(:last-child){ margin-bottom:var(--space-1); }
   left:0; right:0; top:0; height:2px;
   background:var(--edge-line); filter:var(--edge-halo); }
 .cso-portrait img{ display:block; width:100%; height:auto; }
+
+/* Desktop only. In the single-column layout below 820 the portrait has no
+   sibling to match, and `height:100%` inside an auto-height box collapses the
+   image to nothing. The crop is slight: the file is 1.33 and the box lands
+   near 1.3, so cover trims the sides by a few percent rather than reframing. */
+@media (min-width:821px){
+  .cso-portrait{ height:100%; }
+  .cso-portrait img{ height:100%; object-fit:cover; }
+}
 .cso-founder-name{ font-family:var(--fh); font-size:clamp(30px,4.6vw,46px); letter-spacing:.03em;
   color:var(--ivory); margin:0 0 10px; }
 .cso-founder-role{ display:inline-block; font-family:var(--fb); font-size:11px; font-weight:800;
@@ -2525,7 +2577,15 @@ h2.sdp-h2:not(:last-child){ margin-bottom:var(--space-1); }
 .cso-finale-inner{ position:relative; z-index:1; text-align:center; }
 .sd-root .cso-finale .sdp-sub{ color:var(--sand); font-size:clamp(16px,2.2vw,22px);
   font-family:var(--fh); letter-spacing:.03em; }
-.cso-colophon{ position:relative; margin-top:56px; padding-top:34px; text-align:center; }
+/* Room for the docked bar. It is `position:fixed`, so it is out of flow and
+   sits ON the last thing on the page — on a phone that is the colophon, where
+   the button is full width and roughly 70px tall. The safe-area inset is added
+   for the home indicator on notched phones. */
+.cso-colophon{ position:relative; margin-top:56px; padding-top:34px; text-align:center;
+  padding-bottom:calc(96px + env(safe-area-inset-bottom)); }
+@media (min-width:721px){
+  .cso-colophon{ padding-bottom:calc(64px + env(safe-area-inset-bottom)); }
+}
 .cso-colophon::before{ content:""; position:absolute; top:0; left:50%; transform:translateX(-50%);
   width:min(420px,80%); height:1px;
   background:linear-gradient(90deg,
@@ -2535,6 +2595,32 @@ h2.sdp-h2:not(:last-child){ margin-bottom:var(--space-1); }
   color:var(--text-secondary); }
 .cso-colophon-line .star{ color:var(--amber); }
 .cso-colophon-mark{ display:block; height:34px; width:auto; margin:0 auto 22px; opacity:.9; }
+
+/* ---- PHONE PASS ------------------------------------------------------- */
+/* Everything here is a size or a rhythm, not a layout: the grids already
+   collapse at their own breakpoints. */
+@media (max-width:560px){
+  /* TAP TARGETS. Anything a finger has to hit clears 44px, which is the floor
+     both platforms publish. The FAQ head and the venn buttons were close but
+     under it once their padding was measured against their type. */
+  .sdp-q-head{ padding:18px 18px; min-height:56px; }
+  .sdp-cta{ padding:16px 24px 14px; }
+  .sdp-stuck-go{ min-height:50px; }
+
+  /* Panels lose the padding that was sized for a 340px column, so the copy is
+     not running in a 200px measure inside a 320px phone. */
+  .cso-phase-card,.cso-chapter-card,.cso-engine-card{ padding:22px 18px; }
+  .fit-box{ padding:var(--space-3) 18px; }
+  .cso-win{ padding:26px 18px 20px; }
+  .cso-venn-sum{ padding:20px 16px; }
+
+  /* The wrap's gutter is already clamped to 18px at this width, so it is left
+     alone — pulling it in further would let boxes run to the screen edge. */
+
+  /* Long tracked-caps strings are what actually break a phone layout: they
+     cannot hyphenate and they cannot wrap mid-word. */
+  .cso-venn-sum-note,.cso-founder-deck{ letter-spacing:.10em; }
+}
 
 /* ---- Reduced motion (C7) ---- */
 @media (prefers-reduced-motion: reduce){
@@ -2549,4 +2635,638 @@ h2.sdp-h2:not(:last-child){ margin-bottom:var(--space-1); }
   .sdp-vsl,
   .sdp-stuck::before{ animation:none !important; }
   .sdp-cta::after{ display:none; }
+}
+
+
+/* ═══════════════════════════════════════════════════════════════════════
+   FOUNDER CHAPTERS · ALTERNATING PHOTOGRAPH ROWS (2026-09-10, Atul)
+
+   The five journey photographs used to sit in a row under the ledger. They
+   now run BESIDE the chapters, alternating side, on the pattern of the
+   dfy-new services section.
+
+   The spine moves from the left edge to the CENTRE. It was a rail down one
+   side of a two-column ledger; with content on both sides it becomes the
+   axis they alternate across, which is what the reference does and what
+   makes the swap read as deliberate rather than as a wrapping accident.
+
+   THE LOAD-BEARING PART IS `grid-row`, NOT THE COLUMNS. Auto-placement only
+   moves forward. On an odd row the card takes column 1 and the cursor is
+   before column 3 when the photograph arrives, so it lands beside it. On an
+   even row the card takes column 3, the cursor is past the end of the row,
+   and the photograph cannot go backwards to column 1: it gets pushed into a
+   second grid row and sits UNDER its text instead of next to it. Pinning
+   every cell to row 1 makes the placement explicit and the swap symmetrical.
+   This is the exact trap the reference documents, and it is invisible until
+   you look at an even row.
+   ═══════════════════════════════════════════════════════════════════════ */
+@media (min-width:901px){
+  .cso-chapters{ max-width:1120px; }
+
+  .cso-chapter{
+    grid-template-columns:1fr 64px 1fr;
+    gap:28px;
+    /* Stretch, not start. Centred, every row found its own vertical middle and
+       a 4:3 photograph sat against a text block of a different height, so each
+       row was a few pixels out top and bottom: the kind of misalignment that
+       reads as sloppy without anyone being able to name it. */
+    align-items:stretch;
+    padding-bottom:34px;
+  }
+
+  .cso-chapter-card  { grid-row:1; grid-column:1; }
+  .cso-chapter-spine { grid-row:1; grid-column:2; }
+  .cso-chapter-media { grid-row:1; grid-column:3; }
+
+  /* every other row swaps sides */
+  .cso-chapter:nth-child(even) .cso-chapter-card  { grid-column:3; }
+  .cso-chapter:nth-child(even) .cso-chapter-media { grid-column:1; }
+
+  /* The node sits at the top of the axis rather than floating mid-row: it
+     marks where the chapter STARTS, and a number drifting to the vertical
+     centre of a tall paragraph stops pointing at anything. */
+  .cso-chapter-spine{ justify-content:flex-start; }
+}
+
+/* The frame. Same construction as the old journey frames it replaces (lit top
+   edge, rim border, scrim, hover lift) so nothing about how a photograph is
+   presented changed, only where it sits. No aspect-ratio: the row's height is
+   set by the text beside it and the photograph fills whatever that is. */
+.cso-chapter-media{
+  position:relative; margin:0; overflow:hidden;
+  border-radius:var(--r);
+  border:1px solid transparent;
+  background:linear-gradient(var(--graphite),var(--graphite)) padding-box,
+             var(--rim-edge) border-box;
+  transition:transform .3s cubic-bezier(.2,.8,.2,1), border-color .3s;
+  min-height:240px;
+}
+.cso-chapter-media::before{ content:""; position:absolute; z-index:2;
+  pointer-events:none; left:0; right:0; top:0; height:1.5px;
+  background:var(--edge-line-soft); filter:var(--edge-halo-soft); }
+.cso-chapter-media img{ width:100%; height:100%; object-fit:cover; display:block; }
+.cso-chapter-media::after{ content:""; position:absolute; inset:0;
+  background:linear-gradient(180deg,rgba(8,8,66,.10),rgba(13,13,18,.34));
+  transition:opacity .3s; }
+.cso-chapter-media:hover{ transform:translateY(-4px);
+  border-color:rgba(var(--voltage-rgb),.6); }
+.cso-chapter-media:hover::after{ opacity:0; }
+
+/* Under 900 the existing rule already collapses to spine + card. The
+   photograph goes below the text rather than beside it: at this width a
+   side-by-side pair would give the paragraphs four words a line, which is the
+   same reason the two-column ledger collapses here in the first place. */
+@media (max-width:900px){
+  .cso-chapter-media{ grid-column:2; min-height:0; aspect-ratio:4/3; margin-top:16px; }
+}
+
+@media (prefers-reduced-motion:reduce){
+  .cso-chapter-media{ transition:none !important; }
+  .cso-chapter-media:hover{ transform:none; }
+}
+
+
+/* ═══════════════════════════════════════════════════════════════════════
+   FOUNDER CHAPTERS · THE SCROLL SPINE (2026-09-10, Atul)
+
+   The numbered rings are gone. A diamond on a lit rail replaces them, and
+   both follow the scroll: the rail fills to wherever the reader has got to,
+   a diamond lights as it passes, and the chapter behind it dims back. The
+   section reports position rather than being decorated with motion.
+
+   A DIAMOND, not another circle. The process section already owns round
+   nodes on a left-hand rail; a second set of circles on a second rail would
+   read as the same component twice. A square turned 45 degrees is the same
+   geometric family as the rim edges used everywhere else, and it meets a
+   vertical line at a point rather than along a curve, which is what makes it
+   sit ON the axis instead of over it.
+   ═══════════════════════════════════════════════════════════════════════ */
+.cso-chapters{ position:relative; }
+
+/* The rail runs the full ledger. `top`/`bottom` inset so it starts and ends
+   at the first and last diamond rather than in the gaps beyond them. */
+.cso-chapter-rail{
+  position:absolute; top:14px; bottom:14px; left:50%;
+  transform:translateX(-50%);
+  width:2px; border-radius:2px;
+  background:var(--slate);
+}
+/* No overflow:hidden: it would clip the fill's glow, which is the thing that
+   reads as the scroll head. Same reason as the process spine. */
+.cso-chapter-fill{
+  position:absolute; left:0; top:0; width:100%; height:100%;
+  background:linear-gradient(180deg,var(--cobalt),var(--voltage));
+  box-shadow:0 0 16px rgba(var(--voltage-rgb),.75);
+}
+/* Height only follows the scroll once JS has armed it. Unarmed, and under
+   reduced motion where the hook returns early, the fill keeps its 100% and
+   the rail is simply drawn. */
+.cso-chapters.armed .cso-chapter-fill{
+  height:calc(var(--tl-p,0) * 100%);
+  transition:height .18s linear;
+}
+
+/* THE DIAMOND. Lit by default so an unarmed page shows a finished spine. */
+.cso-chapter-mark{
+  position:relative; z-index:1; display:block;
+  width:18px; height:18px; margin-top:16px;
+  transform:rotate(45deg);
+  border-radius:3px;
+  background:var(--voltage);
+  border:1px solid var(--voltage);
+  box-shadow:0 0 0 5px rgba(var(--voltage-rgb),.14), 0 0 20px rgba(var(--voltage-rgb),.55);
+  transition:background .45s, border-color .45s, box-shadow .45s, transform .45s;
+}
+/* Ahead of the reader: hollow, unlit, and a touch smaller, so the lit ones
+   read as arrived-at rather than merely coloured differently. */
+.cso-chapters.armed .cso-chapter:not(.lit) .cso-chapter-mark{
+  background:var(--graphite);
+  border-color:var(--slate);
+  box-shadow:none;
+  transform:rotate(45deg) scale(.72);
+}
+.cso-chapters.armed .cso-chapter:not(.lit) .cso-chapter-card,
+.cso-chapters.armed .cso-chapter:not(.lit) .cso-chapter-media{
+  opacity:.5;
+  transition:opacity .45s;
+}
+.cso-chapters.armed .cso-chapter.lit .cso-chapter-card,
+.cso-chapters.armed .cso-chapter.lit .cso-chapter-media{ opacity:1; }
+
+/* The spine cell no longer holds a 48px ring, so it stops reserving room for
+   one. Below 900 the ledger is single-column and the rail would run down the
+   middle of the text, so it is hidden and the diamond sits inline as a small
+   chapter mark instead. */
+@media (min-width:901px){
+  .cso-chapter{ grid-template-columns:1fr 44px 1fr; }
+}
+@media (max-width:900px){
+  .cso-chapter-rail{ display:none; }
+  .cso-chapter{ grid-template-columns:24px 1fr; gap:16px; }
+  .cso-chapter-mark{ width:14px; height:14px; margin-top:10px; }
+  .cso-chapters.armed .cso-chapter:not(.lit) .cso-chapter-card,
+  .cso-chapters.armed .cso-chapter:not(.lit) .cso-chapter-media{ opacity:1; }
+}
+
+@media (prefers-reduced-motion:reduce){
+  .cso-chapter-mark,.cso-chapter-fill,
+  .cso-chapters.armed .cso-chapter-card,
+  .cso-chapters.armed .cso-chapter-media{ transition:none !important; }
+}
+
+
+/* ═══════════════════════════════════════════════════════════════════════
+   FOUNDER CHAPTERS · MOBILE ORDER (2026-09-10, Atul)
+
+   "After the title of each section there will be photo and then the body."
+
+   The desktop row is card | spine | photograph, three siblings. To get the
+   photograph BETWEEN the title and the body on a phone it has to sit between
+   two children of the card, which are siblings of the photograph's parent,
+   not of the photograph. So on mobile the card goes `display:contents`: its
+   box disappears and its children become grid items of the chapter itself,
+   where they can be ordered against the photograph directly.
+
+   The box does not disappear with it. It moves up onto `.cso-chapter`, which
+   is why the padding, border, ground and lit top edge are restated here
+   rather than dropped. Same box, one level out.
+
+   Order: mark, title, photograph, body.
+   ═══════════════════════════════════════════════════════════════════════ */
+@media (max-width:900px){
+  .cso-chapter{
+    display:grid;
+    grid-template-columns:1fr;
+    gap:0;
+    padding:22px 20px 24px;
+    /* the box, moved up from .cso-chapter-card */
+    position:relative;
+    border:1px solid transparent; border-radius:14px;
+    background:
+      var(--edge-wash) padding-box,
+      linear-gradient(var(--obsidian),var(--obsidian)) padding-box,
+      var(--rim-edge) border-box;
+    box-shadow:var(--shadow-card);
+    margin-bottom:16px;
+  }
+  .cso-chapter:last-child{ margin-bottom:0; }
+  /* the lit top edge follows the box */
+  .cso-chapter::after{ content:""; position:absolute; z-index:2;
+    pointer-events:none; left:1px; right:1px; top:-1px; height:2px;
+    border-radius:2px; background:var(--edge-line); filter:var(--edge-halo); }
+
+  .cso-chapter-card{ display:contents; }
+
+  .cso-chapter-spine{ order:1; align-items:flex-start; }
+  .sd-root .cso-chapter-card h3{ order:2; margin:10px 0 14px; }
+  .cso-chapter-media{ order:3; grid-column:auto; margin:0 0 16px;
+    min-height:0; aspect-ratio:4/3; }
+  .cso-chapter-body{ order:4; }
+
+  /* the mark is now the chapter's opening glyph rather than a rail node, so
+     it loses the top margin that was spacing it against a rail */
+  .cso-chapter-mark{ margin-top:0; }
+}
+
+
+/* ═══════════════════════════════════════════════════════════════════════
+   THE VENN ON MOBILE (2026-09-10, Atul: "I am not able to see the venn
+   diagram")
+
+   It was hidden below 640 and replaced by the button stack. That was a sound
+   call for the reason the stack exists, and the wrong call for the diagram:
+   the Venn is the picture of the mechanism, and a page that argues three
+   things overlap should show them overlapping.
+
+   WHY IT WAS HIDDEN, measured. The viewBox is 764 wide. At a 360px screen
+   with the section's gutter that is about 324px of drawing, a scale of 0.42.
+   Every label shrinks with it:
+     .vn-name        38 -> 16.1px   fine
+     .vn-core-label  26 -> 11.0px   small but readable
+     .vn-pair-label  15 ->  6.4px   unreadable
+     .vn-item      12.5 ->  5.3px   unreadable
+     .vn-rim         11 ->  4.7px   unreadable
+   Simply enlarging them is not available: the layout is tuned so that the
+   longest item clears its arc by about 10px at 12.5, and at the ~26 units it
+   would need to be legible the labels would collide with the arcs and each
+   other.
+
+   SO THE DIAGRAM SHOWS, AND ITS SMALL PRINT DOES NOT. The three circle names,
+   the overlap labels and the core payoff stay; the rim labels and the item
+   lists are dropped, because those are exactly what the stack underneath
+   already spells out at a readable size. Picture above, words below, each
+   doing the half it can do at this width.
+   ═══════════════════════════════════════════════════════════════════════ */
+@media (max-width:640px){
+  /* FULL BLEED, from 2026-09-10. The drawing was capped at 420px inside an
+     18px gutter, so on a 360px screen it rendered 324px wide and the labels
+     had to be inflated to stay legible in it. With the button stack gone the
+     venn has the whole section, so it takes the gutter back: pulling out by
+     the wrap's own padding gives 360px, 11% more shape, and the labels can
+     come back down. */
+  .cso-venn{
+    display:block; max-width:none; margin-bottom:22px;
+    margin-inline:calc(clamp(18px,4vw,28px) * -1);
+  }
+
+  /* the detail the stack carries */
+  .cso-venn .vn-rim,
+  .cso-venn .vn-item{ display:none; }
+
+  /* THE TYPE COMES BACK DOWN. These were 44 / 25 / 31 against design values
+     of 38 / 15 / 26, inflated to survive a 324px drawing. That inflation is
+     what crowded the shape: a label's size is in the SVG's own units, so it
+     grows against the geometry, and the overlap labels sit in lens areas
+     bounded by where two circles cross. Those lenses do not get bigger when
+     the item lists are hidden, so a 67% larger label simply ran out of lens.
+
+     At 20 / 27 / 38 on the wider drawing the RENDERED size is almost
+     unchanged (a 360px canvas scales at 0.471 against 0.424 before), while
+     the units drop 14 to 20%, and it is the units that decide the crowding.
+
+       vn-name        38 -> 17.9px on a 360px screen
+       vn-core-label  27 -> 12.7px
+       vn-pair-label  20 ->  9.4px   short all-caps strings: 2X PRICE,
+                                     NO LEAKS, 50%, CLOSE RATE */
+  /* CLOSING and AI SYSTEMS drop into the space the item lists left behind.
+     Both bottom circles are centred at y=440 with R=200, so each spans
+     y=240 to 640, and the icon-and-name pair sits at 388 to 436: high in the
+     circle, because it was laid out to leave room for a list running from
+     y=474 down. That list is hidden here, so the pair was floating with
+     nothing under it.
+
+     40 units puts the icon at 428 and the name at 476, which centres the pair
+     in its circle without reaching the bottom arc (631 at this x) and without
+     running into the "50% / CLOSE RATE" labels: those sit at x=382 spanning
+     roughly 350 to 414, while CLOSING's name spans 106 to 306.
+
+     It is on a WRAPPER group, not on .vn-icon: the icon group already carries
+     a transform attribute, and a CSS transform replaces that rather than
+     adding to it, which would drop the glyph at the origin. */
+  .cso-venn .vn-lower{ transform:translateY(40px); }
+
+  .cso-venn .vn-name{ font-size:38px; }
+  .cso-venn .vn-pair-label{ font-size:20px; }
+  /* No mobile size for the core any more: 22u is a wedge-fit, and the wedge
+     is in the SVG's own units, so it holds at every scale. */
+
+  /* NOT TAPPABLE HERE. A region is a few hundred square pixels at this scale,
+     well under the 44px floor the rest of this page holds to, and the stack
+     below is the same control at full size. The diagram illustrates; the
+     stack drives. Selection still paints through, so tapping a stack button
+     lights its region. */
+  .cso-venn .vn-region{ pointer-events:none; cursor:default; }
+}
+
+
+/* ═══════════════════════════════════════════════════════════════════════
+   THE VSL, AS DELIVERED (2026-09-10)
+
+   Self-hosted from Cloudflare R2 as a native <video>, mounted directly into
+   the lit frame. It replaced a Loom embed the same day: an <iframe> brought
+   Loom's chrome, its branding and its cookies onto the hero, and a file we
+   own brings none of them.
+
+   THE RATIO. The supplied embed carries `padding-bottom:62.7177700348432%`,
+   which is 1.594 and not the 1.778 the frame was built for. An 11% gap is
+   not nothing: in a 16:9 frame this film would letterbox, and a dark band
+   top and bottom INSIDE a lit border reads as a broken embed rather than as
+   a decision. So the frame takes the film's ratio and the video fills it.
+
+   The number is carried through exactly as supplied rather than rounded to
+   something tidy: CSS takes a ratio as two numbers, so 100/62.717... is the
+   same figure the client's own embed code uses, and if the film is ever
+   re-exported at a different size the two can be compared directly.
+
+   Everything else about the frame (max-width, radius, the travelling conic
+   border) is untouched. Only the height it resolves to has moved.
+   ═══════════════════════════════════════════════════════════════════════ */
+.sdp-vsl.is-file{ aspect-ratio:100 / 62.7177700348432; }
+.sdp-vsl.is-file video{
+  position:absolute; inset:0; width:100%; height:100%; border:0; display:block;
+  /* contain, not cover. The frame's ratio is carried over from the Loom
+     embed, so it is right only while the R2 export matches it. Cover would
+     silently crop a re-export; contain letterboxes it instead, which is
+     visible and therefore fixable. */
+  object-fit:contain; background:#000;
+  border-radius:calc(var(--r-xl) - 1px);
+}
+
+
+/* ═══════════════════════════════════════════════════════════════════════
+   CLIENT RESULTS · INDIA / INTERNATIONAL WALL (2026-09-10)
+
+   Ported from the dfy-new funnel. The STRUCTURE came across (two-region
+   toggle, portrait cards, scrim, name / role / rule / result / multiple);
+   none of its styling did. That build is amber-on-black with Poppins; this
+   one is voltage-on-obsidian with the lit-edge system, so every surface here
+   is rebuilt from this funnel's own tokens.
+   ═══════════════════════════════════════════════════════════════════════ */
+
+/* ── the region switch ────────────────────────────────────────────────
+   A track with two buttons, not a select: there are exactly two states and
+   both should be readable without opening anything. The track takes the SIDE
+   stroke only, per the project rule that a lit line across the top says "lit
+   panel" and these are things you press. */
+.cso-reg{
+  display:flex; gap:4px; width:fit-content; margin:0 auto var(--space-4);
+  padding:4px; border-radius:999px;
+  border:1px solid transparent;
+  background:
+    linear-gradient(var(--graphite),var(--graphite)) padding-box,
+    var(--rim-edge) border-box;
+}
+.cso-reg-btn{
+  appearance:none; border:0; cursor:pointer;
+  padding:10px 26px; border-radius:999px; min-height:44px;
+  font-family:var(--fb); font-size:12.5px; font-weight:700;
+  letter-spacing:.14em; text-transform:uppercase;
+  color:var(--text-secondary); background:transparent;
+  transition:color .25s, background .25s, box-shadow .25s;
+}
+.cso-reg-btn:hover{ color:var(--bone); }
+.cso-reg-btn:focus-visible{ outline:2px solid var(--focus-ring); outline-offset:2px; }
+/* The selected one takes the action colour. It is the only voltage FILL in
+   this beat: the cards below are photographs, and a second filled surface
+   among them would compete with the faces. */
+.cso-reg-btn.is-on{
+  color:var(--cta-ink); background:var(--grad-cta);
+  box-shadow:var(--glow-cta);
+}
+
+/* ── the wall ─────────────────────────────────────────────────────────
+   Four up on a wide screen. A 9:16 box three-across stands taller than a
+   laptop viewport, which is the reason the dfy build settled on four and the
+   reason this one does too. */
+.cso-faces{
+  list-style:none; margin:0; padding:0;
+  display:grid; grid-template-columns:repeat(4,1fr); gap:16px;
+}
+@media (max-width:1000px){ .cso-faces{ grid-template-columns:repeat(3,1fr); gap:14px; } }
+@media (max-width:720px){  .cso-faces{ grid-template-columns:repeat(2,1fr); gap:12px; } }
+
+/* The list's own entry, not the page's shared reveal. See the note in
+   SuccessStories.tsx: the shared one cannot see nodes mounted by a tab
+   switch, so using it here left the second region invisible.
+
+   Replayed on every switch, because the keyed <ul> remounts its children. */
+.cso-face{
+  margin:0;
+  animation:csoFaceIn .5s cubic-bezier(.2,.8,.2,1) both;
+  animation-delay:calc(var(--i,0) * 40ms);
+}
+@keyframes csoFaceIn{
+  from{ opacity:0; transform:translateY(14px); }
+  to{   opacity:1; transform:none; }
+}
+.cso-face-art{
+  position:relative; aspect-ratio:9/16; overflow:hidden;
+  border-radius:var(--r);
+  border:1px solid transparent;
+  background:
+    linear-gradient(160deg,var(--graphite),var(--obsidian)) padding-box,
+    var(--rim-edge) border-box;
+  box-shadow:var(--shadow-card);
+  transition:transform .3s cubic-bezier(.2,.8,.2,1), border-color .3s;
+}
+.cso-face-art::before{ content:""; position:absolute; z-index:3;
+  pointer-events:none; left:0; right:0; top:0; height:1.5px;
+  background:var(--edge-line-soft); filter:var(--edge-halo-soft); }
+.cso-face-art:hover{ transform:translateY(-4px); border-color:rgba(var(--voltage-rgb),.55); }
+.cso-face-art > img{ position:absolute; inset:0; width:100%; height:100%; object-fit:cover; display:block; }
+
+/* No photograph: initials on the card's own ground rather than a stock face. */
+.cso-face-initials{
+  position:absolute; inset:0; display:grid; place-items:center;
+  font-family:var(--fh); font-size:44px; letter-spacing:.04em;
+  color:var(--slate);
+}
+
+/* A scrim, not a bar: the photograph keeps going under the type. Tall,
+   because these are cutouts on a dark ground and a short scrim leaves the
+   type sitting on the subject rather than under them. */
+.cso-face-scrim{
+  position:absolute; inset:auto 0 0; height:62%; z-index:1; pointer-events:none;
+  background:linear-gradient(180deg,
+    rgba(13,13,18,0) 0%,
+    rgba(13,13,18,.72) 46%,
+    rgba(13,13,18,.94) 100%);
+}
+
+.cso-face-foot{
+  position:absolute; inset:auto 0 0; z-index:2;
+  padding:12px 12px 14px; text-align:center;
+}
+.sd-root .cso-face-name{
+  font-family:var(--fh); font-size:15.5px; letter-spacing:.02em; line-height:1.2;
+  color:var(--ivory); margin:0;
+}
+.sd-root .cso-face-role{
+  font-family:var(--fb); font-size:9.5px; font-weight:600;
+  letter-spacing:.12em; text-transform:uppercase; line-height:1.35;
+  color:var(--text-secondary); margin:5px 0 0;
+}
+.cso-face-rule{
+  display:block; width:44px; height:1px; margin:9px auto;
+  background:var(--edge-line-soft);
+}
+/* THE LINE THE READER IS SHOPPING FOR. It takes the weight, in bone rather
+   than in the accent: voltage is the action colour on this page and a result
+   is not something to press. */
+.sd-root .cso-face-result{
+  font-family:var(--fb); font-size:12.5px; font-weight:700; line-height:1.45;
+  color:var(--bone); margin:0;
+}
+/* The multiple is the one chip here, in the warm accent, so it reads as a
+   figure lifted out of the line above rather than as a second claim. */
+.cso-face-roi{
+  display:inline-flex; align-items:center; margin-top:9px;
+  padding:3px 10px; border-radius:999px;
+  font-family:var(--fb); font-size:9.5px; font-weight:700;
+  letter-spacing:.12em; text-transform:uppercase;
+  color:var(--sand); border:1px solid rgba(var(--voltage-rgb),.45);
+  background:rgba(var(--voltage-rgb),.16);
+}
+
+@media (max-width:720px){
+  .cso-face-foot{ padding:10px 8px 12px; }
+  .sd-root .cso-face-name{ font-size:13.5px; }
+  .sd-root .cso-face-role{ font-size:8.5px; letter-spacing:.1em; }
+  .sd-root .cso-face-result{ font-size:11px; }
+  .cso-face-roi{ font-size:8.5px; padding:3px 8px; }
+  .cso-face-rule{ width:34px; margin:7px auto; }
+  .cso-reg-btn{ padding:10px 20px; font-size:11.5px; letter-spacing:.1em; }
+}
+
+@media (prefers-reduced-motion:reduce){
+  .cso-face-art{ transition:none !important; }
+  .cso-face-art:hover{ transform:none; }
+  /* `both` fill means a cancelled animation would strand these at opacity 0,
+     so the animation is not removed here, it is replaced with nothing to do. */
+  .cso-face{ animation:none; opacity:1; transform:none; }
+}
+
+
+/* ── the engine panel at real width (2026-09-10) ──────────────────────
+   With the pyramid gone the card is the section's whole statement, so it
+   takes more air than it did as one of a pair: a wider panel with the same
+   padding reads as a stretched version of the old one rather than a bigger
+   thing. */
+.cso-engine-card{ padding:38px 40px; }
+.sd-root .cso-engine-intro{ max-width:62ch; }
+
+@media (max-width:720px){
+  .cso-engine-card{ padding:26px 22px; }
+  /* The figure drops under the copy: at this width a three-column row leaves
+     the middle column about four words wide. The mark keeps its column and
+     the copy and figure stack beside it, so the row still reads as one item. */
+  .cso-drivers li{ grid-template-columns:44px 1fr; gap:14px;
+    padding:var(--space-2) 0; }
+  .cso-driver-pct{ grid-column:2; font-size:26px; margin-top:6px; }
+}
+
+
+/* ═══════════════════════════════════════════════════════════════════════
+   MOBILE PASS (2026-09-10)
+
+   THE FINDING: the page had NO mobile rule for its headings at all, and did
+   not need one to avoid breaking. It needed one to stop standing still.
+
+   `.sdp-h1-l1`, `.sdp-h1-l2` and `.sdp-h2` are all `clamp(floor, Nvw, max)`
+   with vw terms tuned for desktop: 5.6vw does not reach the 34px floor until
+   a 607px viewport, and 3vw does not reach 20px until 667px. So on EVERY
+   phone, from a 360px Android to a 430px Pro Max, the headline renders at
+   exactly its floor. A 430px screen shows the same size type as a 360px one
+   and simply wastes the extra 70px.
+
+   MEASURED CEILINGS for the real strings, in the shipped Bebas, the width at
+   which the hero's first line still fits three lines:
+       360px -> 35.2px      390px -> 38.6px      430px -> 43.0px
+   The clamps below track that curve and stop just under it, so the headline
+   grows with the screen and never takes a fourth line. Desktop is untouched:
+   these are scoped to the phone range only.
+
+   Everything else measured clean and is left alone: the section rhythm is
+   already fluid (--sp-sec 64->120, --sp-body 40->64), `body` carries
+   overflow-x:hidden, the maths table sits in its own scroller, and no string
+   on the page overflows its container at 360px.
+   ═══════════════════════════════════════════════════════════════════════ */
+@media (max-width:640px){
+  /* 9.6vw lands at 34.6 / 37.4 / 41.3 against ceilings of 35.2 / 38.6 / 43.0. */
+  .sdp-h1-l1{ font-size:clamp(34px,9.6vw,42px); }
+  /* Held at roughly 0.58 of the line above it, which is the ratio the desktop
+     clamp pair holds. Its own two-line ceiling is 32.2px at 360, so this is
+     nowhere near it: the constraint on this line is the step down from L1,
+     not the width. */
+  .sdp-h1-l2{ font-size:clamp(20px,5.6vw,25px); margin-top:6px; }
+  .sd-root .sdp-h2{ font-size:clamp(34px,9.2vw,40px); }
+}
+
+
+/* ═══════════════════════════════════════════════════════════════════════
+   THE PRESS STRIP SLIDES ON MOBILE (2026-09-10, Atul)
+
+   One copy of the set is 540px wide at the phone scale, against a 360px
+   screen. Static, that wrapped to a two-by-two block, which reads as a grid
+   of logos rather than as a press strip. Sliding, all four pass through.
+
+   Doubled and translated -50%, so the second copy arrives exactly where the
+   first began and the seam is invisible. That is the whole reason the set is
+   rendered twice rather than once.
+
+   NO EDGE FADE BY GRADIENT: the strip sits on the section's own ground and a
+   gradient fade would have to be re-grounded every time that ground changes.
+   A mask works on any background, so the logos arrive and leave rather than
+   popping at the edge.
+   ═══════════════════════════════════════════════════════════════════════ */
+@media (max-width:640px){
+  .cso-trust-row{
+    overflow:hidden;
+    -webkit-mask-image:linear-gradient(90deg,transparent,#000 9%,#000 91%,transparent);
+            mask-image:linear-gradient(90deg,transparent,#000 9%,#000 91%,transparent);
+  }
+  /* flex-start, not centre: the track is wider than the row, and centring a
+     too-wide flex item starts the loop half way through it. */
+  .cso-trust-row{ justify-content:flex-start; }
+  .cso-trust-track{
+    flex-wrap:nowrap; justify-content:flex-start; width:max-content;
+    gap:0 26px; padding-right:26px;
+    animation:csoPressSlide 26s linear infinite;
+    will-change:transform;
+  }
+  /* The trailing gap above matters: without it the two halves are unequal by
+     one gap and the loop jumps a little every cycle. */
+  .cso-trust-logo[data-copy="1"]{ display:block; }
+  .cso-trust-row:hover .cso-trust-track,
+  .cso-trust-row:focus-within .cso-trust-track{ animation-play-state:paused; }
+}
+@keyframes csoPressSlide{ from{ transform:translateX(0); } to{ transform:translateX(-50%); } }
+
+@media (prefers-reduced-motion:reduce){
+  /* The proof stays, the reader moves it by hand. Without this the strip
+     freezes with two of the four logos off-screen and no way to reach them. */
+  .cso-trust-track{ animation:none !important; }
+  .cso-trust-row{ overflow-x:auto; -webkit-overflow-scrolling:touch; scrollbar-width:none; }
+  .cso-trust-row::-webkit-scrollbar{ display:none; }
+}
+
+
+/* ═══════════════════════════════════════════════════════════════════════
+   THE IDENTITY BLOCK IS DESKTOP ONLY (2026-09-10, Atul)
+
+   The lit rule, the summary line and the three credential chips render on a
+   wide screen and not on a phone. They were deleted outright first; this is
+   the corrected version.
+
+   WHY THE PHONE DROPS THEM: at 640 and below the block is a single column,
+   so the rule, a line of copy and three full-width chips stack between the
+   portrait and the first chapter and push the story itself off the fold.
+   Everything they carry is said again by the chapters, which is where the
+   figures that earn it live. On a wide screen the block sits beside the
+   portrait and costs nothing, so it stays.
+   ═══════════════════════════════════════════════════════════════════════ */
+@media (max-width:640px){
+  .cso-founder-rule,
+  .sd-root .cso-founder-line,
+  .cso-founder-chips{ display:none; }
 }

@@ -1,6 +1,7 @@
 "use client";
 
-import { useEffect, useRef } from "react";
+import { useRef } from "react";
+import { useSpine } from "./useSpine";
 import { process60 } from "./content";
 import { CtaLockup, SdpHead, Wrap } from "./sdp";
 
@@ -24,55 +25,13 @@ import { CtaLockup, SdpHead, Wrap } from "./sdp";
  * shape competing with the spine: the ledger is what phase 3 delivers, and the
  * pull-quotes are the client's own voice on each phase.
  */
-/* The closing sentence of the three-numbers line, lit in the warm accent. Held
-   here rather than as a second content field so the line stays ONE string in
-   content.ts: if it is ever rewritten and this sentence goes with it, the split
-   simply finds nothing and the whole line renders plain. */
-const TAIL = "That is where 3X comes from.";
-
 export function Process60() {
   const ref = useRef<HTMLDivElement>(null);
 
-  useEffect(() => {
-    const el = ref.current;
-    if (!el) return;
-    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
-
-    const rail = el.querySelector<HTMLElement>(".cso-spine-rail");
-    const phases = Array.from(el.querySelectorAll<HTMLElement>(".cso-phase"));
-    if (!rail || !phases.length) return;
-
-    el.classList.add("armed");
-    let raf = 0;
-
-    const read = () => {
-      const r = rail.getBoundingClientRect();
-      const line = window.innerHeight * 0.58;
-      const p = Math.min(1, Math.max(0, (line - r.top) / (r.height || 1)));
-      el.style.setProperty("--tl-p", String(p));
-      phases.forEach((ph) => {
-        const node = ph.querySelector(".cso-phase-node");
-        if (!node) return;
-        const nb = node.getBoundingClientRect();
-        ph.classList.toggle("lit", nb.top + nb.height / 2 <= line);
-      });
-    };
-
-    const onScroll = () => {
-      cancelAnimationFrame(raf);
-      raf = requestAnimationFrame(read);
-    };
-
-    read();
-    window.addEventListener("scroll", onScroll, { passive: true });
-    window.addEventListener("resize", onScroll);
-    return () => {
-      cancelAnimationFrame(raf);
-      window.removeEventListener("scroll", onScroll);
-      window.removeEventListener("resize", onScroll);
-      el.classList.remove("armed");
-    };
-  }, []);
+  /* The scroll spine now lives in useSpine, shared with the founder
+     chapters. Behaviour is unchanged: same 0.58 sight line, same rAF-guarded
+     scroll read, same fail-open under reduced motion. */
+  useSpine(ref, { railClass: "cso-spine-rail", itemClass: "cso-phase", nodeClass: "cso-phase-node" });
 
   return (
     <section className="sd-section sd-depth" id="process">
@@ -147,59 +106,16 @@ export function Process60() {
           ))}
         </div>
 
-        {/* The three numbers, restated by the client at the end of the install.
-            Deliberately a DIFFERENT render from the mechanism section's cards
-            above, so the repeat reads as a summary and not as a duplicate. */}
-        <span className="cso-maths-cap" style={{ marginTop: 64 }}>
-          {process60.numbersCaption}
-        </span>
-        <div className="cso-numbers" data-sdp-reveal>
-          {process60.numbers.map((x) => (
-            <div key={x.t}>
-              <span className="n">{x.n}</span>
-              <span className="t">{x.t}</span>
-            </div>
-          ))}
-        </div>
-        {/* Centred here, unlike the same line in the mechanism card, which is
-            left-aligned and pinned to the bottom of its panel. The closing
-            sentence takes the warm accent: it is the conclusion the two before
-            it are building to, and the page's rule is that a value-moment goes
-            warm. Split on the sentence itself, so the copy stays verbatim and
-            the highlight cannot drift if the line is rewritten. */}
-        <p className="cso-multiply cso-multiply-center" style={{ marginTop: 28, marginBottom: 0 }}>
-          {process60.numbersLine.split(TAIL)[0]}
-          <span className="tail">{TAIL}</span>
-        </p>
+        {/* Everything that used to sit here was removed on 2026-09-10 (Atul):
+            the 50/50/50 number boxes, the "they multiply" line, the DAY 60 bar,
+            the footnote and the signature. The section had already made its
+            case across the four phases, and all of it restated figures the
+            mechanism beat above states first. Their copy is still in
+            content.ts, unrendered.
 
-        <div className="cso-closing-bar" data-sdp-reveal>
-          {/* "DAY 60 →" stays ivory and the outcome takes the warm accent, the
-              same split the line above the bar uses: the timestamp is the setup,
-              the revenue is the value-moment. Split on the arrow that is already
-              in the copy, so nothing is hard-coded twice and a rewrite of either
-              half carries through untouched. */}
-          <span className="big">
-            {/* trimmed: as flex items the spans no longer collapse the copy's
-                own spaces, so the gap between them is set in CSS instead */}
-            <span>{process60.closingBar.split("→")[0].trim()}</span>
-            {/* An SVG, not the "→" character. A glyph is positioned by its
-                font's baseline, and Bebas sets caps at ~0.73em inside a 0.9em
-                ascent, so the caps ride high in their line box: centring the
-                boxes still left the arrow about a quarter of an em low. An
-                SVG's box IS its artwork, so flex centring puts it exactly on
-                the line's middle, at any size, with no nudging. */}
-            <svg className="arrow" viewBox="0 0 24 12" fill="none" aria-hidden
-              stroke="currentColor" strokeWidth="1.6" strokeLinecap="round"
-              strokeLinejoin="round">
-              <path d="M1 6h20M16 1l5 5-5 5" />
-            </svg>
-            <span className="tail">{process60.closingBar.split("→")[1].trim()}</span>
-          </span>
-          <p>{process60.closingLine}</p>
-        </div>
-
-        <p className="cso-footnote">{process60.footnote}</p>
-        <span className="cso-signature">{process60.signature}</span>
+            The CTA lockup is kept: it is the page's repeating atom and every
+            other beat closes on one, so dropping it here would be the only
+            beat that asks for nothing. Say the word and it goes too. */}
 
         <div data-sdp-reveal>
           <CtaLockup />

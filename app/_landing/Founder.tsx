@@ -1,6 +1,10 @@
+"use client";
+
+import { useRef } from "react";
+import { useSpine } from "./useSpine";
 import { asset } from "./asset-version";
 import {
-  brand, founderChapters, founderChips, founderDeck, founderLine, journey, site,
+  brand, founderChapters, founderChips, founderDeck, founderLine, site,
 } from "./content";
 import { CtaLockup, SdpHead, Wrap } from "./sdp";
 
@@ -24,10 +28,39 @@ import { CtaLockup, SdpHead, Wrap } from "./sdp";
  * that earned them. Lifting them out into a pill row would print the same
  * claims twice and strip them of the story that makes them credible.
  *
- * The five journey photographs ship UNCAPTIONED and ungraded, framed as
- * documents. The client supplied images and no captions; writing a line under
- * each would be inventing a story around someone else's photographs, and
- * colour-grading them to fit the palette would be editing evidence.
+ * The journey photographs ship UNCAPTIONED and ungraded, framed as documents.
+ * The client supplied images and no captions; writing a line under each would
+ * be inventing a story around someone else's photographs, and colour-grading
+ * them to fit the palette would be editing evidence.
+ *
+ * ── CHAPTERS AND PHOTOGRAPHS PAIRED, 2026-09-10 (Atul) ────────────────────
+ * The five photographs used to sit in a row under the ledger. They now run
+ * BESIDE the chapters, alternating: text left / photo right, then photo left /
+ * text right, on the pattern of the dfy-new services section.
+ *
+ * The pairing is SEQUENTIAL, not interpreted. Filenames run first-business,
+ * 2019, 2021, 2023; chapters run 2018, 2020, the problem it exposed, the
+ * decision. Matching them in the order the client filed both is the only
+ * mapping that is not us deciding what someone else's photographs are of,
+ * which is the same restraint that kept them uncaptioned.
+ *
+ * `05-2023-b.jpg` is unplaced: four chapters, five images. It stays in
+ * content.ts rather than being deleted. See the note there.
+ *
+ * ── THE SPINE, 2026-09-10 (Atul) ──────────────────────────────────────────
+ * The chapter ordinals are gone. With photographs beside every chapter the
+ * page already reads as a sequence, and a numeral inside a ring was doing the
+ * same job twice while adding the one piece of furniture that had to be read.
+ *
+ * In their place: a lit rail down the centre axis with a DIAMOND at each
+ * chapter, and both follow the scroll. The rail fills to wherever the reader
+ * has got to, and a diamond lights as it passes; behind it, the chapter it
+ * belongs to dims back. So the section is not decorated with motion, it
+ * reports position: the lit part is what you have read.
+ *
+ * The machinery is `useSpine`, shared with the process section, so both
+ * spines on this page light at the same sight line. Under reduced motion the
+ * hook returns before arming and the rail renders fully drawn and still.
  */
 /* The three credential marks. FILLED and gradient-lit, not hairline strokes:
    a stroked outline at 17px reads as a smudge beside tracked caps, and the same
@@ -85,6 +118,13 @@ function ChipGlyph({ name }: { name: string }) {
 }
 
 export function Founder() {
+  const spineRef = useRef<HTMLDivElement>(null);
+  useSpine(spineRef, {
+    railClass: "cso-chapter-rail",
+    itemClass: "cso-chapter",
+    nodeClass: "cso-chapter-mark",
+  });
+
   return (
     <section className="sd-section sd-deep" id="about">
       <Wrap>
@@ -104,6 +144,13 @@ export function Founder() {
           <div>
             <h3 className="cso-founder-name">{site.name}</h3>
             <span className="cso-founder-role">{site.role}</span>
+            {/* DESKTOP ONLY, from 2026-09-10 (Atul). The rule, the summary
+                line and the three chips are hidden below the mobile
+                breakpoint in globals.css rather than removed: on a phone they
+                pushed the portrait and the first chapter well below the fold,
+                and everything they say is said again by the chapters. On a
+                wide screen there is room for the identity block to be a block,
+                so it stays. */}
             {/* The rule closes the identity block — name and role are one unit,
                 the summary line beneath it is a different one. */}
             <span className="cso-founder-rule" aria-hidden />
@@ -122,7 +169,13 @@ export function Founder() {
           </div>
         </div>
 
-        <div className="cso-chapters">
+        <div className="cso-chapters" ref={spineRef}>
+          {/* The rail is one element behind the whole ledger, not a segment per
+              row: a per-row rail would break at every gap and read as ticks. */}
+          <div className="cso-chapter-rail" aria-hidden>
+            <div className="cso-chapter-fill" />
+          </div>
+
           {founderChapters.map((c, i) => (
             <article
               className="cso-chapter"
@@ -131,29 +184,35 @@ export function Founder() {
               style={{ "--d": `${0.05 * i}s` } as React.CSSProperties}
             >
               <div className="cso-chapter-spine" aria-hidden>
-                <span className="cso-chapter-n">{c.n}</span>
+                <span className="cso-chapter-mark" />
               </div>
 
+              {/* The paragraphs are wrapped so the title and the body can be
+                  ordered independently. On a phone the photograph goes BETWEEN
+                  them (Atul), which is only possible if they are two boxes
+                  rather than one run of children. */}
               <div className="cso-chapter-card">
                 <h3>{c.title}</h3>
-                {c.body.map((p) => (
-                  <p key={p}>{p}</p>
-                ))}
+                <div className="cso-chapter-body">
+                  {c.body.map((p) => (
+                    <p key={p}>{p}</p>
+                  ))}
+                </div>
               </div>
 
+              {/* The photograph is wrapped rather than dropped straight into
+                  the grid. A bare <img> carries an intrinsic height and would
+                  set the row's height, dragging the text to follow it; an
+                  empty box carries none, so it takes the height the text sets
+                  and the image fills it. The wrapper also does the clipping,
+                  which is what lets a cropped fill keep its rounded corners. */}
+              {c.photo && (
+                <figure className="cso-chapter-media">
+                  <img src={asset(c.photo)} alt="" loading="lazy" />
+                </figure>
+              )}
             </article>
           ))}
-        </div>
-
-        <div className="cso-journey" data-sdp-reveal>
-          <span className="cso-journey-cap">From the journey</span>
-          <div className="cso-journey-strip">
-            {journey.map((src) => (
-              <figure className="cso-journey-frame" key={src}>
-                <img src={asset(src)} alt="" loading="lazy" />
-              </figure>
-            ))}
-          </div>
         </div>
 
         <div data-sdp-reveal>
