@@ -98,8 +98,6 @@ export function VennDiagram() {
 
   return (
     <div className="cso-venn-wrap">
-      <span className="cso-venn-cap">{mechanism.vennInstruction}</span>
-
       <div className="cso-venn">
         <svg viewBox={`0 0 ${W} ${H}`} role="group" aria-label="The three parts of the system and what happens where they overlap">
           <defs>
@@ -405,7 +403,25 @@ export function VennDiagram() {
 
             {/* CLOSING — the same three-bar mark the payoff bar uses, so the
                 circle that raises the numbers carries the numbers glyph. */}
-            <g className="vn-icon" transform="translate(198 388)">
+            {/* Wrapped so the pair can be moved as one on mobile, where the
+                item list below it is hidden. The wrapper carries no transform
+                attribute of its own: a CSS transform would REPLACE the
+                attribute on the icon group, not add to it, and the icon would
+                jump to the origin. */}
+            <g className="vn-lower">
+            {/* Raised 21u on 2026-09-10 (Atul). The clearance from an icon's
+                lowest ink to its name baseline was 57u on DIAGNOSIS, 36 here
+                and 33 on AI SYSTEMS, because the three glyphs sit at different
+                depths below their own origin: the clipboard reaches +19, these
+                bars only +12, the cog +15. Matching the ORIGINS would not have
+                matched the gaps.
+
+                The ICON moves up rather than the name moving down: the item
+                list starts at y=474, so a lower name would buy the gap above
+                it by taking one away below. Cleared against the DIAGNOSIS
+                circle, whose lower edge at this x is y=314, well above the
+                raised icon's top at 353. */}
+            <g className="vn-icon" transform="translate(198 367)">
               <rect x="-14" y="0" width="7" height="12" rx="2" />
               <rect x="-3.5" y="-7" width="7" height="19" rx="2" />
               <rect x="7" y="-14" width="7" height="26" rx="2" />
@@ -416,26 +432,37 @@ export function VennDiagram() {
                 still short of the overlap with AI SYSTEMS, which starts at
                 x=308 at this height. */}
             <text className="vn-name" x={206} y={436}>{venn.circles[1].name}</text>
+            </g>
             {venn.circles[1].items.map((it, i) => (
               <text className="vn-item" key={it} x={212} y={474 + i * 21}>{it}</text>
             ))}
 
             {/* AI SYSTEMS — a cog: the only circle whose contents run without
                 anyone touching them. */}
-            <g className="vn-icon" transform="translate(566 388)">
+            <g className="vn-lower">
+            {/* Raised 24u, to the same 57u clearance. Three more than CLOSING
+                because the cog's spokes reach 15 below the origin where the
+                bars stop at 12. Its top lands at 349, clear of the DIAGNOSIS
+                circle's y=314 edge. */}
+            <g className="vn-icon" transform="translate(566 364)">
               <circle cx="0" cy="0" r="6.5" />
               <path d="M0 -15 v5 M0 10 v5 M-15 0 h5 M10 0 h5
                        M-10.6 -10.6 l3.5 3.5 M7.1 7.1 l3.5 3.5
                        M10.6 -10.6 l-3.5 3.5 M-7.1 7.1 l-3.5 3.5" />
             </g>
             <text className="vn-name" x={566} y={436}>{venn.circles[2].name}</text>
+            </g>
             {venn.circles[2].items.map((it, i) => (
               <text className="vn-item" key={it} x={560} y={474 + i * 22}>{it}</text>
             ))}
 
             <text className="vn-pair-label" x={266} y={330}>{venn.overlaps[0].label}</text>
             <text className="vn-pair-label" x={498} y={330}>{venn.overlaps[1].label}</text>
-            <text className="vn-pair-label" x={382} y={487} style={{ fontSize: 24, fontFamily: "var(--fh)", letterSpacing: ".03em" }}>50%</text>
+            {/* fontSize only. The family and tracking used to be forced here, which
+                overrode the pair-label class this text already carries and put
+                one number in a different face from the three labels around
+                it. */}
+            <text className="vn-pair-label" x={382} y={487} style={{ fontSize: 24 }}>50%</text>
             <text className="vn-pair-label" x={382} y={513}>CLOSE RATE</text>
 
             {/* The centre repeats the payoff bar's own three-bar mark, so the
@@ -451,8 +478,8 @@ export function VennDiagram() {
               <rect x="-2.5" y="-7" width="6" height="16" rx="1.8" />
               <rect x="6" y="-13" width="6" height="22" rx="1.8" />
             </g>
-            <text className="vn-core-label" x={382} y={367}>3X REVENUE</text>
-            <text className="vn-core-label" x={382} y={397}>IN 60 DAYS</text>
+            <text className="vn-core-label" x={382} y={385}>3X REVENUE</text>
+            <text className="vn-core-label" x={382} y={412}>IN 60 DAYS</text>
           </g>
         </svg>
       </div>
@@ -475,41 +502,6 @@ export function VennDiagram() {
       </div>
 
       {/* ---- phone: the same seven regions as a stack ---- */}
-      <div className="cso-venn-stack">
-        {venn.circles.map((c) => (
-          <button
-            key={c.key}
-            type="button"
-            className={sel === c.key ? "sel" : undefined}
-            aria-pressed={sel === c.key}
-            onClick={() => pick(c.key)}
-          >
-            {c.name}
-            <span className="sub">{c.rim}</span>
-          </button>
-        ))}
-        {venn.overlaps.map((o) => (
-          <button
-            key={o.key}
-            type="button"
-            className={sel === o.key ? "sel" : undefined}
-            aria-pressed={sel === o.key}
-            onClick={() => pick(o.key)}
-          >
-            {o.label}
-            <span className="sub">{o.of.join(" + ")}</span>
-          </button>
-        ))}
-        <button
-          type="button"
-          className={`core${sel === "core" ? " sel" : ""}`}
-          aria-pressed={sel === "core"}
-          onClick={() => pick("core")}
-        >
-          {venn.core.label}
-          <span className="sub">{venn.core.of.join(" + ")}</span>
-        </button>
-      </div>
 
       {/* reserves its own height, so selecting a region never jolts the page */}
       <div className="cso-venn-panel" aria-live="polite">

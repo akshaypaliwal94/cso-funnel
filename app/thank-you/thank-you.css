@@ -1,0 +1,425 @@
+/* =====================================================================
+   THANK YOU · per-route stylesheet · /thank-you
+   CSO FUNNEL · Akshay Paliwal · Fractional Sales Co-Founder
+
+   SKIN: SIGNAL & DEPTH, unchanged. This file declares NO palette. Every
+   value is a token from PART 1 of app/globals.css, which already loads on
+   this route (layout.tsx imports it and puts .sd-root on <body>).
+
+   IT IS DELIBERATELY THE QUIETEST PAGE IN THE FUNNEL. The selling is over:
+   the money has moved and the only thing left is one action. So there is
+   one lit surface on the whole screen (the step-one card that holds the
+   booking link) and nothing else competes with it. No sticky bar, no
+   second CTA, no reveal choreography, no proof.
+   ===================================================================== */
+
+.ty-page {
+  position: relative;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  background: linear-gradient(
+    180deg,
+    var(--obsidian) 0%,
+    var(--obsidian) 22%,
+    var(--volt-900) 70%,
+    var(--abyss) 100%
+  );
+}
+
+.ty-body {
+  flex: 1 1 auto;
+  padding: clamp(40px, 6vw, 84px) 0 clamp(44px, 6vw, 80px);
+  text-align: center;
+}
+
+/* ---- THE CONFIRMATION MARK ----------------------------------------------
+   A ring, not a filled disc. The skin's one filled voltage surface is the
+   pay button, and that button is behind us now. */
+.ty-mark {
+  width: 62px;
+  height: 62px;
+  margin: 0 auto;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  color: var(--sand);
+  background: rgba(var(--volt-600-rgb), 0.14);
+  box-shadow:
+    inset 0 0 0 1px rgba(var(--volt-300-rgb), 0.4),
+    0 0 22px -6px rgba(var(--volt-400-rgb), 0.55);
+}
+
+.sd-root .ty-h1 {
+  margin: 22px 0 0;
+  font-family: var(--fh);
+  font-size: clamp(34px, 6.4vw, 62px);
+  line-height: 1;
+  letter-spacing: 0.01em;
+  color: var(--ivory);
+  text-transform: uppercase;
+}
+
+.sd-root .ty-sub {
+  margin: 14px auto 0;
+  max-width: 620px;
+  font-family: var(--fb);
+  font-size: 15px;
+  line-height: 1.75;
+  color: var(--text-secondary);
+}
+
+/* The receipt line: amount, and the payment reference if we have one. Mono
+   spacing on the reference so it can be read out over a phone. */
+.ty-receipt {
+  margin: 18px auto 0;
+  display: inline-flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  gap: 6px 14px;
+  padding: 9px 16px;
+  border: 1px solid var(--slate);
+  border-radius: 999px;
+  font-family: var(--fb);
+  font-size: 12px;
+  color: var(--text-secondary);
+}
+.ty-receipt b {
+  color: var(--accent-text-strong);
+  font-weight: 800;
+}
+.ty-receipt code {
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: 11.5px;
+  letter-spacing: 0.06em;
+  color: var(--bone);
+}
+
+/* ---- THE ONE ACTION -----------------------------------------------------
+   The house box: a transparent border, the fill clipped to the padding box,
+   the rim gradient clipped to the border box, and the lit top line on a free
+   pseudo-element. Identical construction to the checkout's panels, so the two
+   surfaces read as the same object. */
+.ty-card {
+  position: relative;
+  margin: clamp(28px, 4vw, 44px) auto 0;
+  max-width: 640px;
+  padding: clamp(22px, 3vw, 32px);
+  border: 1px solid transparent;
+  border-radius: var(--r-lg);
+  background:
+    var(--edge-wash) padding-box,
+    linear-gradient(var(--surface), var(--surface)) padding-box,
+    var(--rim-edge) border-box;
+  box-shadow: var(--shadow-card);
+  text-align: left;
+  --rim-flare-a: 44%;
+  --rim-flare-b: 22%;
+  --rim-flare-c: 66%;
+}
+
+.ty-step {
+  display: inline-flex;
+  align-items: center;
+  gap: 9px;
+  font-family: var(--fb);
+  font-size: 10.5px;
+  font-weight: 800;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--accent-text);
+}
+
+.sd-root .ty-card-title {
+  margin: 12px 0 0;
+  font-family: var(--fh);
+  font-size: clamp(22px, 3vw, 30px);
+  line-height: 1.1;
+  letter-spacing: 0.02em;
+  color: var(--bone);
+  text-transform: uppercase;
+}
+
+.sd-root .ty-card-p {
+  margin: 10px 0 0;
+  font-family: var(--fb);
+  font-size: 14px;
+  line-height: 1.75;
+  color: var(--text-secondary);
+}
+
+/* The booking button. The one voltage surface on the page. */
+.ty-go {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  width: 100%;
+  margin-top: 18px;
+  padding: 15px 26px;
+  border: 1px solid transparent;
+  border-radius: 999px;
+  background: var(--grad-cta) padding-box, var(--rim-top) border-box;
+  color: var(--cta-ink);
+  font-family: var(--fh);
+  font-size: 17px;
+  letter-spacing: 0.06em;
+  text-align: center;
+  text-decoration: none;
+  box-shadow: var(--glow-cta);
+  transition: transform 0.2s, filter 0.2s, box-shadow 0.2s;
+}
+.ty-go:hover {
+  transform: translateY(-2px);
+  filter: brightness(1.08);
+  box-shadow: var(--glow-cta-hover);
+}
+
+/* ---- THE MISSING-LINK STATE --------------------------------------------
+   When NEXT_PUBLIC_BOOKING_URL is unset there is no next step to send the
+   buyer to, and this page must say so at full volume rather than showing a
+   dead button. Someone has just paid: an unfinished thank-you page is the most
+   expensive silent no-op in the funnel. */
+.ty-blocked {
+  margin-top: 18px;
+  padding: 14px 16px;
+  border: 1px dashed var(--warning);
+  border-radius: var(--r-sm);
+  font-family: var(--fb);
+  font-size: 13px;
+  line-height: 1.7;
+  color: var(--warning);
+}
+.ty-blocked b {
+  color: var(--ivory);
+}
+
+/* ---- THE SUPPORT LINE --------------------------------------------------- */
+.sd-root .ty-help {
+  margin: clamp(24px, 3.4vw, 34px) auto 0;
+  max-width: 620px;
+  font-family: var(--fb);
+  font-size: 13px;
+  line-height: 1.8;
+  color: var(--text-muted);
+}
+.ty-help a {
+  color: var(--sand);
+  text-decoration: none;
+}
+.ty-help a:hover {
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+/* The client's own refund sentence, restated once at the bottom. Italic and
+   quiet: it is reassurance after the fact, not a pitch. */
+.sd-root .ty-promise {
+  margin: 14px auto 0;
+  max-width: 620px;
+  font-family: var(--fb);
+  font-style: italic;
+  font-size: 13px;
+  line-height: 1.7;
+  color: var(--text-secondary);
+}
+
+@media (max-width: 520px) {
+  .ty-card {
+    padding: 20px 16px;
+  }
+  .ty-go {
+    min-height: 54px;
+    font-size: 16px;
+  }
+}
+
+
+/* ═══════════════════════════════════════════════════════════════════════
+   THE TWO STEPS (2026-09-10, Atul)
+
+   Built on the shape of step 2 of sanobarsamir.com/book: a numbered badge,
+   a required-tag eyebrow, a display heading, then the thing itself. Same
+   anatomy, this funnel's tokens.
+
+   The badge is ABSOLUTE, not a grid cell. The two steps hold very different
+   contents (a paragraph and a button in one, a 16:9 video frame in the
+   other), and a badge in the flow would have set a different left edge in
+   each. Pinned to the card, both cards read off one margin.
+   ═══════════════════════════════════════════════════════════════════════ */
+.ty-step-card {
+  position: relative;
+  padding-left: 74px;
+}
+.ty-num {
+  position: absolute;
+  left: 26px;
+  top: 26px;
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  font-family: var(--fh);
+  font-size: 16px;
+  letter-spacing: 0.04em;
+  color: var(--ivory);
+  border: 1px solid transparent;
+  background:
+    linear-gradient(var(--obsidian), var(--obsidian)) padding-box,
+    var(--rim-edge) border-box;
+}
+/* The required tag. Warm, not voltage: voltage on this page is the action
+   colour and this is a label, not something to press. */
+.ty-tag {
+  display: block;
+  font-family: var(--fb);
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--sand);
+  margin-bottom: 8px;
+}
+.ty-dm {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 16px;
+}
+
+@media (max-width: 640px) {
+  /* The badge comes back into the flow: at this width a 74px indent leaves
+     the heading about four words a line. */
+  .ty-step-card {
+    padding-left: 22px;
+  }
+  .ty-num {
+    position: static;
+    margin-bottom: 12px;
+  }
+  .ty-dm .ty-go {
+    width: 100%;
+    justify-content: center;
+  }
+}
+
+
+/* ── step 1, the DM: portrait beside the copy ────────────────────────
+   Two columns on a wide screen, in the shape of the reference. The photo
+   is the fixed one and the copy takes the rest: a portrait that flexes
+   changes crop as the column moves, and this is a face. */
+.ty-dm {
+  flex-direction: row;
+  align-items: flex-start;
+  gap: 22px;
+}
+/* THE RATIO LIVES ON THE BOX, not on the image (fixed 2026-09-10). Setting
+   aspect-ratio on the <img> left it rectangular: the element carries width
+   and height attributes of its own, and the box around it had no height to
+   constrain it to. Every other framed image in this funnel does it this way
+   round, .cso-journey-frame and .cso-face-art included, so this now matches
+   the pattern that works. */
+.ty-dm-photo {
+  position: relative;
+  flex: 0 0 160px;
+  width: 160px;
+  aspect-ratio: 1 / 1;
+  border-radius: var(--r);
+  overflow: hidden;
+  border: 1px solid transparent;
+  background:
+    linear-gradient(var(--obsidian), var(--obsidian)) padding-box,
+    var(--rim-edge) border-box;
+}
+/* Fills the square box. The file is 4:3, so cover trims a little off each
+   side and leaves the head untouched, which is the crop that matters on a
+   face. */
+.ty-dm-photo img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+/* The handle sits ON the photo, so the face and the account it belongs to
+   are one object rather than two things near each other. */
+.ty-dm-tag {
+  position: absolute;
+  left: 8px;
+  right: 8px;
+  bottom: 8px;
+  text-align: center;
+  font-family: var(--fb);
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: 0.1em;
+  color: var(--obsidian);
+  background: var(--sand);
+  border-radius: 999px;
+  padding: 4px 8px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.ty-dm-copy {
+  flex: 1 1 0;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 16px;
+}
+
+/* ── the closing note, as an attention box ───────────────────────────
+   It is the client's own refund sentence: a note about the money, not a
+   line of page copy, so it is framed rather than left to trail off the
+   bottom of the page. Warm accent, because it reassures. */
+.ty-note {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  margin: 26px auto 0;
+  max-width: 720px;
+  padding: 16px 18px;
+  border: 1px solid transparent;
+  border-left: 3px solid var(--sand);
+  border-radius: 0 var(--r) var(--r) 0;
+  background:
+    linear-gradient(var(--obsidian), var(--obsidian)) padding-box,
+    var(--rim-edge) border-box;
+}
+.ty-note-ic {
+  flex: 0 0 22px;
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  color: var(--obsidian);
+  background: var(--sand);
+  margin-top: 1px;
+}
+.sd-root .ty-note p,
+.ty-note p {
+  margin: 0;
+  font-family: var(--fb);
+  font-size: 14px;
+  line-height: 1.65;
+  color: var(--bone);
+}
+
+@media (max-width: 640px) {
+  /* The photo goes full width above the copy: at 160px beside a narrow
+     column the text runs to about four words a line. */
+  .ty-dm {
+    flex-direction: column;
+  }
+  .ty-dm-photo {
+    flex: 0 0 auto;
+    width: 100%;
+    max-width: 260px;
+    /* aspect-ratio carries over from the base rule, so it stays square as it
+       grows. */
+  }
+}

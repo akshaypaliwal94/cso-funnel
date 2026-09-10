@@ -1,3 +1,5 @@
+import { PRICE } from "@/lib/offer";
+
 /**
  * ALL landing-page copy, in one place, reproduced VERBATIM from the sole copy
  * source: /workspace/cso-funnel/COPY-SOURCE.md
@@ -16,9 +18,23 @@
 export const site = {
   /** Owned by the LAUNCH agent. The landing page only links to it. */
   checkoutUrl: "/checkout",
-  price: "₹197",
+  /**
+   * THE ONE EDIT THE LAUNCH AGENT MADE TO THIS FILE (2026-09-10).
+   *
+   * This was the literal string "₹197". It is now derived from lib/offer.ts,
+   * which is the single numeric source for the price, because that ONE number
+   * has to set three things that must never disagree: the label printed on
+   * every button on this page, the amount Razorpay actually charges, and the
+   * `value` on every Meta event. Two sources drift, and the drift is invisible
+   * until the charge and the label disagree on a live page.
+   *
+   * The displayed value is unchanged: lib/offer.ts reads
+   * NEXT_PUBLIC_PRICE_RUPEES and falls back to 197, which is the price this
+   * copy source states.
+   */
+  price: PRICE,
   name: "Akshay Paliwal",
-  role: "Sales Co-Founder",
+  role: "Fractional Sales Co-Founder",
 };
 
 /* ---------------------------------------------------------------- HERO --- */
@@ -27,7 +43,7 @@ export const hero = {
   callout:
     "For Coaches, Service Providers & Agencies making min. ₹3L/month already",
   headlineL1:
-    "I'll 3X Your Revenue in 60 Days - As Your Sales Co-Founder,",
+    "I'll 3X Your Revenue in 60 Days - As Your Fractional Sales Co-Founder,",
   /* The two tokens in line 1 that carry the promise, lit in the warm accent.
      Held as data rather than as markup inside the string, so the headline above
      stays one verbatim, greppable, diffable sentence: if the copy changes, the
@@ -39,20 +55,100 @@ export const hero = {
 };
 
 export const cta = {
-  label:
-    "Book Your 1:1 Diagnostic Call With Akshay - ₹197 100% Refundable",
+  /* "100% Refundable" was cut from the BUTTON on 2026-09-10 (Atul): the note
+     directly beneath it already says the ₹197 is refunded, so the button was
+     making the reassurance twice in the space of two lines. The button now
+     carries the action and the price; the note carries the reassurance. */
+  label: "Book Your 1:1 Diagnostic Call With Akshay - ₹197",
   note: "This is a diagnostic session — if we're not the right fit, your ₹197 is refunded",
 };
 
 /* ------------------------------------------------------------ FEATURED --- */
 
-/** Names only. No logo files were supplied, so these render as a type row. */
+/* THE PRESS ROW. Logo artwork supplied 2026-09-10, trimmed to its own ink and
+   converted to a bone monochrome. See the note in Featured.tsx for why they
+   are monochrome rather than in their brand colours.
+
+   EVERY FILE IS TRIMMED TIGHT, with no padding around the mark. That is what
+   makes the row's gap a real gap: an earlier pass put each mark on a shared
+   canvas, and because a stacked lockup carries far more empty canvas than a
+   long wordmark, a single CSS gap produced visibly different spaces between
+   each pair. The file's edges are the mark's edges now.
+
+   `w` and `nh` ARE THE FILE'S OWN PIXELS, and they are load-bearing rather
+   than documentation. These render at `height:var(--logo-h); width:auto`, and
+   an image with width:auto that has not loaded yet has NO intrinsic width: it
+   collapses to zero. In the mobile marquee the duplicate copy starts outside
+   the mask, so it never triggered a lazy load, contributed no width, and the
+   track came out one copy long with a hole after the last logo. The intrinsic
+   pair lets the browser reserve the right box before the file arrives.
+
+   `h` IS THE DISPLAY HEIGHT IN PIXELS, and it has to be per logo. Three of
+   these are wordmarks and one is a stacked icon-over-text lockup: rendered at
+   one height, the lockup's type would be half the size of everything else.
+   Equal optical weight is the goal, and equal height is not the way to it.
+   Each file is baked at 2x its height here, so the row is retina-sharp.
+
+   `name` is not decoration: it is the alt text, so the row still says who
+   these publications are to a screen reader and to anyone whose images fail. */
 export const featured = [
-  "Business Standard",
-  "Google News",
-  "The Outlook",
-  "The Entrepreneur",
+  { name: "Business Standard", src: "/logos/business-standard.webp", h: 26, w: 433, nh: 52 },
+  { name: "Google News", src: "/logos/google-news.webp", h: 52, w: 138, nh: 104 },
+  { name: "The Outlook", src: "/logos/outlook.webp", h: 36, w: 406, nh: 72 },
+  { name: "The Entrepreneur", src: "/logos/entrepreneur.webp", h: 34, w: 343, nh: 68 },
 ];
+
+
+/* ------------------------------------------------------- CLIENT RESULTS --- */
+
+/* THE RESULTS WALL, split India / International behind a toggle. Ported from
+   the dfy-new funnel on 2026-09-10 (Atul): same roster, same numbers, same
+   two-region split, rebuilt in this funnel's own language.
+
+   IT IS THE SAME MAN'S BOOK OF WORK. These are TGO's clients, and the founder
+   beat on this page is the story of building TGO, so the roster belongs here
+   as much as it does there. Nothing was re-voiced: every name, role, result
+   and multiple is carried across exactly as written.
+
+   THE DATA IS DELIBERATELY LOOSE. Several people have a role and no number,
+   a few a number and no role, one has neither and one has no photograph. The
+   card renders what is present rather than reserving empty slots, so a sparse
+   entry reads as a short card instead of a broken one. Filling the gaps with
+   invented roles or figures on a PROOF beat is the one thing this section
+   must never do. */
+export const results = {
+  eyebrow: "Client results",
+  titleLead: "They built it.",
+  titleLit: "We scaled it.",
+  deck: "See how experts turned what they know into businesses that generate more revenue, attract better clients, and scale without relying on them for everything.",
+  tabs: [
+    { id: "india", label: "India" },
+    { id: "international", label: "International" },
+  ],
+  india: [
+    { name: "Sourobh Kulkorni", role: "Leading Spinal Expert", result: "5L/month → 44L/month", roi: "4x ROI", photo: "/testimonials/india/sourobh.webp" },
+    { name: "Nimisha Maniar", role: "Founder at Studio Aware", result: "50L/year → 2 CR/year", roi: "33x ROI", photo: "/testimonials/india/nimisha.webp" },
+    { name: "Aman & Zohra", role: "Natural Fertility Experts", result: "2L/month → 15L/month", roi: "7x ROI", photo: "/testimonials/india/aman-zohra.webp" },
+    { name: "Ankita Barasara", role: "Postpartum Healing Expert", result: "1L/month → 4L/month", roi: "10x ROI", photo: "/testimonials/india/ankita.webp" },
+    { name: "Hardik Dhawal", role: "Erectile Dysfunction Expert", result: "1L/month → 4L/month", roi: "8x ROI", photo: "/testimonials/india/hardik.webp" },
+    { name: "Prashanth Sharma", role: "Fat Loss Expert", result: "0 → 163 online clients in 5 months", photo: "/testimonials/india/prashant.webp" },
+    { name: "Anish & Shubham", role: "Science Driven Performance", result: "1L/month → 8L/month", roi: "5x ROI", photo: "/testimonials/india/anish-shubham.webp" },
+    { name: "Hirav Mehta", role: "Metabolism Expert", result: "Multiple 6-figures monthly, on auto-pilot", photo: "/testimonials/india/hirav.webp" },
+    { name: "Sunny Bhamra", role: "India’s #1 TRT Expert", result: "4L in 10 weeks", roi: "5x ROI", photo: "/testimonials/india/sunny.webp" },
+    { name: "Ayush Thakur", role: "Body Transformation Coach", result: "10x’ed his online revenue in 6 months", photo: "/testimonials/india/ayush.webp" },
+  ],
+  international: [
+    { name: "Marcus Mackay", role: "High Performance Coach", result: "$30K/month → $100K/month", roi: "7x ROI", photo: "/testimonials/international/marcus.webp" },
+    { name: "Luke", result: "$50K/month in the first 30 days", photo: "/testimonials/international/luke.webp" },
+    { name: "Marco Span", result: "15K Euros in the first 4 weeks", photo: "/testimonials/international/marco.webp" },
+    { name: "Rebecca Peri", role: "Trauma Healing Expert", result: "$5.5K in the first 4 weeks", photo: "/testimonials/international/rebecca.webp" },
+    { name: "Nikki Barta", result: "0 → 8 high-ticket clients in 4 weeks", photo: "/testimonials/international/nikki.webp" },
+    { name: "Diego Carrete", role: "Wellness Expert", photo: "/testimonials/international/diego.webp" },
+    { name: "Paul Bradley" },
+    { name: "Stephen Campollo", photo: "/testimonials/international/stephen.webp" },
+    { name: "Erin McDermot", photo: "/testimonials/international/erin.webp" },
+  ],
+} as const;
 
 /* ------------------------------------------------------ THIS IS FOR YOU --- */
 
@@ -215,14 +311,17 @@ export const mechanism = {
     {
       title: "Lead-to-close conversion",
       sub: "Get more of your leads to say yes.",
+      pct: "+50%",
     },
     {
       title: "Average deal value",
       sub: "Increase what each deal is worth.",
+      pct: "+50%",
     },
     {
       title: "Recovery of deals lost after the first call",
       sub: "Win back the deals you're currently losing.",
+      pct: "+50%",
     },
   ],
 
@@ -248,6 +347,14 @@ export const mechanism = {
      and a caption as three separate pieces. These are his image's wording, so
      nothing here is invented, but they are not the copy doc's words either and
      should be approved or replaced. The figure is the doc's own 50%. */
+  /* RETIRED 2026-09-10 (Atul): the pyramid was removed from the section. It
+     and the drivers list beside it were the same three drivers twice, so the
+     shape went and its +50% figures moved onto `drivers` above, where the row
+     already names the driver each figure measures.
+
+     Kept, not deleted, because the `caption` strings here are the only place
+     the reference render's wording survives, and `label` is a shorter name for
+     each driver than the drivers list carries. Neither is rendered now. */
   pyramid: [
     {
       label: "More leads say yes",
@@ -528,6 +635,7 @@ export const founderChips = [
 export const founderChapters = [
   {
     n: "01",
+    photo: "/journey/02-2019.jpg",
     title: "I Started As The Lowest-Paid Employee",
     body: [
       "In 2018, I joined an AI company that is a unicorn today. I had never sold internationally or explained AI to people who had never even heard of it - so I learned the only way I could: on calls, getting rejected and getting better.",
@@ -536,6 +644,7 @@ export const founderChapters = [
   },
   {
     n: "02",
+    photo: "/journey/01-first-business.jpg",
     title: "Then I Built My Own Company",
     body: [
       "In 2020, I started TGO. If I could sell a complex product for someone else, I thought, why not build and sell my own?",
@@ -544,6 +653,7 @@ export const founderChapters = [
   },
   {
     n: "03",
+    photo: "/journey/03-2021.jpg",
     title: "But Building TGO Revealed A Bigger Problem",
     body: [
       "We became very good at generating leads. The ads worked, the pipelines filled, and the cost per lead made sense - yet revenue rarely grew at that scale.",
@@ -552,6 +662,7 @@ export const founderChapters = [
   },
   {
     n: "04",
+    photo: "/journey/05-2023-b.jpg",
     title: "So I Decided To Own That Gap",
     body: [
       "Everyone was blaming everyone else - the agency blamed sales, sales blamed the leads, clients blamed the agency, and founders were stuck paying for all three.",
@@ -566,6 +677,17 @@ export const founderChapters = [
  * for each would be inventing a story around someone else's photographs. The
  * only label on the strip is the span Atul confirmed, 2019 to 2023.
  */
+/* PAIRED WITH THE CHAPTERS 2026-09-10. Each chapter now carries its own
+   photograph on the `photo` field above, matched IN THE ORDER THE CLIENT FILED
+   BOTH: the filenames run first-business, 2019, 2021, 2023, and the chapters
+   run 2018, 2020, the problem it exposed, the decision. Sequential is the only
+   mapping that is not us deciding what someone else's photographs are of.
+
+   `05-2023-b.jpg` HAS NO CHAPTER. There are four chapters and five images, so
+   the last one is unplaced. It is left here rather than deleted: tell us which
+   chapter it belongs to and it goes in, or say drop it and it goes.
+
+   This array is no longer rendered anywhere. */
 export const journey = [
   "/journey/01-first-business.jpg",
   "/journey/02-2019.jpg",

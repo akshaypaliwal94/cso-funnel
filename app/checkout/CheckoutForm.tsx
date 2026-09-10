@@ -1,9 +1,12 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { cta, site } from "../_landing/content";
 import { ArrowGlyph } from "../_landing/sdp";
 import { LockGlyph, RefundGlyph } from "./glyphs";
+import { collectSignals } from "@/lib/client-signals";
+import { BOOK_HREF, PRODUCT_NAME } from "@/lib/offer";
+import { trackAddToCart, trackInitiateCheckout } from "@/lib/track";
 
 /**
  * THE DETAILS PANEL — the left half of the empirical order-summary checkout
@@ -15,8 +18,29 @@ import { LockGlyph, RefundGlyph } from "./glyphs";
  *
  * The form is UNCONTROLLED on purpose. Every field is `required` and typed, so
  * the browser does the validation the surface needs, and the pay handler
- * receives one plain object instead of a state tree it has to be taught. Less
- * for the LAUNCH half to unpick.
+ * receives one plain object instead of a state tree it has to be taught.
+ *
+ * ── THE PAY HANDLER (the seam, now filled) ────────────────────────────────
+ *
+ *   mount   AddToCart to Meta, ref-guarded, arrival only
+ *   submit  InitiateCheckout to Meta, then POST /api/razorpay/create-order,
+ *           then open the Razorpay sheet
+ *   handler navigate to /book-a-call?p=<payment_id> and NOTHING ELSE
+ *
+ * Two things this handler deliberately does not do:
+ *
+ *  · It does not fire Purchase. The Razorpay webhook owns that, because a UPI
+ *    payer finishes inside their bank app and often never returns to this tab,
+ *    and the webhook is the only place a payment is proven rather than merely
+ *    attempted.
+ *  · It does not send an amount. The server reads the price from lib/offer.ts,
+ *    which reads one env var, so the amount charged cannot drift from the
+ *    amount printed on the button.
+ *
+ * WHY THE ROUTE IS /api/razorpay/create-order AND NOT /api/checkout/order,
+ * which the original seam comment named: the house layout puts gateway routes
+ * under the gateway that owns them, so the webhook sits beside its own
+ * create-order and the two are read together.
  */
 
 /** The payload the pay handler receives. Exported so LAUNCH can type against it. */
@@ -30,12 +54,76 @@ export type CheckoutOrder = {
 };
 
 const COUNTRY_CODE = "+91";
+/* The form validates a +91 subscriber number as exactly ten digits, so India
+   is what the surface actually enforces, not an assumption about the buyer.
+   Sent as the ISO 3166-1 alpha-2 `country` match key, hashed. */
+const COUNTRY_ISO = "in";
+
+declare global {
+  interface Window {
+    Razorpay?: new (options: Record<string, unknown>) => { open: () => void };
+  }
+}
+
+const RZP_SDK = "https://checkout.razorpay.com/v1/checkout.js";
+
+/* Loaded on demand rather than in the layout: it is roughly 100KB that only
+   matters once someone actually presses pay. */
+function loadRazorpay(): Promise<boolean> {
+  return new Promise((resolve) => {
+    if (typeof window === "undefined") return resolve(false);
+    if (window.Razorpay) return resolve(true);
+    const existing = document.querySelector<HTMLScriptElement>(`script[src="${RZP_SDK}"]`);
+    if (existing) {
+      existing.addEventListener("load", () => resolve(true));
+      existing.addEventListener("error", () => resolve(false));
+      return;
+    }
+    const el = document.createElement("script");
+    el.src = RZP_SDK;
+    el.async = true;
+    el.onload = () => resolve(true);
+    el.onerror = () => resolve(false);
+    document.body.appendChild(el);
+  });
+}
+
+/* The payment sheet's accent. It is `--voltage` from PART 1 of globals.css,
+   restated as a literal because Razorpay renders the sheet inside its own
+   iframe on its own domain, where this project's CSS custom properties do not
+   exist. If the token ever changes, change it here in the same pass. */
+const RZP_THEME = "#1A0FF5";
 
 export function CheckoutForm() {
-  const [seam, setSeam] = useState(false);
+  const [busy, setBusy] = useState(false);
+  const [failed, setFailed] = useState("");
 
-  function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
+  /* CHECKOUT ARRIVAL. Meta gets AddToCart, and this is the only place it ever
+     fires: not on a landing-page CTA click, which would count a reader who
+     tapped two of the page's CTAs twice, and which is not an arrival anyway.
+
+     It is also the ONLY Meta event a DIRECT arrival produces. Someone who
+     opens /checkout from an email, a retargeting ad or a bookmark never
+     touches the landing page, so without this they are invisible to Meta until
+     the pay tap.
+
+     InitiateCheckout deliberately does NOT fire here. It waits for the pay tap
+     below: a page-load InitiateCheckout teaches Meta to buy people who land
+     rather than people who try to pay.
+
+     Ref-guarded so StrictMode's double effect and a remount cannot inflate the
+     count. */
+  const arrived = useRef(false);
+  useEffect(() => {
+    if (arrived.current) return;
+    arrived.current = true;
+    trackAddToCart();
+  }, []);
+
+  async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
+    if (busy) return;
+
     const f = new FormData(e.currentTarget);
     const order: CheckoutOrder = {
       firstName: String(f.get("firstName") ?? "").trim(),
@@ -45,34 +133,84 @@ export function CheckoutForm() {
       phone: `${COUNTRY_CODE}${String(f.get("phone") ?? "").replace(/\D/g, "")}`,
     };
 
-    /* ==================================================================
-       ▼▼▼  PAY HANDLER SEAM — THIS IS THE LAUNCH AGENT'S HALF  ▼▼▼
+    setFailed("");
+    setBusy(true);
 
-       Everything above this line is the surface: it collects and validates
-       the details and hands you `order`. Everything below is payment, and
-       none of it is written here on purpose (no Razorpay, no API route, no
-       env, no amount hardcoded anywhere in the UI — the price the visitor
-       reads comes from `site.price` in app/_landing/content.ts and the price
-       that is CHARGED must come from the server).
+    /* Meta InitiateCheckout, fired BEFORE the sheet opens rather than after
+       payment, because this is the moment intent is real: every field is valid
+       (the browser enforced it) and the buyer is committing. */
+    trackInitiateCheckout({
+      email: order.email,
+      /* E.164 without the plus, which is what Meta wants and what the
+         create-order route strips to anyway. */
+      phone: order.phone.replace(/\D/g, ""),
+      firstName: order.firstName,
+      lastName: order.lastName,
+      city: order.city,
+      country: COUNTRY_ISO,
+    });
 
-       What goes here:
-         1. POST `order` to /api/checkout/order → create the Razorpay order
-            server-side, amount read from env, never from the client.
-         2. Open the Razorpay modal with the returned order_id.
-         3. On success: verify the signature server-side, fire the Purchase
-            event (Meta CAPI + GA4) with an event_id for dedupe, then send
-            the visitor to the booking surface.
-         4. UPI users often never return to the page, so the webhook, not
-            this handler, is the source of truth for the conversion.
+    try {
+      const sdk = await loadRazorpay();
+      if (!sdk) throw new Error("sdk");
 
-       Until it is wired, this deliberately says so on screen rather than
-       failing silently: a checkout whose button does nothing must never look
-       finished.
-       ▲▲▲  END SEAM  ▲▲▲
-       ================================================================== */
-    // eslint-disable-next-line no-console
-    console.warn("[checkout] pay handler not wired yet. Order collected:", order);
-    setSeam(true);
+      /* The amount is NEVER sent from here. The server reads it from
+         lib/offer.ts, which reads one env var, so the price charged cannot
+         drift from the price on the page. */
+      const res = await fetch("/api/razorpay/create-order", {
+        method: "POST",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify({
+          ...order,
+          phone: order.phone.replace(/\D/g, ""),
+          country: COUNTRY_ISO,
+          ...collectSignals(),
+        }),
+      });
+      const created = await res.json();
+
+      if (!res.ok || !created?.ok) {
+        setBusy(false);
+        setFailed(
+          created?.reason === "not-configured"
+            ? "Payments are not switched on yet. Nothing has been charged."
+            : "We could not start the payment. Please try again.",
+        );
+        return;
+      }
+
+      const rzp = new window.Razorpay!({
+        key: created.keyId,
+        order_id: created.orderId,
+        amount: created.amount,
+        currency: created.currency,
+        name: site.name,
+        /* ABSOLUTE, not a relative path: Razorpay renders the sheet inside an
+           iframe served from its own domain, where "/brand/..." would resolve
+           against checkout.razorpay.com and silently 404 into a blank tile. */
+        image: `${window.location.origin}/brand/lead-to-cash-logo.png`,
+        description: PRODUCT_NAME,
+        prefill: {
+          name: `${order.firstName} ${order.lastName}`.trim(),
+          email: order.email,
+          contact: order.phone,
+        },
+        theme: { color: RZP_THEME },
+        modal: { ondismiss: () => setBusy(false) },
+        /* PURCHASE IS NOT FIRED HERE. The webhook owns it, so a UPI payer who
+           finishes inside their bank app and never returns to this tab is
+           still counted. This handler only moves the buyer on. */
+        handler: (r: { razorpay_payment_id: string }) => {
+          window.location.href = `${BOOK_HREF}?p=${encodeURIComponent(
+            r.razorpay_payment_id,
+          )}`;
+        },
+      });
+      rzp.open();
+    } catch {
+      setBusy(false);
+      setFailed("We could not start the payment. Please try again.");
+    }
   }
 
   return (
@@ -181,22 +319,26 @@ export function CheckoutForm() {
             would be re-voicing the client's promise on the page where it is
             legally load-bearing.
 
-            FLAG: /terms and /refund-policy are the LAUNCH agent's pages and do
-            not exist yet, so these two links 404 until that half ships. */}
+            Both pages now exist. The Terms href was "/terms" and is now
+            "/terms-and-conditions", which is the route that was built. */}
         <label className="co-ack">
           <input className="co-ack-box" name="ack" type="checkbox" required />
           <span>
-            I agree to the <a href="/terms">Terms</a> and the{" "}
+            I agree to the <a href="/terms-and-conditions">Terms</a> and the{" "}
             <a href="/refund-policy">Refund Policy</a>.
           </span>
         </label>
       </div>
 
-      {/* ONE focal action. There is no second button anywhere on this route. */}
-      <button className="sdp-cta co-pay" type="submit">
+      {/* ONE focal action. There is no second button anywhere on this route.
+          The label is unchanged while busy except for the word in front of the
+          price, so the button does not resize under the thumb that just tapped
+          it; `aria-busy` carries the state to a screen reader. */}
+      <button className="sdp-cta co-pay" type="submit" disabled={busy} aria-busy={busy}>
         <span className="sdp-cta-main">
           <span className="cta-label">
-            Pay <span className="co-pay-price">{site.price}</span> · Book My 1:1
+            {busy ? "Opening payment" : "Pay"}{" "}
+            <span className="co-pay-price">{site.price}</span> · Book My 1:1
             Diagnostic Call
           </span>
           <span className="arrow">
@@ -205,12 +347,13 @@ export function CheckoutForm() {
         </span>
       </button>
 
-      {seam ? (
+      {/* The failure message. A checkout that cannot take money must say so
+          rather than looking finished: the two cases it distinguishes are "the
+          gateway is not configured" (nothing was charged, and it is our fault)
+          and "the request failed" (try again). */}
+      {failed ? (
         <p className="co-say" role="status">
-          <b>Payment is not connected yet.</b> The details were collected and
-          logged to the console. The Razorpay handler goes in the marked seam in{" "}
-          <code>app/checkout/CheckoutForm.tsx</code> and is the LAUNCH agent&rsquo;s
-          half of this build.
+          <b>{failed}</b>
         </p>
       ) : null}
 

@@ -1,5 +1,7 @@
 import type { Metadata, Viewport } from "next";
 import { Bebas_Neue, Manrope } from "next/font/google";
+import Clarity from "@/components/Clarity";
+import MetaPixel from "@/components/MetaPixel";
 import "./globals.css";
 
 /**
@@ -25,7 +27,7 @@ const manrope = Manrope({
 });
 
 export const metadata: Metadata = {
-  title: "Akshay Paliwal · Your Sales Co-Founder",
+  title: "Akshay Paliwal · Your Fractional Sales Co-Founder",
   description:
     "As your sales co-founder, I find exactly where your revenue is leaking, fix it by automating 70% of your sales process with custom-built AI systems, then get you (or your team) closing at up to 50%.",
 };
@@ -40,7 +42,24 @@ export const viewport: Viewport = {
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="en">
-      <body className={`${bebas.variable} ${manrope.variable} sd-root`}>{children}</body>
+      <body className={`${bebas.variable} ${manrope.variable} sd-root`}>
+        {children}
+        {/* EVERY ROUTE, not just the landing page.
+
+            MetaPixel does two jobs: the pixel base code plus PageView, and,
+            ABOVE its own pixel-id guard, the first-touch attribution capture.
+            Both have to run on every route, because a retargeting ad or an
+            email can drop someone straight onto /checkout, and that visit is
+            the only one carrying the campaign. One click later the UTMs and
+            the fbclid are gone from the url for good.
+
+            Clarity is the whole analytics layer on this project: no GA4 base
+            tag, no Measurement Protocol, by Atul's scope call. Both components
+            render nothing when their env id is missing, so an unfilled value
+            leaves no broken script tag behind. */}
+        <MetaPixel />
+        <Clarity />
+      </body>
     </html>
   );
 }

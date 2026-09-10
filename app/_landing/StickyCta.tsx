@@ -42,7 +42,7 @@ export function StickyCta() {
       <div className="sdp-wrap sdp-stuck-inner">
         <span className="sdp-stuck-label">{cta.note}</span>
         <a className="sdp-stuck-go" href={site.checkoutUrl} tabIndex={on ? 0 : -1}>
-          Book Your 1:1 Diagnostic Call - {site.price} 100% Refundable
+          Book Your 1:1 Diagnostic Call - {site.price}
           <ArrowGlyph />
         </a>
       </div>

@@ -27,25 +27,6 @@ const ICONS = [
   </>,
 ];
 
-/* The attention mark for the disqualifier bar. Same house line style as the
-   three box glyphs: 24x24 viewBox, currentColor, 1.9 stroke, round caps and
-   joins. A hexagon rather than a triangle: a triangle is a hazard sign and
-   this is a boundary, not a warning.
-
-   52px, which is the height of the two lines of copy beside it (16.5px at 1.5
-   leading, twice, plus the 4px between them). The mark and the copy block are
-   the same object height, so the rule between them spans both cleanly. */
-function AlertGlyph({ size = 52 }: { size?: number }) {
-  return (
-    <svg viewBox="0 0 24 24" width={size} height={size} fill="none" aria-hidden
-      stroke="currentColor" strokeWidth="1.9" strokeLinecap="round" strokeLinejoin="round">
-      <path d="M12 2.6l8.1 4.7v9.4L12 21.4 3.9 16.7V7.3z" />
-      <path d="M12 8v5" />
-      <path d="M12 16.4h.01" />
-    </svg>
-  );
-}
-
 function FitIcon({ i }: { i: number }) {
   return (
     <svg viewBox="0 0 24 24" width="30" height="30" fill="none" aria-hidden
@@ -64,6 +45,10 @@ function FitIcon({ i }: { i: number }) {
  * systems do not. A flat list makes six equal complaints; three boxes make one
  * diagnosis with a shape, and the reader can see which box they are standing
  * in.
+ *
+ * The disqualifier bar that used to close this beat was removed on
+ * 2026-09-10 (Atul). Its copy is still in content.ts under `forYouIf.note`,
+ * unrendered, so the words are not lost if it is ever wanted back.
  *
  * The masthead is built here rather than through SdpHead because this title
  * carries a lit phrase inside it and the shared component takes a plain
@@ -120,26 +105,11 @@ export function ForYouIf() {
           ))}
         </div>
 
-        {/* The disqualifier. It sits under the three boxes because it only
-            makes sense after them: the boxes say who this is for, this says
-            who it is not. Its own lit edge ties it to them without making it a
-            fourth box in the row. */}
-        <aside className="fit-note" data-sdp-reveal style={{ "--d": ".24s" } as React.CSSProperties}>
-          <span className="fit-note-ic" aria-hidden>
-            <AlertGlyph />
-          </span>
-          <span className="fit-note-rule" aria-hidden />
-          <p className="fit-note-copy">
-            <span className="fit-note-lead">{forYouIf.note.lead}</span>
-            <span className="fit-note-turn">{forYouIf.note.turn}</span>
-          </p>
-        </aside>
-
         {/* The same lockup the hero runs, unchanged. It is the repeating atom
             of this page: every other beat closes on it, and this was the one
-            that did not. It lands AFTER the disqualifier, not before, so the
-            reader has already checked themselves against both the three boxes
-            and the exclusion before they are asked to act. */}
+            that did not. It now follows the three boxes directly: the
+            disqualifier bar that used to sit between them was removed on
+            2026-09-10 (Atul). */}
         <div data-sdp-reveal style={{ "--d": ".30s" } as React.CSSProperties}>
           <CtaLockup />
         </div>

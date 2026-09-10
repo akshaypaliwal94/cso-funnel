@@ -4,6 +4,7 @@ import { brand, cta, site } from "../_landing/content";
 import { ArrowGlyph, Wrap } from "../_landing/sdp";
 import { CheckoutForm } from "./CheckoutForm";
 import { LockGlyph, PersonGlyph, RefundGlyph, ShieldGlyph } from "./glyphs";
+import SiteFooter from "@/components/SiteFooter";
 import "./checkout.css";
 
 /**
@@ -213,12 +214,15 @@ export default function CheckoutPage() {
       </section>
 
       {/* --------------------------------------------------------- foot ---
-          The identity line only. The compliance footer Razorpay's merchant
-          review looks for (registered name, full postal address, phone, email
-          + the three legal links) is the LAUNCH agent's, and none of those
-          four facts exists in content.ts. Inventing an address on a payment
-          page is the one thing a checkout must never do. */}
-      <footer className="co-foot">
+          The identity line, then the compliance rail beneath it.
+
+          The rail is the thing Razorpay's merchant review looks for: the
+          registered name, the full postal address, a working phone and email,
+          and the three policy links, present ON THE SITE rather than only
+          inside a policy page. Its facts come from lib/legal.ts, and the two
+          the client has not supplied (the PIN code and the governing-law
+          state) render as visible [TODO] boxes rather than as inventions. */}
+      <div className="co-foot">
         <Wrap>
           <div className="co-foot-line">
             <span>{site.name}</span>
@@ -232,7 +236,9 @@ export default function CheckoutPage() {
             <span>{site.price} diagnostic call</span>
           </div>
         </Wrap>
-      </footer>
+      </div>
+
+      <SiteFooter />
     </main>
   );
 }

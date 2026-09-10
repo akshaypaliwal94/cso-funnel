@@ -243,19 +243,22 @@ export function Mechanism() {
           sub={mechanism.sub}
         />
 
-        {/* --- THE ENGINE: the drivers stated, then shown stacking ---------
-             Two panels reading left to right: the argument, then the picture
-             of it. The pyramid is the same three drivers as the list beside
-             it, which is the point — one is the claim, the other is why the
-             claim compounds instead of adding. */}
+        {/* --- THE ENGINE ---------------------------------------------------
+             ONE panel, from 2026-09-10 (Atul). This was two: the drivers on
+             the left and a sliced pyramid on the right carrying a +50% on
+             each band. They were the same three drivers twice, and the second
+             telling added a shape rather than an argument, so the pyramid is
+             gone and its figures moved onto the rows that already named the
+             drivers. One statement, with its numbers on it. */}
         <div className="cso-engine">
           <article className="sdp-card cso-engine-card" data-sdp-reveal>
             <span className="cso-engine-eyebrow">{mechanism.engineEyebrow}</span>
             <p className="cso-engine-intro">{mechanism.engineIntro}</p>
-            {/* Name, then a plain-English gloss. No figure here: the +50%s
-                belong to the pyramid beside this, and printing them twice
-                would make the panels read as two versions of one claim rather
-                than as the claim and the picture of it. */}
+            {/* Name, gloss, and the figure. The figure used to live on the
+                pyramid beside this, which is why these rows had none: printing
+                it in both places would have made the two panels read as two
+                versions of one claim. With the pyramid gone it belongs here,
+                on the row that names the driver it measures. */}
             <ul className="cso-drivers">
               {mechanism.drivers.map((dr, i) => (
                 <li key={dr.title}>
@@ -266,6 +269,9 @@ export function Mechanism() {
                     <span className="cso-driver-title">{dr.title}</span>
                     <span className="cso-driver-sub">{dr.sub}</span>
                   </span>
+                  {mechanism.drivers[i]?.pct ? (
+                    <span className="cso-driver-pct">{mechanism.drivers[i].pct}</span>
+                  ) : null}
                 </li>
               ))}
             </ul>
@@ -275,280 +281,6 @@ export function Mechanism() {
             </p>
           </article>
 
-          {/* THE PYRAMID — geometry measured off Atul's reference render.
-              It is ONE triangle sliced into three bands: every side edge lies
-              on the same two lines (slope 0.685 in the reference), which is
-              what makes it read as a single pyramid rather than three separate
-              trapezoids. Drawn in SVG because the corners are ROUNDED, and a
-              clip-path polygon can only give sharp ones — that mismatch is why
-              the first attempt did not look like the reference. */}
-          <article className="sdp-card cso-pyramid-card" data-sdp-reveal
-            style={{ "--d": ".08s" } as React.CSSProperties}>
-            <div className="cso-pyramid">
-              <svg className="cso-pyr-svg" viewBox="0 0 600 440" aria-hidden
-                preserveAspectRatio="xMidYMid meet">
-                <defs>
-                  {/* THE TIER EDGE — the house LIT EDGE, in the volt family.
-                      Same language as --rim-edge on every card: near-white
-                      volt-100 where the light lands, fading as it descends.
-
-                      It fades by OPACITY, not by hue. Walking the ramp down
-                      into volt-600/700 made the top half of every outline
-                      silver and the bottom half saturated blue, which reads as
-                      two different borders rather than one falling off. The
-                      colour now holds in the pale end (50 → 100 → 200 → 300)
-                      and only the level drops, which is what light actually
-                      does. The shine is brought up throughout: it opens on
-                      volt-50, the same near-white the lit edge uses for its
-                      nucleus, and the floor at the bottom of each tier lifts
-                      from .34 to .58 so the underside stays lit rather than
-                      trailing away.
-
-                      It falls DOWNWARD because the reference does too: each
-                      tier's top edge measures far brighter than its bottom
-                      (tier 2 runs luma 215 to 128, tier 3 168 to 41). In
-                      objectBoundingBox units every tier gets its own copy of
-                      the ramp instead of sharing one down the whole pyramid. */}
-                  <linearGradient id="pyrEdge" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="0%"   stopColor="var(--volt-50)"  stopOpacity="1" />
-                    <stop offset="22%"  stopColor="var(--volt-100)" stopOpacity=".96" />
-                    <stop offset="55%"  stopColor="var(--volt-200)" stopOpacity=".82" />
-                    <stop offset="100%" stopColor="var(--volt-300)" stopOpacity=".58" />
-                  </linearGradient>
-
-                  {/* THE INNER GLOW — on the edges, but MODULATED, exactly the
-                      way the lit edge's own shine is: strong where the edges
-                      meet, low along the straight runs between them, never a
-                      flat even band. Built from two things blurred together:
-                      a faint continuous stroke just inside the outline, and a
-                      bloom pooled at each corner point. One colour, volt-600,
-                      so only the LEVEL changes as it travels round, never the
-                      hue. Alphas are set against that colour's luminance (34,
-                      against volt-700's 28), so they come down slightly from
-                      the volt-700 values to hold the glow at the same strength
-                      rather than brightening it as a side effect. */}
-                  <radialGradient id="pyrCorner" cx="50%" cy="50%" r="50%">
-                    <stop offset="0%"   stopColor="var(--volt-600)" stopOpacity=".74" />
-                    <stop offset="45%"  stopColor="var(--volt-600)" stopOpacity=".30" />
-                    <stop offset="100%" stopColor="var(--volt-600)" stopOpacity="0" />
-                  </radialGradient>
-                  {/* The inner run is WEIGHTED DOWNWARD. Each tier sits on the
-                      one below it, so its underside is the lit edge and its top
-                      edge is in the shadow of the tier above. It still leans
-                      downward, but only about half as hard as it did: the
-                      bottom stop comes from .52 to .26. The undersides already
-                      carry the outline's two brightest flares plus both corner
-                      pools, and a strong continuous run underneath them was
-                      pooling into a bar rather than reading as glow. The
-                      corners are untouched. In objectBoundingBox units each
-                      tier gets its own copy of this ramp. */}
-                  <linearGradient id="pyrInner" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="0%"   stopColor="var(--volt-600)" stopOpacity=".06" />
-                    <stop offset="40%"  stopColor="var(--volt-600)" stopOpacity=".13" />
-                    <stop offset="100%" stopColor="var(--volt-600)" stopOpacity=".26" />
-                  </linearGradient>
-
-                  {/* One blur over the whole glow group, so the low run along
-                      the straight edges and the bright pools in the corners
-                      melt into a single band whose value rises and falls,
-                      rather than reading as a stroke with discs on it. */}
-                  <filter id="pyrSoft" x="-25%" y="-25%" width="150%" height="150%"
-                    colorInterpolationFilters="sRGB">
-                    <feGaussianBlur stdDeviation="9" />
-                  </filter>
-                  {TIERS.map((pts, i) => (
-                    <clipPath id={`pyrClip${i}`} key={i}>
-                      <path d={roundedPath(pts, 13)} />
-                    </clipPath>
-                  ))}
-
-                  {/* THE SHINE MASK. A single stroke of the outline is
-                      painted at full strength and then masked, so the highlight
-                      is shaped entirely by a GRADIENT and there is nothing
-                      stepped left to see. White shows the stroke, black hides
-                      it, and every pool is one radial blob with a smooth
-                      falloff.
-
-                      The stops are eased rather than linear: a plain
-                      white→transparent radial has its steepest change at the
-                      very centre, which still reads as an edge. Holding near
-                      white to 30% and easing out through 55/78% puts the fastest
-                      part of the change in the middle of the run, where the eye
-                      reads it as a highlight rather than as a boundary. */}
-                  <radialGradient id="pyrShineBlob" cx="50%" cy="50%" r="50%">
-                    <stop offset="0%"   stopColor="#fff" stopOpacity="1" />
-                    <stop offset="30%"  stopColor="#fff" stopOpacity=".86" />
-                    <stop offset="55%"  stopColor="#fff" stopOpacity=".52" />
-                    <stop offset="78%"  stopColor="#fff" stopOpacity=".20" />
-                    <stop offset="100%" stopColor="#fff" stopOpacity="0" />
-                  </radialGradient>
-                  {/* THE CORE. The soft blob above carries the falloff; on its
-                      own it has no peak, because a gradient that starts easing
-                      immediately never actually reads as bright. This one HOLDS
-                      full white across the middle 40% and only then drops, so
-                      the run has a hot centre with a fast, still-smooth
-                      shoulder. Two layers: sharpness from this, blending from
-                      the other. */}
-                  {/* A small blur for the outer glow below. It is deliberately
-                      the only blurred thing touching the outline: everything
-                      else stays hard. */}
-                  <filter id="pyrOuter" x="-30%" y="-30%" width="160%" height="160%"
-                    colorInterpolationFilters="sRGB">
-                    <feGaussianBlur stdDeviation="3.5" />
-                  </filter>
-
-                  <radialGradient id="pyrShineCore" cx="50%" cy="50%" r="50%">
-                    <stop offset="0%"   stopColor="#fff" stopOpacity="1" />
-                    <stop offset="40%"  stopColor="#fff" stopOpacity="1" />
-                    <stop offset="62%"  stopColor="#fff" stopOpacity=".62" />
-                    <stop offset="82%"  stopColor="#fff" stopOpacity=".22" />
-                    <stop offset="100%" stopColor="#fff" stopOpacity="0" />
-                  </radialGradient>
-                  {TIERS.map((pts, i) => (
-                    <mask key={i} id={`pyrShineMask${i}`} maskUnits="userSpaceOnUse"
-                      x="0" y="0" width="600" height="440">
-                      <rect x="0" y="0" width="600" height="440" fill="#000" />
-                      {shineSpots(pts).map((sp, k) => (
-                        <circle key={k} cx={sp.x} cy={sp.y} r={sp.r}
-                          fill="url(#pyrShineBlob)" opacity={sp.k.toFixed(3)} />
-                      ))}
-                    </mask>
-                  ))}
-                  {TIERS.map((pts, i) => (
-                    <mask key={i} id={`pyrCoreMask${i}`} maskUnits="userSpaceOnUse"
-                      x="0" y="0" width="600" height="440">
-                      <rect x="0" y="0" width="600" height="440" fill="#000" />
-                      {shineSpots(pts).map((sp, k) => (
-                        <circle key={k} cx={sp.x} cy={sp.y} r={sp.r * 0.4}
-                          fill="url(#pyrShineCore)" opacity={sp.k.toFixed(3)} />
-                      ))}
-                    </mask>
-                  ))}
-
-                  {/* The apex flare, pulled right down. At r=46 with a .95
-                      volt-50 core it sat on the point like a bulb — brighter
-                      and far wider than anything else on the shape, and the
-                      apex already has the outline's own corner pool on it. This
-                      is now a hint that the point is lit, not a light source:
-                      r=20 at .40, opening on volt-100 rather than volt-50. */}
-                  <radialGradient id="pyrApex" cx="50%" cy="50%" r="50%">
-                    <stop offset="0%"   stopColor="var(--volt-100)" stopOpacity=".40" />
-                    <stop offset="35%"  stopColor="var(--volt-300)" stopOpacity=".16" />
-                    <stop offset="100%" stopColor="var(--volt-500)" stopOpacity="0" />
-                  </radialGradient>
-                </defs>
-
-                {TIERS.map((pts, i) => {
-                  const d = roundedPath(pts, 13);
-                  return (
-                    <g key={i}>
-                      {/* No fill: the tier interior sits within a few luma of
-                          the page behind it. */}
-                      <g clipPath={`url(#pyrClip${i})`} filter="url(#pyrSoft)">
-                        {/* the low continuous run along every edge */}
-                        <path d={d} fill="none" stroke="url(#pyrInner)"
-                          strokeWidth="16" />
-                        {/* the pools where the edges meet. Clipped, so each is
-                            cut by the shape and reads as light gathering in the
-                            angle rather than a disc laid on top of it — and
-                            weighted by where the corner sits in its own tier,
-                            so the two at the bottom pool brightly and the ones
-                            along the top barely show. */}
-                        {pts.map(([cx, cy], k) => {
-                          const ys = pts.map((q) => q[1]);
-                          const lo = Math.min(...ys);
-                          const hi = Math.max(...ys);
-                          const t = hi === lo ? 1 : (cy - lo) / (hi - lo);
-                          return (
-                            <circle key={k} cx={cx} cy={cy} r="54"
-                              fill="url(#pyrCorner)" opacity={(0.18 + 0.82 * t).toFixed(2)} />
-                          );
-                        })}
-                      </g>
-
-                      {/* A DYNAMIC outer glow, and deliberately almost
-                          nothing: a wide, blurred stroke wearing the same shine
-                          mask, so light only spills where the outline is
-                          actually lit and the dim stretches throw none. Painted
-                          before the edge so it sits behind it and cannot soften
-                          the line. Opacity .09 — it should register as a hint
-                          that the corners are hot, never as a halo. */}
-                      <path d={d} fill="none" stroke="var(--volt-400)"
-                        strokeWidth="7" strokeLinejoin="round" opacity=".09"
-                        filter="url(#pyrOuter)"
-                        mask={`url(#pyrShineMask${i})`} />
-
-                      {/* The crisp lit edge, painted last so nothing softens
-                          it. 1.6px, up from 1.2: this outline is now the ONLY
-                          thing describing the pyramid, since the tiers carry no
-                          fill, where a card's 1px border merely edges a panel
-                          that is already visible. Still well under the 2.16px
-                          it drew before, which read as too heavy. */}
-                      <path d={d} fill="none" stroke="url(#pyrEdge)"
-                        vectorEffect="non-scaling-stroke" strokeWidth="1.6"
-                        strokeLinejoin="round" />
-
-                      {/* THE SHINE, two masked passes over the base edge, BOTH
-                          at the border's own 1.6px. That is the point: the
-                          shine is the border going bright, not a glow sitting
-                          on it. At 3 units the halo rendered 2.7px against a
-                          1.6px border, overhanging by half a pixel on each
-                          side, and the lit runs read as thick soft bars.
-                          Matching the width makes the highlight sharp again;
-                          the smoothness comes from the mask, not from spread.
-
-                          First the halo: volt-100, shaped by the eased blob. */}
-                      <path d={d} fill="none" stroke="var(--volt-100)"
-                        vectorEffect="non-scaling-stroke" strokeWidth="1.6"
-                        strokeLinejoin="round"
-                        mask={`url(#pyrShineMask${i})`} />
-
-                      {/* the hot core, tighter mask, pure white, pinned to real
-                          pixels so it stays a hard line at any viewport */}
-                      <path d={d} fill="none" stroke="#fff"
-                        vectorEffect="non-scaling-stroke" strokeWidth="1.6"
-                        strokeLinejoin="round"
-                        mask={`url(#pyrCoreMask${i})`} />
-
-                    </g>
-                  );
-                })}
-
-                <circle cx="300" cy="7" r="20" fill="url(#pyrApex)" />
-              </svg>
-
-              {/* The copy over the shape, laid out exactly as the reference
-                  render has it, and the two layouts differ:
-
-                  APEX — everything stacked and centred: icon, label, figure,
-                  caption. It has to be, since a triangle has no width to put
-                  anything beside anything else.
-
-                  BANDS — the icon sits to the LEFT of a left-aligned label +
-                  figure, that row centred as a group.
-
-                  No caption line: each tier is icon, label, figure. The
-                  caption strings stay in content.ts as `caption` — they came
-                  from the reference render rather than the copy doc, so nothing
-                  of the source is lost by not printing them. */}
-              {[...mechanism.pyramid].reverse().map((tier, i) => {
-                const driver = mechanism.pyramid.length - 1 - i;
-                return (
-                  <div className={`cso-tier cso-tier-${i + 1}`} key={tier.label}>
-                    <div className="cso-tier-row">
-                      <span className="cso-tier-ic" aria-hidden>
-                        <DriverGlyph i={driver} size={i === 0 ? 19 : 22} />
-                      </span>
-                      <span className="cso-tier-head">
-                        <span className="cso-tier-label">{tier.label}</span>
-                        <span className="cso-tier-pct">{tier.pct}</span>
-                      </span>
-                    </div>
-                  </div>
-                );
-              })}
-            </div>
-          </article>
         </div>
 
         {/* --- THE MATHS, as the comparison it always was ------------------

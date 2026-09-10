@@ -1,138 +1,139 @@
-import type { ReactNode } from "react";
+"use client";
+
+import { useState } from "react";
 import { asset } from "./asset-version";
-import { missing, successStories } from "./content";
-import { CtaLockup, SdpHead, Wrap } from "./sdp";
+import { results } from "./content";
+import { Wrap } from "./sdp";
 
 /**
- * BEAT 3/4 · PROOF — §6 proof-set crossed with §4 magnitude.
+ * BEAT 3/4 · PROOF · §6 proof-set crossed with §4 magnitude.
  *
- * The card anatomy follows Atul's reference render (5 Sep), top to bottom:
- * brand mark, brand name in tracked caps, lit rule, the figure, a one-line
- * description, a category chip, a second lit rule, then two outcome cells
- * split by a vertical rule.
+ * ── REBUILT 2026-09-10 (Atul) ─────────────────────────────────────────────
+ * This was three brand cards, most of whose slots were reserved placeholders
+ * because the source supplied three names and two figures. It is now the
+ * India / International results wall ported from the dfy-new funnel: same
+ * roster, same numbers, same two-region split, rebuilt in this funnel's own
+ * language rather than pasted in with its.
  *
- * What the SOURCE supplies is three names and two figures. Nothing else. So
- * every other slot renders as a named, sized placeholder rather than as
- * invented copy — this is the proof beat, and a fabricated description or
- * outcome here is precisely the claim we must never make. The card shows its
- * full designed shape and tells whoever fills it exactly what goes where.
+ * It is the same man's book of work. These are TGO's clients and the founder
+ * beat on this page is the story of building TGO, so the roster belongs here
+ * as much as it does there.
  *
- * Hardik Dhawal has no figure at all, so his card ships visibly incomplete
- * rather than quietly dropped: a proof section that hides its own gap is the
- * design version of a fabricated claim.
+ * ── WHY A TOGGLE AND NOT ONE LONG WALL ────────────────────────────────────
+ * Nineteen faces in one grid is a wall nobody reads, and the split is not
+ * cosmetic: a reader in Bengaluru and a reader in Berlin are each checking
+ * whether this works for people like them, and the answer is on a different
+ * card for each of them. Two buttons rather than a select, because there are
+ * exactly two states and both should be readable without opening anything.
+ *
+ * ── WHAT THE CARD DOES NOT DO ─────────────────────────────────────────────
+ * No play control. The dfy build renders an idle one on every card to say
+ * "this is a video", but no testimonial URLs are wired here, and a play mark
+ * over a still that cannot play is the same promise-with-nothing-behind-it
+ * this page refuses everywhere else. Add `video` to an entry and the control
+ * can come back with it.
+ *
+ * Sparse entries render short, not broken: several people have a role and no
+ * figure, a few a figure and no role, one has neither, one has no photograph.
+ * Inventing any of those on a proof beat is the one thing this section must
+ * never do.
  */
+
+type Story = {
+  readonly name: string;
+  readonly role?: string;
+  readonly result?: string;
+  readonly roi?: string;
+  readonly photo?: string;
+};
+
+/** Falls back to initials: an unrelated face is worse than no face. */
+const initials = (name: string) =>
+  name
+    .replace(/&/g, " ")
+    .split(/\s+/)
+    .filter(Boolean)
+    .slice(0, 2)
+    .map((w) => w[0]?.toUpperCase() ?? "")
+    .join("");
+
 export function SuccessStories() {
+  const [active, setActive] = useState<"india" | "international">("india");
+  const stories: readonly Story[] = results[active];
+
   return (
     <section className="sd-section sd-panel" id="results">
       <Wrap>
-        <SdpHead eyebrow="Results" title="Success Stories" />
-        <div className="cso-wins">
-          {successStories.map((s, i) => (
-            <article
-              className="sdp-card cso-win"
-              key={s.name}
-              data-sdp-reveal
-              style={{ "--d": `${0.06 * i}s` } as React.CSSProperties}
+        <div className="sdp-head">
+          <div className="sdp-eyebrow center">{results.eyebrow}</div>
+          <h2 className="sdp-h2">
+            {results.titleLead} <em className="fit-lit">{results.titleLit}</em>
+          </h2>
+          <p className="sdp-sub">{results.deck}</p>
+        </div>
+
+        <div className="cso-reg" role="tablist" aria-label="Where the results are from" data-sdp-reveal>
+          {results.tabs.map((t) => (
+            <button
+              key={t.id}
+              type="button"
+              role="tab"
+              aria-selected={active === t.id}
+              className={`cso-reg-btn${active === t.id ? " is-on" : ""}`}
+              onClick={() => setActive(t.id as "india" | "international")}
             >
-              {/* MARK, on a LIGHT PLATE. That is an asset decision, not a
-                  style one: TGO ships as a black wordmark on transparent and
-                  is invisible on obsidian, while FM4 and FAB are JPGs with
-                  baked white backgrounds that would read as bright white
-                  rectangles. A plate is the one treatment all three sit on
-                  honestly, with no image editing. When knockout versions
-                  (white on transparent) arrive, drop the plate and they sit
-                  straight on the card as in the reference. */}
-              <div className="cso-win-mark">
-                {s.logo ? (
-                  <span
-                    className="cso-win-plate"
-                    /* --logo-h is the file height needed for this mark to
-                       render at the shared 40px optical height, after its own
-                       built-in white margin is cancelled out. */
-                    style={{ "--logo-h": `${(40 / (s.logoTrim ?? 1)).toFixed(1)}px` } as React.CSSProperties}
-                  >
-                    <img src={asset(s.logo)} alt={s.name} loading="lazy" />
-                  </span>
-                ) : (
-                  <span className="cso-slot cso-slot-mark">{missing.storyLogo.label}</span>
-                )}
-              </div>
-
-              <div className="cso-win-name">{s.name}</div>
-
-              <span className="cso-win-rule" aria-hidden />
-
-              {/* FIGURE. The source sentence, whole, with its amount lit. */}
-              {s.result ? (
-                <p className="cso-win-figure">{litFigure(s.result, s.resultLit)}</p>
-              ) : (
-                <p className="cso-win-figure cso-win-figure-empty">
-                  <span className="cso-slot">{missing.storyResult.label}</span>
-                </p>
-              )}
-
-              {s.desc ? (
-                <p className="cso-win-desc">{s.desc}</p>
-              ) : (
-                <p className="cso-win-desc cso-win-desc-empty">
-                  <span className="cso-slot">{missing.storyDesc.label}</span>
-                </p>
-              )}
-
-              {s.tag ? (
-                <span className="cso-win-tag">{s.tag}</span>
-              ) : (
-                <span className="cso-win-tag cso-win-tag-empty">{missing.storyTag.label}</span>
-              )}
-
-              <span className="cso-win-rule" aria-hidden />
-
-              {/* OUTCOME CELLS. Two, split by the vertical cut of the house
-                  rule, exactly as in the reference. */}
-              <ul className="cso-win-outcomes">
-                {(s.outcomes ?? [null, null]).map((o, k) => (
-                  <li key={k}>
-                    <span className="cso-win-oc-ic" aria-hidden />
-                    <span className="cso-win-oc-copy">
-                      {o ? (
-                        <>
-                          <span className="l1">{o.l1}</span>
-                          <span className="l2">{o.l2}</span>
-                        </>
-                      ) : (
-                        <span className="cso-slot">{missing.storyOutcomes.label}</span>
-                      )}
-                    </span>
-                  </li>
-                ))}
-              </ul>
-            </article>
+              {t.label}
+            </button>
           ))}
         </div>
 
-        <div data-sdp-reveal style={{ "--d": ".18s" } as React.CSSProperties}>
-          <CtaLockup />
-        </div>
+        {/* Keyed on the region so React rebuilds the list rather than
+            reconciling nineteen cards into eighteen different ones, which is
+            what makes the switch read as a change of set instead of a flicker
+            of mismatched faces.
+
+            THE CARDS DO NOT USE `data-sdp-reveal`, and that is not an
+            oversight. RevealRoot collects those nodes ONCE on mount and
+            unobserves each one after it fires. Because this list is keyed, a
+            tab switch mounts nine nodes the observer has never seen, so
+            nothing ever adds `.vis` to them and `.sd-armed [data-sdp-reveal]`
+            leaves them at opacity 0: the second tab renders completely empty.
+            It is invisible on the first tab and total on the second, which is
+            the worst shape a bug can have.
+
+            So the entry animation is the list's own, in CSS, replayed by the
+            remount. That also makes the switch read better than the shared
+            reveal would: the set arrives as a set. */}
+        <ul className="cso-faces" key={active}>
+          {stories.map((s, i) => (
+            <li
+              className="cso-face"
+              key={s.name}
+              style={{ "--i": Math.min(i, 11) } as React.CSSProperties}
+            >
+              <div className="cso-face-art">
+                {s.photo ? (
+                  // eslint-disable-next-line @next/next/no-img-element
+                  <img src={asset(s.photo)} alt={s.name} loading="lazy" decoding="async" />
+                ) : (
+                  <span className="cso-face-initials" aria-hidden>
+                    {initials(s.name)}
+                  </span>
+                )}
+                <span className="cso-face-scrim" aria-hidden />
+
+                <div className="cso-face-foot">
+                  <p className="cso-face-name">{s.name}</p>
+                  {s.role ? <p className="cso-face-role">{s.role}</p> : null}
+                  <span className="cso-face-rule" aria-hidden />
+                  {s.result ? <p className="cso-face-result">{s.result}</p> : null}
+                  {s.roi ? <span className="cso-face-roi">{s.roi}</span> : null}
+                </div>
+              </div>
+            </li>
+          ))}
+        </ul>
       </Wrap>
     </section>
   );
-}
-
-/**
- * Lights the amount inside the sentence, leaving the sentence itself intact
- * and in its original order. Split rather than replace, so nothing is
- * re-parsed as markup; if the token is not found the sentence still renders
- * whole, so the copy can never be damaged by a stale highlight value.
- */
-function litFigure(sentence: string, token?: string): ReactNode[] {
-  if (!token) return [sentence];
-  const at = sentence.indexOf(token);
-  if (at === -1) return [sentence];
-  return [
-    sentence.slice(0, at),
-    <span className="cso-win-amount" key="amt">
-      {token}
-    </span>,
-    sentence.slice(at + token.length),
-  ];
 }
