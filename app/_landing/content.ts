@@ -51,7 +51,7 @@ export const hero = {
      still appear in it. Matched in order, first occurrence only. */
   headlineL1Lit: ["3X", "60 Days"],
   headlineL2: "With My Done-For-You 'Lead-to-Cash' System",
-  sub: "As your sales co-founder, I find exactly where your revenue is leaking, fix it by automating 70% of your sales process with custom-built AI systems, then get you (or your team) closing at up to 50% - even at 2X the price you charge today.",
+  sub: "I find exactly where your revenue is leaking, fix it by automating 70% of your sales process with custom-built AI systems, then get you (or your team) closing at up to 50% - even at 2X the price you charge today.",
 };
 
 export const cta = {
