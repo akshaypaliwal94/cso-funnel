@@ -52,6 +52,14 @@ export const hero = {
   headlineL1Lit: ["3X", "60 Days"],
   headlineL2: "With My Done-For-You 'Lead-to-Cash' System",
   sub: "I find exactly where your revenue is leaking, fix it by automating 70% of your sales process with custom-built AI systems, then get you (or your team) closing at up to 50% - even at 2X the price you charge today.",
+  /* The two phrases in the sub that carry the mechanism and the outcome. Same
+     convention as headlineL1Lit above: held as data, not as markup inside the
+     string, so the sub stays one verbatim, greppable, diffable sentence and a
+     stale token can never damage the copy — it just fails to light. */
+  subLit: [
+    "automating 70% of your sales process",
+    "closing at up to 50%",
+  ],
 };
 
 export const cta = {

@@ -728,6 +728,13 @@ h2.sdp-h2:not(:last-child){ margin-bottom:var(--space-1); }
    sentence, not a second typographic voice. */
 .sdp-lit{ color:var(--accent-text); font:inherit; }
 
+/* The sub's own highlight (2026-09-13). Not the headline's accent colour: the
+   H1 directly above already lights two tokens in it, and a third and fourth in
+   the same hue two lines down flattens the hierarchy instead of adding to it.
+   The sub sits in --text-secondary, so weight plus a lift to the bright text
+   colour is enough to pull a phrase forward out of its own line. */
+.sd-root .sdp-sub-lit{ font-weight:700; color:var(--bone); font-style:inherit; }
+
 /* Reveal — FAIL-OPEN (C7): content is visible until JS arms the page by
    putting .sd-armed on the root. If the script never runs, nothing is
    ever hidden. */
