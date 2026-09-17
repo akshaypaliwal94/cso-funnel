@@ -41,7 +41,7 @@ export function Hero() {
           data-sdp-reveal
           style={{ "--d": ".14s", maxWidth: "820px", fontSize: "16px" } as React.CSSProperties}
         >
-          {hero.sub}
+          {litten(hero.sub, hero.subLit, "sdp-sub-lit")}
         </p>
 
         <div data-sdp-reveal style={{ "--d": ".20s" } as React.CSSProperties}>
@@ -57,15 +57,20 @@ export function Hero() {
 }
 
 /**
- * Wraps each listed token in the headline with the warm accent, in order and
- * first-occurrence only, leaving the sentence itself untouched.
+ * Wraps each listed token in a sentence with `cls`, in order and
+ * first-occurrence only, leaving the sentence itself untouched. The headline
+ * uses it for the warm accent; the sub passes "sdp-sub-lit" for weight.
  *
  * Split rather than replace, so nothing is ever re-parsed as markup and a
  * token that appears twice ("3X" also opens line 2 of the maths later) cannot
  * light the wrong one. If a token is not found the sentence still renders
  * whole: the copy can never be damaged by a stale highlight list.
  */
-function litten(sentence: string, tokens: readonly string[]): ReactNode[] {
+function litten(
+  sentence: string,
+  tokens: readonly string[],
+  cls = "sdp-lit",
+): ReactNode[] {
   let rest = sentence;
   const out: ReactNode[] = [];
   tokens.forEach((t, i) => {
@@ -73,7 +78,7 @@ function litten(sentence: string, tokens: readonly string[]): ReactNode[] {
     if (at === -1) return;
     out.push(rest.slice(0, at));
     out.push(
-      <span className="sdp-lit" key={`${t}-${i}`}>
+      <span className={cls} key={`${t}-${i}`}>
         {t}
       </span>,
     );

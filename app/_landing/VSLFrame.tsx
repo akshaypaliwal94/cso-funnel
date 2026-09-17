@@ -38,9 +38,14 @@ const R2_ORIGIN = "https://pub-ad7f214986d245689e13bb48b2f2819e.r2.dev";
  *  content, so a new cut of the film is one filename to edit. */
 const VSL_FILE = "cso-vsl.mp4";
 
-/** Optional poster frame, once one exists. Until then the browser shows the
- *  film's own first frame under the disc. */
-const POSTER_SRC: string | null = null;
+/** The poster frame. Client-supplied 2026-09-13, exported to WebP at q90:
+ *  1.6MB of PNG is a bad thing to put in front of the hero's LCP, and 136KB
+ *  of WebP is the same picture.
+ *
+ *  The artwork carries its own play button, so when a poster is set the frame
+ *  gets `has-poster` and the skin's voltage disc is hidden. Two play buttons
+ *  stacked on one another is worse than either alone. */
+const POSTER_SRC: string | null = "/brand/vsl-poster.webp";
 
 export function VSLFrame() {
   const [playing, setPlaying] = useState(false);
@@ -54,7 +59,7 @@ export function VSLFrame() {
   };
 
   return (
-    <div className={`sdp-vsl is-file${playing ? " playing" : ""}`} id="vsl">
+    <div className={`sdp-vsl is-file${POSTER_SRC ? " has-poster" : ""}${playing ? " playing" : ""}`} id="vsl">
       <video
         ref={vid}
         src={`${R2_ORIGIN}/${VSL_FILE}`}
