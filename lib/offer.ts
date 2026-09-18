@@ -11,8 +11,14 @@
  * territory and app/_landing/content.ts is already the single source for every
  * string on the page, so the numeric price lives here and content.ts imports
  * `PRICE` for its `site.price`. There is still exactly ONE declaration of the
- * number, which is the whole point of the law. The only edit made to content.ts
- * was that one import.
+ * number, which is the whole point of the law.
+ *
+ * WHAT content.ts TAKES FROM HERE (extended 2026-09-18): `site.price`, and the
+ * price inside `cta.label` and `cta.note`. Those last two were still typed by
+ * hand and are the two the reader actually reads, the button and the refund
+ * sentence beneath it, so the number reached the page from two directions at
+ * once. It now reaches it from one. Nothing downstream of this file writes the
+ * figure literally.
  *
  * THE GUARD IS ON A POSITIVE NUMBER, never on null. `??` does not catch an
  * empty string, and .env.example ships every key blank, so a copied-but-

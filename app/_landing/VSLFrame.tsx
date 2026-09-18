@@ -2,6 +2,8 @@
 
 import { useRef, useState } from "react";
 
+import { r2 } from "./r2";
+
 /**
  * The hero's focal object (§8 focal media, blueprint beat 1).
  *
@@ -30,12 +32,10 @@ import { useRef, useState } from "react";
  * is what it looks like, the whole stage is what you can hit.
  */
 
-/** The R2 public bucket origin, client-supplied 2026-09-10. */
-const R2_ORIGIN = "https://pub-ad7f214986d245689e13bb48b2f2819e.r2.dev";
-
-/** The object key inside that bucket. Client-supplied 2026-09-10.
- *  Kept apart from the origin: the bucket is infrastructure and the file is
- *  content, so a new cut of the film is one filename to edit. */
+/** The object key inside the R2 bucket. Client-supplied 2026-09-10.
+ *  Kept apart from the origin (now in ./r2, shared with the results wall): the
+ *  bucket is infrastructure and the file is content, so a new cut of the film
+ *  is one filename to edit. */
 const VSL_FILE = "cso-vsl.mp4";
 
 /** The poster frame. Client-supplied 2026-09-13, exported to WebP at q90:
@@ -62,7 +62,7 @@ export function VSLFrame() {
     <div className={`sdp-vsl is-file${POSTER_SRC ? " has-poster" : ""}${playing ? " playing" : ""}`} id="vsl">
       <video
         ref={vid}
-        src={`${R2_ORIGIN}/${VSL_FILE}`}
+        src={r2(VSL_FILE)}
         poster={POSTER_SRC ?? undefined}
         controls={playing}
         playsInline

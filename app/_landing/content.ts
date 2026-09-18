@@ -71,8 +71,18 @@ export const cta = {
      directly beneath it already says the ₹197 is refunded, so the button was
      making the reassurance twice in the space of two lines. The button now
      carries the action and the price; the note carries the reassurance. */
-  label: "Book Your 1:1 Diagnostic Call With Akshay - ₹197",
-  note: "This is a diagnostic session — if we're not the right fit, your ₹197 is refunded",
+  /* THE PRICE IS INTERPOLATED, NOT TYPED (2026-09-18). These two strings are
+     the last places the number was still written by hand, and they are the two
+     the reader actually reads: `label` is on every button on the page and
+     `note` is the refund sentence under them, reprinted on the checkout, the
+     thank-you and the refund policy. Set NEXT_PUBLIC_PRICE_RUPEES to anything
+     but 197 with these hardcoded and the buttons kept promising the old price
+     while Razorpay charged the new one.
+
+     THE WORDS ARE OTHERWISE VERBATIM, em dash included: see the note at the
+     top of this file. Only the figure moved. */
+  label: `Book Your 1:1 Diagnostic Call With Akshay - ${PRICE}`,
+  note: `This is a diagnostic session — if we're not the right fit, your ${PRICE} is refunded`,
 };
 
 /* ------------------------------------------------------------ FEATURED --- */
@@ -122,12 +132,16 @@ export const featured = [
    as much as it does there. Nothing was re-voiced: every name, role, result
    and multiple is carried across exactly as written.
 
-   THE DATA IS DELIBERATELY LOOSE. Several people have a role and no number,
-   a few a number and no role, one has neither and one has no photograph. The
-   card renders what is present rather than reserving empty slots, so a sparse
-   entry reads as a short card instead of a broken one. Filling the gaps with
-   invented roles or figures on a PROOF beat is the one thing this section
-   must never do. */
+   EVERY ENTRY IS NOW A COMPOSED CARD (2026-09-18). The artwork in both regions
+   carries the name, role, figure and multiple typeset into the image, so the
+   card no longer prints any of them: see the note in SuccessStories.tsx.
+
+   THE FIELDS BELOW ARE STILL LOAD-BEARING. They are the alt text, and the only
+   machine readable copy of figures that are otherwise locked inside a picture.
+   They are transcribed FROM the artwork, never the other way round: if a card
+   and its row disagree, the card is right and the row is stale. Filling a gap
+   with an invented role or figure on a PROOF beat is the one thing this
+   section must never do. */
 export const results = {
   eyebrow: "Client results",
   titleLead: "They built it.",
@@ -138,27 +152,29 @@ export const results = {
     { id: "international", label: "International" },
   ],
   india: [
-    { name: "Sourobh Kulkorni", role: "Leading Spinal Expert", result: "5L/month → 44L/month", roi: "4x ROI", photo: "/testimonials/india/sourobh.webp" },
-    { name: "Nimisha Maniar", role: "Founder at Studio Aware", result: "50L/year → 2 CR/year", roi: "33x ROI", photo: "/testimonials/india/nimisha.webp" },
-    { name: "Aman & Zohra", role: "Natural Fertility Experts", result: "2L/month → 15L/month", roi: "7x ROI", photo: "/testimonials/india/aman-zohra.webp" },
-    { name: "Ankita Barasara", role: "Postpartum Healing Expert", result: "1L/month → 4L/month", roi: "10x ROI", photo: "/testimonials/india/ankita.webp" },
-    { name: "Hardik Dhawal", role: "Erectile Dysfunction Expert", result: "1L/month → 4L/month", roi: "8x ROI", photo: "/testimonials/india/hardik.webp" },
-    { name: "Prashanth Sharma", role: "Fat Loss Expert", result: "0 → 163 online clients in 5 months", photo: "/testimonials/india/prashant.webp" },
-    { name: "Anish & Shubham", role: "Science Driven Performance", result: "1L/month → 8L/month", roi: "5x ROI", photo: "/testimonials/india/anish-shubham.webp" },
-    { name: "Hirav Mehta", role: "Metabolism Expert", result: "Multiple 6-figures monthly, on auto-pilot", photo: "/testimonials/india/hirav.webp" },
-    { name: "Sunny Bhamra", role: "India’s #1 TRT Expert", result: "4L in 10 weeks", roi: "5x ROI", photo: "/testimonials/india/sunny.webp" },
-    { name: "Ayush Thakur", role: "Body Transformation Coach", result: "10x’ed his online revenue in 6 months", photo: "/testimonials/india/ayush.webp" },
+    { name: "Sourobh Kulkorni", role: "Leading Spinal Expert", result: "5L/month → 44L/month", roi: "4x ROI", photo: "/testimonials/india/sourobh.webp", card: true, lead: true, video: "sourobh-testimonial.mp4" },
+    { name: "Nimisha Maniar", role: "Founder at Studio Aware", result: "50L/year → 2 CR/year", roi: "33x ROI", photo: "/testimonials/india/nimisha.webp", card: true },
+    { name: "Aman & Zohra", role: "Natural Fertility Experts", result: "2L/month → 15L/month", roi: "7x ROI", photo: "/testimonials/india/aman-zohra.webp", card: true },
+    { name: "Ankita Barasara", role: "Postpartum Healing Expert", result: "1L/month → 4L/month", roi: "10x ROI", photo: "/testimonials/india/ankita.webp", card: true },
+    { name: "Hardik Dhawal", role: "Erectile Dysfunction Expert", result: "1L/month → 4L/month", roi: "8x ROI", photo: "/testimonials/india/hardik.webp", card: true },
+    { name: "Prashanth Sharma", role: "Fat Loss Expert", result: "0 → 163 online clients in 5 months", photo: "/testimonials/india/prashant.webp", card: true },
+    { name: "Anish & Shubham", role: "Science Driven Performance", result: "1L/month → 8L/month", roi: "5x ROI", photo: "/testimonials/india/anish-shubham.webp", card: true },
+    { name: "Hirav Mehta", role: "Metabolism Expert", result: "Multiple 6-figures monthly, on auto-pilot", photo: "/testimonials/india/hirav.webp", card: true },
+    { name: "Sunny Bhamra", role: "India’s #1 TRT Expert", result: "4L in 10 weeks", roi: "5x ROI", photo: "/testimonials/india/sunny.webp", card: true },
+    { name: "Ayush Thakur", role: "Body Transformation Coach", result: "10x’ed his online revenue in 6 months", photo: "/testimonials/india/ayush.webp", card: true },
   ],
   international: [
-    { name: "Marcus Mackay", role: "High Performance Coach", result: "$30K/month → $100K/month", roi: "7x ROI", photo: "/testimonials/international/marcus.webp" },
-    { name: "Luke", result: "$50K/month in the first 30 days", photo: "/testimonials/international/luke.webp" },
-    { name: "Marco Span", result: "15K Euros in the first 4 weeks", photo: "/testimonials/international/marco.webp" },
-    { name: "Rebecca Peri", role: "Trauma Healing Expert", result: "$5.5K in the first 4 weeks", photo: "/testimonials/international/rebecca.webp" },
-    { name: "Nikki Barta", result: "0 → 8 high-ticket clients in 4 weeks", photo: "/testimonials/international/nikki.webp" },
-    { name: "Diego Carrete", role: "Wellness Expert", photo: "/testimonials/international/diego.webp" },
-    { name: "Paul Bradley" },
-    { name: "Stephen Campollo", photo: "/testimonials/international/stephen.webp" },
-    { name: "Erin McDermot", photo: "/testimonials/international/erin.webp" },
+    /* LEADS THE REGION. Same treatment as Sourobh on the India tab: a 16:9 cut
+       of the card, full width on its own row, with the film behind the play
+       mark. It sits first because `lead` sets the SPAN, not the order. */
+    { name: "Diego Carrete", role: "Wellness Expert", result: "10x'ed his business in 1 year", photo: "/testimonials/international/diego.webp", card: true, lead: true, video: "diego-testimonial.mp4" },
+    { name: "Marcus Mackay", role: "High Performance Coach", result: "$30K/month → $100K/month", roi: "7x ROI", photo: "/testimonials/international/marcus.webp", card: true },
+    { name: "Luke Briggs", result: "$50K/month in the first 30 days", photo: "/testimonials/international/luke.webp", card: true },
+    { name: "Marco Span", role: "Italian Health Expert", result: "€15K in the first 4 weeks", photo: "/testimonials/international/marco.webp", card: true },
+    { name: "Rebecca Peri", role: "Trauma Healing Expert", result: "$5.5K in the first 4 weeks", photo: "/testimonials/international/rebecca.webp", card: true },
+    { name: "Nikki Barta", role: "Fitness Business Expert", result: "0 → 8 high-ticket clients in 4 weeks", photo: "/testimonials/international/nikki.webp", card: true },
+    { name: "Stephen Campollo", role: "Men's Fitness Expert", result: "$30K/month within 3 months", photo: "/testimonials/international/stephen.webp", card: true },
+    { name: "Erin McDermot", role: "Wellness Expert", result: "Earned $62K in just 3 months", photo: "/testimonials/international/erin.webp", card: true },
   ],
 } as const;
 
