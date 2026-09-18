@@ -3066,14 +3066,20 @@ h2.sdp-h2:not(:last-child){ margin-bottom:var(--space-1); }
 }
 
 /* ── the wall ─────────────────────────────────────────────────────────
-   Four up on a wide screen. A 9:16 box three-across stands taller than a
-   laptop viewport, which is the reason the dfy build settled on four and the
-   reason this one does too. */
+   Three up on a wide screen (2026-09-18, Atul). It was four, on the dfy
+   build's reasoning that a 9:16 box three-across stands taller than a laptop
+   viewport. That reasoning died with the artwork: the India set is 1:1 now, so
+   three-across is a SHORTER row than four-across of a portrait box was, and
+   the bigger cell is what lets the figure typeset into each card stay
+   readable rather than shrinking with the column.
+
+   Neither region divides by three: India is ten (one alone on a fourth row),
+   International eight (two on a third). */
 .cso-faces{
   list-style:none; margin:0; padding:0;
-  display:grid; grid-template-columns:repeat(4,1fr); gap:16px;
+  display:grid; grid-template-columns:repeat(3,1fr); gap:16px;
 }
-@media (max-width:1000px){ .cso-faces{ grid-template-columns:repeat(3,1fr); gap:14px; } }
+@media (max-width:1000px){ .cso-faces{ gap:14px; } }
 @media (max-width:720px){  .cso-faces{ grid-template-columns:repeat(2,1fr); gap:12px; } }
 
 /* The list's own entry, not the page's shared reveal. See the note in
@@ -3090,8 +3096,95 @@ h2.sdp-h2:not(:last-child){ margin-bottom:var(--space-1); }
   from{ opacity:0; transform:translateY(14px); }
   to{   opacity:1; transform:none; }
 }
+
+/* ── the lead card (2026-09-18) ───────────────────────────────────────
+   One entry takes the whole first row at 16:9 and the rest flow from the
+   second. It spans `1 / -1` rather than a counted number of tracks so it stays
+   full width when the grid drops to two columns on mobile.
+
+   It is a SEPARATE 16:9 FILE, not the square one stretched: at this width the
+   square's type would be blown up past its own resolution. The flag only sets
+   the span, so a lead has to be first in the data to lead. */
+.cso-face.is-lead{ grid-column:1 / -1; }
+.cso-face.is-lead .cso-face-art{ aspect-ratio:16/9; }
+
+/* ── the play mark (2026-09-18) ───────────────────────────────────────
+   Centred on the card. The hit area is the BUTTON and the disc is inside it,
+   so the ring animation can overflow the disc without growing the target.
+
+   `.is-inert` is the same mark with no button around it, for a lead whose film
+   is not wired yet: it must not take a tab stop or a pointer cursor, because
+   the one thing worse than no play mark is one that answers a click with
+   nothing. */
+.cso-play{
+  position:absolute; z-index:4; inset:0; margin:auto;
+  width:88px; height:88px; display:grid; place-items:center;
+  padding:0; border:0; background:none; cursor:pointer;
+  color:var(--ivory);
+}
+.cso-play.is-inert{ cursor:default; pointer-events:none; }
+
+.cso-play-mark{
+  position:relative; display:grid; place-items:center;
+  width:72px; height:72px; border-radius:50%;
+  background:rgba(var(--voltage-rgb),.92);
+  box-shadow:0 8px 30px rgba(var(--voltage-rgb),.55), 0 0 0 1px rgba(255,255,255,.22) inset;
+  transition:transform .3s cubic-bezier(.2,.8,.2,1), box-shadow .3s;
+}
+/* Optically centred: a triangle's visual mass sits left of its bounding box,
+   so a mathematically centred one always reads as pushed back. */
+.cso-play-mark > svg{ width:34px; height:34px; margin-left:3px; }
+
+/* Two rings on the same keyframes, the second half a cycle behind, which is
+   what makes it read as a repeating pulse rather than a single throb. */
+.cso-play-ring{
+  position:absolute; inset:0; border-radius:50%;
+  border:2px solid rgba(var(--voltage-rgb),.55);
+  animation:csoPlayPulse 2.4s cubic-bezier(.2,.6,.3,1) infinite;
+}
+.cso-play-ring:nth-child(2){ animation-delay:1.2s; }
+@keyframes csoPlayPulse{
+  0%{   transform:scale(1);   opacity:.75; }
+  70%{  transform:scale(1.9); opacity:0; }
+  100%{ transform:scale(1.9); opacity:0; }
+}
+
+.cso-play:hover .cso-play-mark,
+.cso-play:focus-visible .cso-play-mark{
+  transform:scale(1.08);
+  box-shadow:0 12px 40px rgba(var(--voltage-rgb),.7), 0 0 0 1px rgba(255,255,255,.35) inset;
+}
+.cso-play:focus-visible{ outline:2px solid var(--ivory); outline-offset:6px; border-radius:50%; }
+
+/* The film itself, once opened: same box, same corners as the still it replaced. */
+.cso-face-video{
+  position:absolute; inset:0; z-index:4;
+  width:100%; height:100%; object-fit:cover;
+  display:block; background:#000;
+}
+
+@media (max-width:720px){
+  .cso-play{ width:64px; height:64px; }
+  .cso-play-mark{ width:54px; height:54px; }
+  .cso-play-mark > svg{ width:26px; height:26px; }
+}
+
+/* The pulse is decoration on a control that is already obvious. It goes. */
+@media (prefers-reduced-motion:reduce){
+  .cso-play-ring{ animation:none; opacity:0; }
+  .cso-play-mark{ transition:none; }
+  .cso-play:hover .cso-play-mark{ transform:none; }
+}
+/* 1:1 IS THE WALL'S RATIO NOW (2026-09-18). It was 9/16 for cutout portraits,
+   and every cutout in both regions has since been replaced with square
+   composed artwork.
+
+   Nothing currently renders this frame: every entry in both regions is now a
+   composed card that strips it below. It is kept, at the artwork's ratio, so
+   that an entry added later without a finished card still lands in the grid
+   square rather than standing a head taller than everything around it. */
 .cso-face-art{
-  position:relative; aspect-ratio:9/16; overflow:hidden;
+  position:relative; aspect-ratio:1/1; overflow:hidden;
   border-radius:var(--r);
   border:1px solid transparent;
   background:
@@ -3105,6 +3198,26 @@ h2.sdp-h2:not(:last-child){ margin-bottom:var(--space-1); }
   background:var(--edge-line-soft); filter:var(--edge-halo-soft); }
 .cso-face-art:hover{ transform:translateY(-4px); border-color:rgba(var(--voltage-rgb),.55); }
 .cso-face-art > img{ position:absolute; inset:0; width:100%; height:100%; object-fit:cover; display:block; }
+
+/* ── composed cards (2026-09-18) ──────────────────────────────────────
+   Both regions are finished 1:1 cards now, each with its own rounded frame,
+   its own lit edge and its own type. So this variant TAKES THE FRAME OFF
+   rather than adding to it: the border, the ground, the drop shadow and the
+   ::before edge line would all sit a few pixels outside artwork that already
+   draws them, and a frame around a frame is the one thing that makes supplied
+   artwork look pasted on.
+
+   The hover lift stays, because it belongs to the wall rather than to the
+   artwork. */
+.cso-face-art.is-card{
+  border-color:transparent;
+  background:none;
+  box-shadow:none;
+  border-radius:0;
+}
+.cso-face-art.is-card::before{ display:none; }
+.cso-face-art.is-card:hover{ border-color:transparent; }
+.cso-face-art.is-card > img{ object-fit:contain; }
 
 /* No photograph: initials on the card's own ground rather than a stock face. */
 .cso-face-initials{
