@@ -43,13 +43,19 @@ export const hero = {
   callout:
     "For Coaches, Service Providers & Agencies making min. ₹3L/month already",
   headlineL1:
-    "I'll 3X Your Revenue in 60 Days - As Your Fractional Sales Co-Founder,",
-  /* The two tokens in line 1 that carry the promise, lit in the warm accent.
+    "I'll 3X Your Revenue - As Your Fractional Sales Co-Founder,",
+  /* The token in line 1 that carries the promise, lit in the warm accent.
      Held as data rather than as markup inside the string, so the headline above
      stays one verbatim, greppable, diffable sentence: if the copy changes, the
      string changes in one place and these keep working as long as the words
-     still appear in it. Matched in order, first occurrence only. */
-  headlineL1Lit: ["3X", "60 Days"],
+     still appear in it. Matched in order, first occurrence only.
+
+     "60 Days" WAS THE SECOND TOKEN, removed 2026-09-18 with the timeframe
+     itself. It has to come out of this list as well as out of the headline: a
+     token that no longer appears in the string does not throw, it just quietly
+     fails to light, so the headline would have kept reading correctly while
+     half its emphasis went missing. */
+  headlineL1Lit: ["3X"],
   headlineL2: "With My Done-For-You 'Lead-to-Cash' System",
   sub: "I find exactly where your revenue is leaking, fix it by automating 70% of your sales process with custom-built AI systems, then get you (or your team) closing at up to 50% - even at 2X the price you charge today.",
   /* The phrases in the sub that carry the problem, the mechanism and the
@@ -299,7 +305,7 @@ export const successStories: {
 /* ---------------------------------------------------------- MECHANISM --- */
 
 export const mechanism = {
-  headline: "I'll 3X your revenue in 60 days. Here is the system I install",
+  headline: "I'll 3X your revenue. Here is the system I install",
   sub: "It comes down to three numbers:",
   threeNumbers: [
     "A 50% lift in how many of your leads say yes",
