@@ -3,7 +3,7 @@ import crypto from "crypto";
 import { NextResponse } from "next/server";
 
 import { CHECKOUT_CONFIG, isTestMode } from "@/lib/checkout-config";
-import { packContext } from "@/lib/order-notes";
+import { DFY_V2_KIND, packContext } from "@/lib/order-notes";
 import { readClientIp, readClientUserAgent } from "@/lib/request-signals";
 
 /**
@@ -81,7 +81,9 @@ export async function POST(req: Request) {
      Nothing further can be added at this level; new fields go into the packed
      context instead, which has headroom. */
   const notes: Record<string, string> = {
-    kind: "diagnostic_call",
+    /* Which funnel sold it. The webhook reads this to send DFYPurchase rather
+       than Purchase for /dfy-v2 orders. */
+    kind: body.funnel === "dfy_v2" ? DFY_V2_KIND : "diagnostic_call",
     lead_id: leadId,
     name: truncate(`${firstName} ${lastName}`.trim()),
     email: truncate(email),
@@ -92,6 +94,7 @@ export async function POST(req: Request) {
       lastName,
       city,
       country,
+      dialCode: truncate(body.dialCode, 6),
       externalId: truncate(body.externalId, 64),
       fbc: truncate(body.fbc),
       fbp: truncate(body.fbp),

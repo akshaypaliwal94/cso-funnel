@@ -554,16 +554,19 @@ body{ margin:0; overflow-x:hidden;
    as "the section is not centred" and is impossible to spot in the component's
    own CSS. `margin-block` cannot reach the inline axis, so the collision cannot
    happen. The UA default for h1-h4 has no inline margin, so nothing is lost. */
-.sd-root h1,.sd-root h2,.sd-root h3,.sd-root h4{ font-family:var(--fh); color:var(--ivory);
+/* The :where(:not(.dfy-v2-root *)) guards keep these base rules off the
+   /dfy-v2 pages, which carry their own skin. :where() adds zero specificity,
+   so the cascade on every other page is unchanged. */
+.sd-root h1:where(:not(.dfy-v2-root *)),.sd-root h2:where(:not(.dfy-v2-root *)),.sd-root h3:where(:not(.dfy-v2-root *)),.sd-root h4:where(:not(.dfy-v2-root *)){ font-family:var(--fh); color:var(--ivory);
   line-height:1.05; letter-spacing:.01em; font-weight:400; margin-block:0 .5em; }
-.sd-root p{ font-family:var(--fb); color:var(--text-primary); margin-bottom:1em; }
-.sd-root strong,.sd-root b{ font-weight:700; color:var(--ivory); }
+.sd-root p:where(:not(.dfy-v2-root *)){ font-family:var(--fb); color:var(--text-primary); margin-bottom:1em; }
+.sd-root strong:where(:not(.dfy-v2-root *)),.sd-root b:where(:not(.dfy-v2-root *)){ font-weight:700; color:var(--ivory); }
 /* Same rule as the headings above, same reason: `.sd-root ul` (0,1,1) beat
    a class-centred block (0,1,0) and killed its `margin:0 auto`, so a
    max-width element sat flush left in a wider column. UA `ul` has no inline margin, only
    a padding-left, which the padding reset already handles. */
-.sd-root ul{ margin-block:0; padding:0; list-style:none; }
-.sd-root :focus-visible{ outline:2px solid var(--focus-ring); outline-offset:3px; border-radius:4px; }
+.sd-root ul:where(:not(.dfy-v2-root *)){ margin-block:0; padding:0; list-style:none; }
+.sd-root :focus-visible:where(:not(.dfy-v2-root *)){ outline:2px solid var(--focus-ring); outline-offset:3px; border-radius:4px; }
 
 /* ---- BANDS. Dark is the ground; light is the rare accent ------------- */
 /* The neutral bands carry an ambient COBALT wash rather than a flat fill.

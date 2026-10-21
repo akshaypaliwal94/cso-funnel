@@ -12,6 +12,9 @@ import { collectSignals } from "@/lib/client-signals";
  *   pay tap, sheet opening InitiateCheckout   immediately before rzp.open()
  *   payment captured       Purchase           the Razorpay webhook, only
  *
+ * /dfy-v2 fires the same four as DFYViewContent, DFYAddToCart,
+ * DFYInitiateCheckout and DFYPurchase.
+ *
  * There is no GA4 leg anywhere: Atul's scope call for this build is Meta and
  * payments, Clarity for session replay, no Google Analytics. So there is no
  * begin_checkout, no add_payment_info and no browser purchase event, and the
@@ -101,4 +104,21 @@ export function trackAddToCart() {
 /** Details valid and the payment sheet is opening. This is the real intent. */
 export function trackInitiateCheckout(person: Person) {
   capi("InitiateCheckout", person);
+}
+
+/* The /dfy-v2 funnel's equivalents: same moments and rules, its own event
+   names on the shared pixel. Its Purchase (DFYPurchase) comes from the webhook. */
+
+export function trackDfyViewContent() {
+  once("dfy_view_content", () => {
+    capi("DFYViewContent");
+  });
+}
+
+export function trackDfyAddToCart() {
+  capi("DFYAddToCart");
+}
+
+export function trackDfyInitiateCheckout(person: Person) {
+  capi("DFYInitiateCheckout", person);
 }

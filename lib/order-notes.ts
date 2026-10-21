@@ -23,6 +23,9 @@
  * why the five human fields stay outside them.
  */
 
+/** The `kind` note on a /dfy-v2 order. Its Purchase is sent as DFYPurchase. */
+export const DFY_V2_KIND = "dfy_v2_call";
+
 /** The machine-readable half of the order, carried in `x0` to `x9`. */
 export type OrderContext = {
   createdAt: string; // ISO 8601, stamped when the order was created
@@ -30,6 +33,7 @@ export type OrderContext = {
   lastName: string;
   city: string;
   country: string; // ISO 3166-1 alpha-2, lowercase
+  dialCode: string; // e.g. "+91"; /dfy-v2 only, for its Pabbly payload
   externalId: string;
   fbc: string;
   fbp: string;
@@ -51,6 +55,7 @@ export const EMPTY_CONTEXT: OrderContext = {
   lastName: "",
   city: "",
   country: "",
+  dialCode: "",
   externalId: "",
   fbc: "",
   fbp: "",
@@ -92,6 +97,7 @@ const OTHER_CAPS: Partial<Record<keyof OrderContext, number>> = {
   lastName: 80,
   city: 80,
   country: 2,
+  dialCode: 6,
   externalId: 64,
   fbc: 255,
   fbp: 128,
