@@ -64,8 +64,10 @@ export function Featured() {
                   src={asset(p.src)}
                   alt={copy === 0 ? p.name : ""}
                   aria-hidden={copy === 1 || undefined}
-                  /* React 18 only writes `inert` as a string; true warns. */
-                  {...(copy === 1 ? { inert: "" } : {})}
+                  /* React 18 only renders inert from a string (true warns),
+                     while its types demand a boolean; the cast bridges the two.
+                     Revisit on React 19, where inert={true} is correct. */
+                  {...(copy === 1 ? ({ inert: "" } as object) : {})}
                   style={{ "--logo-h": `${p.h}px` } as React.CSSProperties}
                   width={p.w}
                   height={p.nh}
