@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 
-import { CHECKOUT_CONFIG, capiReady } from "@/lib/checkout-config";
+import { CHECKOUT_CONFIG, capiReady, metaFor } from "@/lib/checkout-config";
 import { sendCapiEvent, sha256Hex, type SendableEvent } from "@/lib/meta-capi";
 
 /**
@@ -19,25 +19,20 @@ import { sendCapiEvent, sha256Hex, type SendableEvent } from "@/lib/meta-capi";
  * webhook's equivalents have to travel via the order notes, because that
  * request comes from Razorpay. See lib/request-signals.ts.
  */
-const ALLOWED: SendableEvent[] = [
-  "ViewContent",
-  "AddToCart",
-  "InitiateCheckout",
-  "DFYViewContent",
-  "DFYAddToCart",
-  "DFYInitiateCheckout",
-];
+const ALLOWED: SendableEvent[] = ["ViewContent", "AddToCart", "InitiateCheckout"];
 
 export async function POST(req: Request) {
-  if (!capiReady()) {
-    return NextResponse.json({ ok: false, reason: "capi-not-configured" });
-  }
-
   let body: Record<string, unknown>;
   try {
     body = await req.json();
   } catch {
     return NextResponse.json({ ok: false, reason: "bad-json" }, { status: 400 });
+  }
+
+  /* /dfy-v2 pages tag their events; they go to that funnel's own pixel. */
+  const funnel = body.funnel === "dfy_v2" ? "dfy_v2" : "main";
+  if (!capiReady(funnel)) {
+    return NextResponse.json({ ok: false, reason: "capi-not-configured" });
   }
 
   const eventName = String(body.eventName ?? "") as SendableEvent;
@@ -57,8 +52,8 @@ export async function POST(req: Request) {
   const eventId = sha256Hex(`${seed}|${eventName}`);
 
   const result = await sendCapiEvent({
-    pixelId: CHECKOUT_CONFIG.meta.pixelId,
-    accessToken: CHECKOUT_CONFIG.meta.accessToken,
+    pixelId: metaFor(funnel).pixelId,
+    accessToken: metaFor(funnel).accessToken,
     eventName,
     eventId,
     eventSourceUrl:

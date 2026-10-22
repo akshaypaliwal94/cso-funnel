@@ -70,15 +70,11 @@ export type StandardEvent =
  * an event name, and the event name is one of the surfaces a dataset is
  * classified on.
  *
- * The DFY* events are the /dfy-v2 funnel's own names on this shared pixel
- * (Atul, 2026-10-21), so its traffic and sales stay separable from the main
- * funnel's standard events. DFYPurchase is sent by the webhook only.
+ * `sales` is an exact duplicate of every /dfy-v2 Purchase, kept as a backup
+ * (Atul, 2026-10-22). It is sent only by the webhook, alongside Purchase,
+ * through `alsoAs`, never on its own.
  */
-export type CustomEvent =
-  | "DFYViewContent"
-  | "DFYAddToCart"
-  | "DFYInitiateCheckout"
-  | "DFYPurchase";
+export type CustomEvent = "sales";
 
 export type SendableEvent = StandardEvent | CustomEvent;
 
@@ -162,27 +158,28 @@ export async function sendCapiEvent(params: {
      uses it for its own deduplication of a purchase across sources. */
   orderId?: string;
   testEventCode?: string;
+  /** Extra names to send the IDENTICAL event under, in the same request. */
+  alsoAs?: SendableEvent[];
 }): Promise<{ ok: boolean; status: number; body: unknown }> {
+  const event = {
+    event_name: params.eventName,
+    event_time: Math.floor(Date.now() / 1000),
+    event_id: params.eventId,
+    event_source_url: originOnly(params.eventSourceUrl),
+    action_source: "website",
+    user_data: buildUserData(params.user),
+    /* Nothing may be added here without the same review these three got.
+       See the classification note at the top of this file: every key below
+       is a number or an opaque id, and that is the property that keeps
+       this dataset unclassified. */
+    custom_data: {
+      currency: params.currency,
+      value: params.valueRupees,
+      ...(params.orderId && { order_id: params.orderId }),
+    },
+  };
   const body = {
-    data: [
-      {
-        event_name: params.eventName,
-        event_time: Math.floor(Date.now() / 1000),
-        event_id: params.eventId,
-        event_source_url: originOnly(params.eventSourceUrl),
-        action_source: "website",
-        user_data: buildUserData(params.user),
-        /* Nothing may be added here without the same review these three got.
-           See the classification note at the top of this file: every key below
-           is a number or an opaque id, and that is the property that keeps
-           this dataset unclassified. */
-        custom_data: {
-          currency: params.currency,
-          value: params.valueRupees,
-          ...(params.orderId && { order_id: params.orderId }),
-        },
-      },
-    ],
+    data: [event, ...(params.alsoAs ?? []).map((name) => ({ ...event, event_name: name }))],
     ...(params.testEventCode && { test_event_code: params.testEventCode }),
   };
 

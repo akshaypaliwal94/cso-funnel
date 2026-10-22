@@ -253,7 +253,7 @@ const CheckoutContent: React.FC = () => {
     if (errors.phone) setErrors((prev) => ({ ...prev, phone: '' }));
   };
 
-  // Checkout arrival: DFYAddToCart, ref-guarded against StrictMode's double run.
+  // Checkout arrival: AddToCart (to the /dfy-v2 pixel), ref-guarded against StrictMode's double run.
   const arrived = useRef(false);
   useEffect(() => {
     if (arrived.current) return;
@@ -325,7 +325,7 @@ const CheckoutContent: React.FC = () => {
         },
         theme: { color: '#FF6A00' },
         modal: { ondismiss: () => setIsLoading(false) },
-        // DFYPurchase is fired by the Razorpay webhook, not here: UPI payers often
+        // Purchase is fired by the Razorpay webhook, not here: UPI payers often
         // never return to this tab.
         handler: (r: { razorpay_payment_id: string }) => {
           const qs = new URLSearchParams(queryString);

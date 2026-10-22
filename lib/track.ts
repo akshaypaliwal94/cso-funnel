@@ -12,8 +12,8 @@ import { collectSignals } from "@/lib/client-signals";
  *   pay tap, sheet opening InitiateCheckout   immediately before rzp.open()
  *   payment captured       Purchase           the Razorpay webhook, only
  *
- * /dfy-v2 fires the same four as DFYViewContent, DFYAddToCart,
- * DFYInitiateCheckout and DFYPurchase.
+ * /dfy-v2 fires the same four standard events to its own pixel: its calls
+ * carry funnel "dfy_v2", and its orders kind dfy_v2_call for the webhook.
  *
  * There is no GA4 leg anywhere: Atul's scope call for this build is Meta and
  * payments, Clarity for session replay, no Google Analytics. So there is no
@@ -37,13 +37,13 @@ import { collectSignals } from "@/lib/client-signals";
  */
 
 /** Fire and forget: analytics must never block or fail a click. */
-function capi(eventName: string, person: Person = {}) {
+function capi(eventName: string, person: Person = {}, funnel?: "dfy_v2") {
   const s = collectSignals();
   try {
     void fetch("/api/meta/event", {
       method: "POST",
       headers: { "content-type": "application/json" },
-      body: JSON.stringify({ eventName, ...s, ...person }),
+      body: JSON.stringify({ eventName, ...s, ...person, ...(funnel && { funnel }) }),
       keepalive: true, // survives the navigation a CTA click causes
     });
   } catch {
@@ -106,19 +106,19 @@ export function trackInitiateCheckout(person: Person) {
   capi("InitiateCheckout", person);
 }
 
-/* The /dfy-v2 funnel's equivalents: same moments and rules, its own event
-   names on the shared pixel. Its Purchase (DFYPurchase) comes from the webhook. */
+/* The /dfy-v2 funnel's equivalents: same events and rules, sent to its own
+   pixel. Its Purchase comes from the webhook. */
 
 export function trackDfyViewContent() {
   once("dfy_view_content", () => {
-    capi("DFYViewContent");
+    capi("ViewContent", {}, "dfy_v2");
   });
 }
 
 export function trackDfyAddToCart() {
-  capi("DFYAddToCart");
+  capi("AddToCart", {}, "dfy_v2");
 }
 
 export function trackDfyInitiateCheckout(person: Person) {
-  capi("DFYInitiateCheckout", person);
+  capi("InitiateCheckout", person, "dfy_v2");
 }

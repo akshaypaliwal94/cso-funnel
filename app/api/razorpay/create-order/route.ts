@@ -81,8 +81,8 @@ export async function POST(req: Request) {
      Nothing further can be added at this level; new fields go into the packed
      context instead, which has headroom. */
   const notes: Record<string, string> = {
-    /* Which funnel sold it. The webhook reads this to send DFYPurchase rather
-       than Purchase for /dfy-v2 orders. */
+    /* Which funnel sold it. The webhook reads this to send a /dfy-v2 order's
+       Purchase to that funnel's own pixel. */
     kind: body.funnel === "dfy_v2" ? DFY_V2_KIND : "diagnostic_call",
     lead_id: leadId,
     name: truncate(`${firstName} ${lastName}`.trim()),
