@@ -1,0 +1,1733 @@
+/* Display type + ambient hero motion for /dfy-v2 only. */
+
+/* ---- Scoped base ----
+   cso-funnel ships Tailwind with preflight off and its own body styles, while
+   these pages were built on Tailwind's preflight over a plain body. This
+   restores both, inside .dfy-v2-root only. Every selector is wrapped in
+   :where() so it carries zero specificity and any utility class still wins. */
+:where(.dfy-v2-root) {
+  line-height: 1.5;
+  color: #000;
+  -webkit-font-smoothing: auto;
+}
+:where(.dfy-v2-root) *,
+:where(.dfy-v2-root) ::before,
+:where(.dfy-v2-root) ::after {
+  box-sizing: border-box;
+  border-width: 0;
+  border-style: solid;
+  border-color: #e5e7eb;
+}
+:where(.dfy-v2-root) :where(h1, h2, h3, h4, h5, h6) {
+  font-size: inherit;
+  font-weight: inherit;
+}
+:where(.dfy-v2-root)
+  :where(blockquote, dl, dd, h1, h2, h3, h4, h5, h6, hr, figure, p, pre) {
+  margin: 0;
+}
+:where(.dfy-v2-root) :where(ol, ul, menu) {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+:where(.dfy-v2-root) :where(a) {
+  color: inherit;
+  text-decoration: inherit;
+}
+:where(.dfy-v2-root) :where(b, strong) {
+  font-weight: bolder;
+}
+:where(.dfy-v2-root)
+  :where(img, svg, video, canvas, audio, iframe, embed, object) {
+  display: block;
+  vertical-align: middle;
+}
+:where(.dfy-v2-root) :where(img, video) {
+  max-width: 100%;
+  height: auto;
+}
+:where(.dfy-v2-root) :where(button, input, optgroup, select, textarea) {
+  font-family: inherit;
+  font-feature-settings: inherit;
+  font-size: 100%;
+  font-weight: inherit;
+  line-height: inherit;
+  letter-spacing: inherit;
+  color: inherit;
+  margin: 0;
+  padding: 0;
+}
+:where(.dfy-v2-root) :where(button, [type='button'], [type='submit']) {
+  -webkit-appearance: button;
+  background-color: transparent;
+  background-image: none;
+}
+:where(.dfy-v2-root) :where(button, [role='button']) {
+  cursor: pointer;
+}
+:where(.dfy-v2-root) :where(:disabled) {
+  cursor: default;
+}
+:where(.dfy-v2-root) :where(input, textarea)::placeholder {
+  opacity: 1;
+  color: #9ca3af;
+}
+:where(.dfy-v2-root) :where(hr) {
+  height: 0;
+  color: inherit;
+  border-top-width: 1px;
+}
+
+/* ---- Motion tokens ----
+   The page already had motion in it, but every effect had picked its own
+   numbers: 0.25s here, 450ms there, 0.7s on the CTA sheen, `ease` throughout.
+   Individually fine, together slightly off, in the way a room of furniture in
+   six different woods is off. These are the two numbers everything new uses.
+
+   The curve leaves fast and settles slow (0.16, 1, 0.3, 1). On entrances that
+   reads as something arriving under its own weight; a symmetrical ease reads as
+   a computer moving a box from A to B. That difference is most of what makes
+   motion feel expensive.
+
+   Nothing here moves more than 18px or takes longer than 600ms. Premium motion
+   is short and small: what makes it feel considered is that everything shares
+   one curve, not that anything is elaborate. Short is not the same as
+   invisible, though: 10px over 520ms tuned itself out of existence, and a
+   reveal nobody can see is just a slower page. */
+:root {
+  --dfy-ease: cubic-bezier(0.16, 1, 0.3, 1);
+  --dfy-in: 600ms;
+  --dfy-quick: 320ms;
+  /* how much later each item in a group starts than the one before it */
+  --dfy-stagger: 65ms;
+}
+
+/* ---- Scroll reveal ----
+   Anything marked data-reveal starts down and transparent and settles when it
+   first scrolls into view. It is a transition rather than an animation so that
+   the pre-reveal state IS the resting state with a class removed: no keyframe
+   can run early, and an element that never gets observed simply stays put
+   instead of being stuck invisible.
+
+   --i staggers a group. The delay is capped at 6 steps so a long grid does not
+   end with items arriving a second and a half after the first: past about six,
+   a stagger stops reading as sequence and starts reading as lag. */
+[data-reveal] {
+  opacity: 0;
+  /* translate3d, not translateY: the z keeps the move on the compositor instead
+     of it being re-rasterised each frame, which is what a card full of
+     photographs cannot afford while the page is also scrolling. */
+  transform: translate3d(0, 18px, 0);
+  transition:
+    opacity var(--dfy-in) var(--dfy-ease),
+    transform var(--dfy-in) var(--dfy-ease);
+  transition-delay: calc(min(var(--i, 0), 6) * var(--dfy-stagger));
+}
+
+/* Mobile is a different problem, not a smaller one.
+
+   The stagger goes to zero. Its job is to give a ROW of items a sequence, and
+   below md these grids are one or two columns, so items that shared a row on
+   desktop are now stacked screens apart. Each already triggers on its own as it
+   scrolls in; keeping the delay just meant the seventh card sat still for 390ms
+   after entering, which reads as the page failing to keep up.
+
+   Travel drops to 12px. There is less screen for the move to happen in, and the
+   same 18px that reads as a settle on a desktop row reads as a jump in a phone
+   viewport. Slightly quicker with it, because mobile scrolling is faster and
+   carries momentum. */
+@media (max-width: 767px) {
+  [data-reveal] {
+    transform: translate3d(0, 12px, 0);
+    transition-delay: 0ms;
+  }
+
+  :root {
+    --dfy-in: 520ms;
+  }
+}
+
+/* No will-change here, deliberately. It was on every marked element at once,
+   which is roughly forty layers held from first paint: the hint that is
+   supposed to buy smoothness is what costs it once it is applied broadly, and
+   the stutter while scrolling was the compositor carrying all of them. The
+   transform is already a compositor property, so it needs no hint. */
+[data-reveal].is-in {
+  opacity: 1;
+  transform: none;
+}
+
+/* No JS, no reveal: without this every marked element would sit invisible
+   forever if the observer never mounted. */
+.no-js [data-reveal] {
+  opacity: 1;
+  transform: none;
+}
+
+/* ---- Press marquee (mobile only) ----
+   The window. Its mask fades the row out at both ends instead of letting logos
+   appear and vanish at a hard edge: a mark cut in half by an invisible boundary
+   reads as a clipping bug, while one dissolving reads as a strip that continues
+   past the screen. */
+.dfy-marquee {
+  overflow: hidden;
+  -webkit-mask-image: linear-gradient(
+    to right,
+    transparent 0%,
+    #000 14%,
+    #000 86%,
+    transparent 100%
+  );
+  mask-image: linear-gradient(
+    to right,
+    transparent 0%,
+    #000 14%,
+    #000 86%,
+    transparent 100%
+  );
+}
+
+.dfy-marquee-track {
+  display: flex;
+  align-items: center;
+  /* max-content, so the track is as wide as both passes laid end to end rather
+     than being squeezed into the window it is supposed to overflow */
+  width: max-content;
+  animation: dfy-marquee-run 26s linear infinite;
+}
+
+/* Spacing lives here rather than as a gap on the track. See the note in
+   FeaturedIn: a gap adds one space between the two passes that the 50% shift
+   does not account for, and the loop jumps every time it comes round. */
+.dfy-marquee-item {
+  padding-inline: 1.125rem;
+}
+
+@keyframes dfy-marquee-run {
+  from {
+    transform: translate3d(0, 0, 0);
+  }
+  to {
+    transform: translate3d(-50%, 0, 0);
+  }
+}
+
+/* Stopped dead is the wrong answer here: the row is wider than the screen, so a
+   frozen marquee hides half the press. Handing scrolling back to the visitor
+   keeps all of it reachable without anything moving on its own. */
+@media (prefers-reduced-motion: reduce) {
+  .dfy-marquee {
+    overflow-x: auto;
+  }
+
+  .dfy-marquee-track {
+    animation: none;
+  }
+}
+
+/* ---- Hover life on artwork ----
+   A photograph or a logo that does not respond to the pointer reads as a
+   picture of a card rather than a card. The move is deliberately under 4%:
+   enough to register as the surface answering, small enough that nobody can
+   point at it and call it an effect. Driven from the CARD's hover, not the
+   image's, so the whole tile responds as one object. */
+.dfy-face-card .dfy-face-art img,
+.dfy-face-card .dfy-partner-well img,
+.dfy-tl-media img {
+  transition: transform var(--dfy-in) var(--dfy-ease);
+}
+
+/* Gated on a real pointer. A touch browser resolves :hover on tap and then
+   leaves it resolved until you tap elsewhere, so ungated these would latch: tap
+   a card, and it stays scaled with no way to undo it. Nothing here is worth a
+   stuck state on a phone. */
+@media (hover: hover) and (pointer: fine) {
+  .dfy-face-card:hover .dfy-face-art img,
+  .dfy-tl-row:hover .dfy-tl-media img {
+    transform: scale(1.04);
+  }
+
+  /* Logos get less: a wordmark growing is far more noticeable than a
+     photograph growing, because its edges are type. */
+  .dfy-face-card:hover .dfy-partner-well img {
+    transform: scale(1.025);
+  }
+}
+
+/* The logo plate has to clip now that what is inside it moves. */
+.dfy-partner-well {
+  overflow: hidden;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  [data-reveal] {
+    opacity: 1;
+    transform: none;
+    transition: none;
+  }
+
+  .dfy-face-card .dfy-face-art img,
+  .dfy-face-card .dfy-partner-well img,
+  .dfy-tl-media img,
+  .dfy-face-card:hover .dfy-face-art img,
+  .dfy-face-card:hover .dfy-partner-well img,
+  .dfy-tl-row:hover .dfy-tl-media img {
+    transition: none;
+    transform: none;
+  }
+}
+
+
+.dfy-v2-root .font-display {
+  font-family: var(--font-jost), sans-serif;
+  font-weight: 600;
+}
+
+/* ---- Hero title gradients ----
+   Both are painted with background-clip: text, so the gradient maps to each
+   SPAN's own box. Every title line is its own block span, which is why the grey
+   lands at the foot of the letters on every line rather than only the last one.
+
+   The stops are deliberately lopsided: grey occupies the bottom fifth and the
+   rest is white. An even two-stop gradient greys the whole letterform and reads
+   as dirty rather than as lighting.
+
+   The @supports block is not optional. -webkit-text-fill-color: transparent with
+   no background-clip support renders the text INVISIBLE, so the fallback
+   restores the solid colour each element already declares. */
+.dfy-title-white {
+  background-image: linear-gradient(
+    to top,
+    /* The gradient maps to the ELEMENT BOX, not the glyphs. With leading 1.34
+       and Poppins' 0.35em descender, roughly the bottom QUARTER of that box is
+       below the baseline, i.e. empty for any letter without a descender. Stops
+       under ~26% therefore paint into nothing and the grey never shows. These
+       start the grey above that dead zone and carry it to 44%, which is where
+       it actually lands on the feet of the letters. */
+    #99a0af 0%,
+    #a9b0bd 26%,
+    #ccd1da 36%,
+    #eef0f4 44%,
+    #ffffff 62%
+  );
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  -webkit-box-decoration-break: clone;
+  box-decoration-break: clone;
+}
+
+.dfy-title-orange {
+  background-image: linear-gradient(
+    to top,
+    /* orange holds flat to 35%, then the amber ramp runs the rest of the way */
+    #ff5c00 0%,
+    #ff6a00 35%,
+    #ff8a1c 60%,
+    #ffa835 80%,
+    #ffbe4d 100%
+  );
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  -webkit-box-decoration-break: clone;
+  box-decoration-break: clone;
+}
+
+/* The per-IP version of .dfy-title-orange. Same gradient shape, but the two
+   stops come from --ip-a (the brand's own colour) and --ip-b (its light end),
+   set on the story block in ClientStories.
+
+   Why a variable rather than five classes: the ramp, the clip and the
+   box-decoration-break are the part that is fiddly and shared. Only the two
+   colours differ, so only the two colours are data. */
+.dfy-title-ip {
+  background-image: linear-gradient(
+    to top,
+    var(--ip-a) 0%,
+    var(--ip-a) 35%,
+    color-mix(in srgb, var(--ip-a) 55%, var(--ip-b)) 62%,
+    var(--ip-b) 100%
+  );
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  -webkit-box-decoration-break: clone;
+  box-decoration-break: clone;
+}
+
+/* Both the accent word and the swoosh change colour when the carousel steps,
+   so both ease rather than cut. stop-color is animatable, which is what lets
+   the wave itself carry the change instead of only the type doing it.
+
+   Held to one duration so the headline, the bar and the wave land together:
+   three lengths would read as three unrelated things reacting to one click. */
+.dfy-title-ip,
+.dfy-story-bar {
+  transition:
+    background-color 450ms ease,
+    background-image 450ms ease;
+}
+
+.dfy-swoosh-stop {
+  transition: stop-color 450ms ease;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .dfy-title-ip,
+  .dfy-story-bar,
+  .dfy-swoosh-stop {
+    transition: none;
+  }
+}
+
+/* The marker bar under the title takes the brand's flat colour. Leaving it
+   orange under a teal or blue word would read as a bug, not as a house accent:
+   the bar and the word are one lockup. */
+.dfy-story-bar {
+  background: var(--ip-a);
+}
+
+@supports not ((-webkit-background-clip: text) or (background-clip: text)) {
+  .dfy-title-white,
+  .dfy-title-orange {
+    background: none;
+    -webkit-text-fill-color: currentColor;
+  }
+
+  /* currentColor would render this as body text, so the accent is named. */
+  .dfy-title-ip {
+    background: none;
+    -webkit-text-fill-color: var(--ip-b);
+    color: var(--ip-b);
+  }
+}
+
+/* ---- Hero eyebrow ----
+   Gradient ring on a rounded pill with nothing behind it: the pill is an
+   outline over the hero backdrop, not a filled chip.
+
+   The two-layer padding-box/border-box background trick cannot do this. Its
+   fill layer has to be opaque to hide the gradient underneath, so a transparent
+   fill just lets the gradient tint the whole pill. Instead the ring lives on a
+   pseudo-element whose gradient is masked down to a 1px band — the interior is
+   punched out, so what shows through it is the backdrop itself.
+
+   The glow stays on the pill rather than the pseudo-element: a mask clips the
+   element's shadows along with its paint, so a shadow on the masked layer would
+   be cut away. The ring runs orange at the ends into amber through the middle,
+   and the pair of shadows (one tight, one wide) is what makes it read as
+   glowing rather than as a flat hairline. */
+.dfy-eyebrow {
+  position: relative;
+  border: 1px solid transparent;
+  background: transparent;
+  box-shadow:
+    0 0 4px rgba(255, 166, 60, 0.55),
+    0 0 14px rgba(255, 122, 18, 0.3);
+}
+
+.dfy-eyebrow::before {
+  content: '';
+  position: absolute;
+  inset: -1px;
+  border-radius: inherit;
+  padding: 1px;
+  pointer-events: none;
+  background: linear-gradient(
+    90deg,
+    #ff5c00 0%,
+    #ff8a1c 22%,
+    #ffd58a 50%,
+    #ff8a1c 78%,
+    #ff5c00 100%
+  );
+  -webkit-mask:
+    linear-gradient(#000 0 0) content-box,
+    linear-gradient(#000 0 0);
+  mask:
+    linear-gradient(#000 0 0) content-box,
+    linear-gradient(#000 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+}
+
+/* The rules running out of each end. Each is two layers: a thin triangular glow
+   that is widest against the pill and narrows to a point outwards, blurred wide
+   and faint so it spreads instead of sitting as a solid wedge, plus a hairline
+   core along its centre. The blur is applied after the clip, which is what keeps
+   the shape pointy while leaving the boundary soft.
+
+   The box is taller than the glow it holds. That headroom is what the blur
+   spreads into — tighten it and the spread gets clipped flat. */
+.dfy-eyebrow-rule {
+  position: relative;
+  display: block;
+  /* Tall on purpose. A background is always clipped to its own box, so a bloom
+     any larger than the box gets sliced flat top and bottom and the cut reads as
+     a hard edge. The box is sized to hold the whole falloff instead. The row
+     centres its children, so the extra height costs no layout. */
+  height: 44px;
+  background-repeat: no-repeat;
+  flex: 1 1 0%;
+  min-width: 0;
+  max-width: 120px;
+}
+
+.dfy-eyebrow-rule::before,
+.dfy-eyebrow-rule::after {
+  content: '';
+  position: absolute;
+}
+
+/* The glow body: the pointy shape, wide blur and low alpha. The colour run goes
+   amber at the thick end against the pill and is pure orange by mid-length, so
+   the taper cools as it thins rather than staying one hue. */
+.dfy-eyebrow-rule::before {
+  inset: 0;
+  filter: blur(4px);
+  opacity: 0.55;
+}
+
+/* The core hairline, tapered by the same triangle so the centre of the beam
+   stays bright and thin all the way to the point. */
+.dfy-eyebrow-rule::after {
+  top: 50%;
+  left: 0;
+  right: 0;
+  height: 1px;
+  transform: translateY(-50%);
+  filter: blur(0.4px);
+}
+
+.dfy-eyebrow-rule--l::before,
+.dfy-eyebrow-rule--l::after {
+  background: linear-gradient(
+    to left,
+    rgba(255, 213, 138, 0.9) 0%,
+    rgba(255, 154, 40, 0.8) 9%,
+    rgba(255, 106, 0, 0.75) 20%,
+    rgba(255, 106, 0, 0.6) 60%,
+    rgba(255, 106, 0, 0) 100%
+  );
+}
+
+.dfy-eyebrow-rule--l {
+  background-image: radial-gradient(
+    circle 22px at 100% 50%,
+    rgba(255, 184, 92, 0.16) 0%,
+    rgba(255, 168, 60, 0.09) 35%,
+    rgba(255, 122, 18, 0.03) 65%,
+    rgba(255, 106, 0, 0) 100%
+  );
+}
+
+.dfy-eyebrow-rule--l::before {
+  clip-path: polygon(100% 46.5%, 100% 53.5%, 0 50%);
+}
+
+.dfy-eyebrow-rule--l::after {
+  clip-path: polygon(100% 0, 100% 100%, 0 50%);
+}
+
+.dfy-eyebrow-rule--r::before,
+.dfy-eyebrow-rule--r::after {
+  background: linear-gradient(
+    to right,
+    rgba(255, 213, 138, 0.9) 0%,
+    rgba(255, 154, 40, 0.8) 9%,
+    rgba(255, 106, 0, 0.75) 20%,
+    rgba(255, 106, 0, 0.6) 60%,
+    rgba(255, 106, 0, 0) 100%
+  );
+}
+
+.dfy-eyebrow-rule--r {
+  background-image: radial-gradient(
+    circle 22px at 0 50%,
+    rgba(255, 184, 92, 0.16) 0%,
+    rgba(255, 168, 60, 0.09) 35%,
+    rgba(255, 122, 18, 0.03) 65%,
+    rgba(255, 106, 0, 0) 100%
+  );
+}
+
+.dfy-eyebrow-rule--r::before {
+  clip-path: polygon(0 46.5%, 0 53.5%, 100% 50%);
+}
+
+.dfy-eyebrow-rule--r::after {
+  clip-path: polygon(0 0, 0 100%, 100% 50%);
+}
+
+/* ---- Hero video frame ----
+   The section is lit from the top corners: the rays start there, the ground
+   darkens downwards, and the title gradients run white at the cap and grey at
+   the feet. The frame follows the same logic instead of drawing a border. Its
+   rim is bright amber along the top edge, cools to orange down the sides and is
+   all but gone by the bottom, so the frame reads as an object catching the
+   light rather than as a lit UI panel.
+
+   Three parts: the rim (::before), the warm bounce pooling under the frame
+   (::after), and the screen itself. The rim has to live on this wrapper rather
+   than on the screen, because the screen clips its overflow to hold the video
+   corners and would cut a masked ring away. */
+.dfy-video-frame {
+  position: relative;
+  border-radius: 18px;
+}
+
+.dfy-video-frame::before {
+  content: '';
+  position: absolute;
+  inset: -1px;
+  z-index: 2;
+  border-radius: inherit;
+  padding: 1px;
+  pointer-events: none;
+  background: linear-gradient(
+    180deg,
+    rgba(255, 216, 150, 0.95) 0%,
+    rgba(255, 154, 45, 0.6) 16%,
+    rgba(255, 106, 0, 0.28) 42%,
+    rgba(255, 106, 0, 0.12) 72%,
+    rgba(255, 106, 0, 0.06) 100%
+  );
+  -webkit-mask:
+    linear-gradient(#000 0 0) content-box,
+    linear-gradient(#000 0 0);
+  mask:
+    linear-gradient(#000 0 0) content-box,
+    linear-gradient(#000 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+}
+
+/* The bounce. Warm light spilling off the frame onto the ground beneath it,
+   wide and weak, blurred past any edge of its own. This is what stops the video
+   from looking pasted onto the background. */
+.dfy-video-frame::after {
+  content: '';
+  position: absolute;
+  z-index: 0;
+  left: 6%;
+  right: 6%;
+  bottom: -22px;
+  height: 90px;
+  pointer-events: none;
+  background: radial-gradient(
+    60% 100% at 50% 0,
+    rgba(255, 138, 28, 0.28) 0%,
+    rgba(255, 106, 0, 0.12) 45%,
+    rgba(255, 106, 0, 0) 100%
+  );
+  filter: blur(22px);
+}
+
+/* Near-black rather than grey: a mid grey backing reads as an empty box on this
+   ground, where black reads as screen. The inset hairline is the specular the
+   top rim would throw onto the glass. */
+.dfy-video-screen {
+  position: relative;
+  z-index: 1;
+  background: #0a0a0b;
+  box-shadow:
+    inset 0 1px 0 rgba(255, 220, 170, 0.14),
+    0 30px 80px -40px rgba(0, 0, 0, 0.95);
+}
+
+/* ---- Primary CTA ----
+   Same light: a bright bevel across the top edge and the fill deepening
+   downwards. No warm pool under it — the button carries a neutral depth shadow
+   only, so the orange stays inside its own edges. The sheen sweeps once on
+   hover, which is the only thing on the page that moves on interaction, so it
+   stays slow and low-contrast. */
+.dfy-cta {
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
+  border-radius: 16px;
+  background: linear-gradient(
+    180deg,
+    #ff9331 0%,
+    #ff6f04 38%,
+    #f25c00 72%,
+    #d94e00 100%
+  );
+  box-shadow:
+    inset 0 1px 0 rgba(255, 233, 199, 0.55),
+    inset 0 -1px 0 rgba(120, 40, 0, 0.4),
+    0 0 0 1px rgba(255, 154, 45, 0.35),
+    0 10px 28px -14px rgba(0, 0, 0, 0.7);
+  transition:
+    transform 0.18s ease,
+    box-shadow 0.18s ease,
+    filter 0.18s ease;
+}
+
+.dfy-cta:hover {
+  transform: translateY(-1px);
+  filter: brightness(1.05);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 233, 199, 0.65),
+    inset 0 -1px 0 rgba(120, 40, 0, 0.4),
+    0 0 0 1px rgba(255, 184, 92, 0.5),
+    0 12px 30px -14px rgba(0, 0, 0, 0.7);
+}
+
+.dfy-cta:active {
+  transform: translateY(0);
+  filter: brightness(0.98);
+}
+
+.dfy-cta:focus-visible {
+  outline: 2px solid rgba(255, 200, 120, 0.9);
+  outline-offset: 3px;
+}
+
+.dfy-cta__sheen {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  pointer-events: none;
+  background: linear-gradient(
+    105deg,
+    transparent 38%,
+    rgba(255, 255, 255, 0.22) 50%,
+    transparent 62%
+  );
+  transform: translateX(-130%);
+  transition: transform 0.7s ease;
+}
+
+.dfy-cta:hover .dfy-cta__sheen {
+  transform: translateX(130%);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .dfy-cta,
+  .dfy-cta__sheen {
+    transition: none;
+  }
+
+  .dfy-cta:hover {
+    transform: none;
+  }
+
+  .dfy-cta:hover .dfy-cta__sheen {
+    transform: translateX(-130%);
+  }
+}
+
+/* ---- CTA breathing ----
+   One slow, symmetric cycle: the button grows for half of it and shrinks for
+   the other half, at the same rate in both directions. There is no hold, no
+   second beat and no overshoot — every one of those reads as a bounce, which is
+   what the earlier cardiac version was doing. ease-in-out on a single midpoint
+   keyframe is what keeps the motion even at both ends.
+
+   The rings ride the same clock, evenly spaced half a cycle apart, so the
+   spacing between them never changes either. They live on the wrapper, not the
+   button: the button clips its overflow to hold the sheen inside its corners,
+   so anything expanding past its edge would be cut off. Amber leads and orange
+   follows, the same hot-core-cooler-spill order as every other light on the
+   page. */
+.dfy-cta-halo {
+  position: relative;
+}
+
+.dfy-cta-halo::before,
+.dfy-cta-halo::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  border-radius: 16px;
+  border: 1px solid transparent;
+  pointer-events: none;
+  opacity: 0;
+  animation: dfy-cta-ripple 5.6s ease-out infinite;
+}
+
+.dfy-cta-halo::before {
+  border-color: rgba(255, 200, 120, 0.7);
+}
+
+/* Half a cycle behind, weaker and cooler, so the pair reads as depth rather
+   than as a repeat. */
+.dfy-cta-halo::after {
+  border-color: rgba(255, 122, 18, 0.5);
+  animation-delay: 2.8s;
+}
+
+.dfy-cta-halo > .dfy-cta {
+  position: relative;
+  z-index: 1;
+}
+
+/* The ring spends the whole half-cycle travelling and fading; it never sits
+   still at full opacity, which is what would make it pop. */
+@keyframes dfy-cta-ripple {
+  0% {
+    transform: scale(1);
+    opacity: 0;
+  }
+
+  8% {
+    opacity: 0.5;
+  }
+
+  50% {
+    transform: scale(1.06);
+    opacity: 0;
+  }
+
+  100% {
+    transform: scale(1.06);
+    opacity: 0;
+  }
+}
+
+/* Scale only. The glow that used to swell with it has been taken off the
+   button, so the breath is now carried by size alone. */
+.dfy-cta-halo .dfy-cta {
+  animation: dfy-cta-breathe 5.6s ease-in-out infinite;
+}
+
+@keyframes dfy-cta-breathe {
+  0%,
+  100% {
+    transform: scale(1);
+  }
+
+  50% {
+    transform: scale(1.022);
+  }
+}
+
+/* Hover owns the scale and the shadow while the pointer is on it, so the
+   breathing does not fight the lift. */
+.dfy-cta-halo .dfy-cta:hover {
+  animation: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .dfy-cta-halo::before,
+  .dfy-cta-halo::after,
+  .dfy-cta-halo .dfy-cta {
+    animation: none;
+  }
+}
+
+/* ---- Press strip ----
+   Logos are masks, not images: the element paints the colour and the file only
+   supplies the shape. One token therefore sets the tone of every mark, and the
+   source files can stay whatever colour they shipped in. */
+.dfy-press-logo {
+  background-color: #c9cfda;
+  opacity: 0.42;
+  -webkit-mask-repeat: no-repeat;
+  mask-repeat: no-repeat;
+  -webkit-mask-position: center;
+  mask-position: center;
+  -webkit-mask-size: contain;
+  mask-size: contain;
+  transition: opacity 0.25s ease;
+}
+
+.dfy-press-logo:hover {
+  opacity: 0.72;
+}
+
+/* The rules flanking the label. Amber where they meet the text, cooling to
+   orange and fading out at the far end, mirrored so both sides read the same
+   way outwards — the eyebrow figure again, at full strength this time. */
+.dfy-press-rule {
+  height: 1px;
+  flex: 1 1 0%;
+  min-width: 0;
+  max-width: 180px;
+}
+
+.dfy-press-rule--l {
+  background: linear-gradient(
+    to left,
+    rgba(255, 213, 138, 0.95) 0%,
+    rgba(255, 154, 40, 0.85) 12%,
+    rgba(255, 106, 0, 0.7) 32%,
+    rgba(255, 106, 0, 0.45) 65%,
+    rgba(255, 106, 0, 0) 100%
+  );
+}
+
+.dfy-press-rule--r {
+  background: linear-gradient(
+    to right,
+    rgba(255, 213, 138, 0.95) 0%,
+    rgba(255, 154, 40, 0.85) 12%,
+    rgba(255, 106, 0, 0.7) 32%,
+    rgba(255, 106, 0, 0.45) 65%,
+    rgba(255, 106, 0, 0) 100%
+  );
+}
+
+/* The label takes the same light as the hero title: orange at the feet running
+   up into amber. Stops are tighter than .dfy-title-orange because this is small
+   uppercase text with no descenders, so there is no dead zone at the bottom of
+   the box to spend gradient on. The @supports fallback is not optional —
+   transparent text fill with no background-clip support renders it invisible. */
+.dfy-press-label {
+  background-image: linear-gradient(
+    to top,
+    #ff6a00 0%,
+    #ff8a1c 40%,
+    #ffb14a 75%,
+    #ffd58a 100%
+  );
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+@supports not ((-webkit-background-clip: text) or (background-clip: text)) {
+  .dfy-press-label {
+    background: none;
+    -webkit-text-fill-color: #ff8a1c;
+    color: #ff8a1c;
+  }
+}
+
+/* ---- Press-strip counter-light ----
+   The shader's own falloff bottoms out at 0.5, so the rays never reach zero on
+   their own: whatever is left when they hit the end of the canvas gets cut off
+   square, and that cut reads as a line ruled across the hero. This mask does
+   the last of the fade in CSS so the beam dissolves before its box ends and the
+   two light fields blend instead of meeting at an edge. */
+.dfy-press-beam {
+  -webkit-mask-image: linear-gradient(
+    to top,
+    #000 0%,
+    #000 28%,
+    rgba(0, 0, 0, 0.55) 62%,
+    rgba(0, 0, 0, 0) 100%
+  );
+  mask-image: linear-gradient(
+    to top,
+    #000 0%,
+    #000 28%,
+    rgba(0, 0, 0, 0.55) 62%,
+    rgba(0, 0, 0, 0) 100%
+  );
+}
+
+/* The strip's ground, picking up exactly where the hero's leaves off. */
+.dfy-press-panel {
+  background: linear-gradient(180deg, #050505 0%, #000000 55%);
+}
+
+/* ---- Client stories ----
+   The rule running out of the section label. Orange at the label, brightening
+   into an amber core about two-thirds along and gone by the end — the same
+   figure as the hero eyebrow rules, stretched across a much longer run. */
+/* The rule beside the eyebrow is also the carousel's clock: it fills left to
+   right over one slide's life, and reaching the end is what advances the story.
+
+   The advance is driven by the fill's own animationend rather than by a
+   separate timer running alongside it. One source of truth, so the bar can
+   never finish early or sit full waiting for a timeout, and pausing the
+   animation pauses the carousel for free.
+
+   Two layers, not one: the track is the old rule dimmed almost out, so the line
+   still spans the rail before the fill has crossed it. Without the track the
+   rail reads as broken while the bar is short. */
+.dfy-story-rule {
+  position: relative;
+  height: 1px;
+  flex: 1 1 0%;
+  min-width: 0;
+  overflow: hidden;
+  background: rgba(255, 255, 255, 0.1);
+}
+
+.dfy-story-rule-fill {
+  display: block;
+  height: 100%;
+  width: 100%;
+  transform-origin: left center;
+  transform: scaleX(0);
+  /* the IP's own colour, running out to nothing at the leading edge so the fill
+     reads as light travelling rather than as a bar being extruded */
+  background: linear-gradient(
+    to right,
+    var(--ip-a) 0%,
+    var(--ip-b) 62%,
+    var(--ip-b) 88%,
+    rgba(255, 255, 255, 0) 100%
+  );
+  animation: dfy-story-progress var(--dfy-story-duration, 7s) linear forwards;
+}
+
+/* Hovering the section holds the current story. A carousel that pulls the page
+   out from under someone mid-paragraph is worse than one that never moves, and
+   because the advance IS the animation, pausing it is the whole fix. */
+/* Same pointer gate, and here it matters more than on a hover effect: a latched
+   :hover on a phone would stop the carousel dead and never release it. Touch
+   visitors get the arrows instead. */
+@media (hover: hover) and (pointer: fine) {
+  .dfy-story-clock:hover .dfy-story-rule-fill {
+    animation-play-state: paused;
+  }
+}
+
+/* Keyboard focus pauses too, but this must be :focus-visible, never
+   :focus-within. A mouse click on the prev/next arrow leaves that button
+   focused, so :focus-within stayed true after the pointer had gone and the
+   carousel never restarted: one click and it was stopped for good.
+   :focus-visible does not match a click, only a tab.
+
+   Its own rule rather than a comma on the one above, because a browser without
+   :has() drops the whole selector list it appears in, which would take the
+   hover pause down with it. */
+.dfy-story-clock:has(:focus-visible) .dfy-story-rule-fill {
+  animation-play-state: paused;
+}
+
+@keyframes dfy-story-progress {
+  from {
+    transform: scaleX(0);
+  }
+  to {
+    transform: scaleX(1);
+  }
+}
+
+/* No animation means no animationend, so the carousel would never advance.
+   Standing the fill full and leaving it manual is the honest answer: the
+   arrows still work and nothing moves on its own. */
+@media (prefers-reduced-motion: reduce) {
+  .dfy-story-rule-fill {
+    animation: none;
+    transform: scaleX(1);
+  }
+}
+
+/* The arrows. Outlined rather than filled: they are controls sitting beside the
+   content, and a filled pair would read as a second CTA. */
+.dfy-story-nav {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 44px;
+  height: 44px;
+  border-radius: 9999px;
+  color: rgba(255, 205, 150, 0.9);
+  border: 1px solid rgba(255, 122, 18, 0.45);
+  background: rgba(255, 106, 0, 0.04);
+  transition:
+    border-color 0.2s ease,
+    color 0.2s ease,
+    background-color 0.2s ease;
+}
+
+.dfy-story-nav:hover {
+  color: #ffe3c4;
+  border-color: rgba(255, 168, 60, 0.85);
+  background: rgba(255, 106, 0, 0.1);
+}
+
+.dfy-story-nav:focus-visible {
+  outline: 2px solid rgba(255, 200, 120, 0.9);
+  outline-offset: 3px;
+}
+
+/* The card. A warm-black fill inside a gradient ring, lit from the top like
+   every other object on the page, with the glow kept low so the card sits in
+   the scene rather than hovering over it. The padding is the mount the artwork
+   sits in — tight, because the poster is the point. */
+.dfy-story-card {
+  position: relative;
+  border-radius: 24px;
+  padding: 10px;
+  background:
+    linear-gradient(180deg, #140d08 0%, #0b0709 60%, #08080a 100%) padding-box,
+    linear-gradient(
+        180deg,
+        rgba(255, 200, 120, 0.85) 0%,
+        rgba(255, 122, 18, 0.5) 35%,
+        rgba(255, 106, 0, 0.22) 100%
+      )
+      border-box;
+  border: 1px solid transparent;
+  box-shadow:
+    inset 0 1px 0 rgba(255, 214, 168, 0.16),
+    0 0 40px -18px rgba(255, 122, 18, 0.5),
+    0 30px 70px -40px rgba(0, 0, 0, 0.95);
+}
+
+/* Stands in for card artwork that does not exist yet. Dark enough to read as
+   part of the card rather than as a hole in it. */
+.dfy-story-art {
+  background: linear-gradient(160deg, #1a0f07 0%, #0d0a0b 55%, #08080a 100%);
+}
+
+/* ---- Section rhythm ----
+   The vertical spacing every section on this page shares: eyebrow, then title,
+   then intro line, then the section's content. Three steps, one set of numbers,
+   declared once here rather than as spacing utilities repeated across six
+   components — which is how they drifted apart in the first place (two sections
+   at 44/64 to their content, one at 36/44, one at zero).
+
+   These live in CSS, not as mt-* classes on the elements, for a second reason:
+   this stylesheet is imported by the dfy-v2 layout and Tailwind by the root
+   one, so it lands after the utilities and wins on equal specificity. A margin
+   set here cannot be quietly overridden by a class in the markup, and equally,
+   a class in the markup will not appear to work when it does not. One owner
+   per number.
+
+   The step to content is 80px on desktop rather than the 64px most sections
+   were using. The extra air is what the services timeline needed once its rows
+   became top-aligned, and a section rhythm that has an exception in it is not a
+   rhythm, so every section takes the wider gap. */
+.dfy-sec-title {
+  margin-top: 2rem;
+}
+
+.dfy-sec-intro {
+  margin-top: 1rem;
+}
+
+.dfy-sec-body {
+  margin-top: 3rem;
+}
+
+@media (min-width: 768px) {
+  .dfy-switch-btn {
+    padding: 13px 38px;
+    font-size: 16px;
+  }
+
+  .dfy-sec-title {
+    margin-top: 2.75rem;
+  }
+
+  .dfy-sec-intro {
+    margin-top: 1.25rem;
+  }
+
+  .dfy-sec-body {
+    margin-top: 5rem;
+  }
+}
+
+/* ---- Roster cards ----
+   The page's ring: amber at the top cooling into orange down the card, the same
+   hot-core-cooler-spill run as the eyebrow, the video frame and the CTA. Gold
+   all the way round would be a different system — and a flat one, since it is
+   the falloff that makes a ring look like an edge catching light rather than a
+   bevel from a template. */
+.dfy-face-card {
+  position: relative;
+  border-radius: 18px;
+  padding: 5px;
+  border: 1px solid transparent;
+  background:
+    linear-gradient(180deg, #191007 0%, #0d0908 55%, #08080a 100%) padding-box,
+    linear-gradient(
+        170deg,
+        rgba(255, 216, 150, 0.95) 0%,
+        rgba(255, 154, 45, 0.7) 28%,
+        rgba(255, 106, 0, 0.4) 60%,
+        rgba(255, 106, 0, 0.28) 100%
+      )
+      border-box;
+  box-shadow:
+    inset 0 1px 0 rgba(255, 216, 150, 0.16),
+    0 0 26px -14px rgba(255, 122, 18, 0.55),
+    0 18px 40px -30px rgba(0, 0, 0, 0.95);
+  transition:
+    box-shadow 0.25s ease,
+    transform 0.25s ease;
+}
+
+.dfy-face-card:hover {
+  transform: translateY(-2px);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 216, 150, 0.24),
+    0 0 34px -12px rgba(255, 154, 45, 0.8),
+    0 22px 46px -30px rgba(0, 0, 0, 0.95);
+}
+
+/* Stands in until the photographs land. */
+.dfy-face-art {
+  background: linear-gradient(160deg, #1a1008 0%, #0d0a0b 55%, #08080a 100%);
+}
+
+/* The number carries the same gold as the ring, so the two read as one system
+   rather than as gold trim around white type. */
+.dfy-face-value {
+  background-image: linear-gradient(
+    to top,
+    #ff6a00 0%,
+    #ff9a2e 45%,
+    #ffd9a0 100%
+  );
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+@supports not ((-webkit-background-clip: text) or (background-clip: text)) {
+  .dfy-face-value {
+    background: none;
+    -webkit-text-fill-color: #ff9a2e;
+    color: #ff9a2e;
+  }
+}
+
+/* The rule between a name and its credential. Bright in the middle and gone at
+   both ends, so it reads as part of the card's light rather than as a border. */
+.dfy-face-divider {
+  background: linear-gradient(
+    90deg,
+    rgba(255, 106, 0, 0) 0%,
+    rgba(255, 154, 45, 0.5) 28%,
+    rgba(255, 216, 150, 0.85) 50%,
+    rgba(255, 154, 45, 0.5) 72%,
+    rgba(255, 106, 0, 0) 100%
+  );
+}
+
+/* ---- Partner cards ----
+   Same ring as the roster (.dfy-face-card); only the inside differs, because a
+   logo needs a ground of its own where a portrait supplies one. */
+.dfy-partner-inner {
+  background: linear-gradient(180deg, #150e08 0%, #0c0809 60%, #08080a 100%);
+}
+
+/* The well the logo sits in. A touch lighter than the card so the mark reads as
+   placed on a surface rather than floating, and never tight to its edges — a
+   logo boxed to its own bounds always looks cramped. */
+.dfy-partner-well {
+  /* A plate, not a box. The marks keep their own colours, which needs a light
+     ground under them, and the premium is bought in how that ground is made
+     rather than in recolouring anyone's logo.
+
+     Warm ivory, never #fff: pure white against this black glares, and glare is
+     the thing that made the row read cheap. Ivory sits back, holds the colour
+     accurately, and lets the card's amber stay the only heat in the section.
+
+     Raised rather than sunk (a light plate cut into a dark card reads as a
+     hole), with a warm shadow underneath, a hairline inside the top edge for
+     the lift, and no amber outline: an orange ring around a bright plate is one
+     border too many. */
+  background: linear-gradient(180deg, #faf8f4 0%, #f1ede5 100%);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.9),
+    inset 0 0 0 1px rgba(28, 18, 8, 0.07),
+    0 10px 22px -14px rgba(0, 0, 0, 0.85),
+    0 2px 5px -3px rgba(0, 0, 0, 0.5);
+}
+
+/* ---- Downstream pages (checkout, call-booking, call-booked) ----
+   The landing page's card, field and chip language, factored out so the rest of
+   the funnel can wear it. These pages sat on a different system entirely: flat
+   #0E1014 panels with a 10%-white hairline, a separate orange (#EB5E00), Jost
+   where the landing uses Poppins, and a silver gradient on headings that exists
+   nowhere on the landing page. A visitor crossing from the landing page into
+   the checkout was changing sites, which is the moment a funnel can least
+   afford to look unfamiliar.
+
+   .dfy-panel is the roster card's construction with the portrait taken out: the
+   amber-into-orange ring on a padding-box/border-box pair, over the same dark
+   vertical gradient. Same ring as everything on the landing page, so a form and
+   a testimonial read as the same furniture. */
+.dfy-panel {
+  position: relative;
+  border-radius: 18px;
+  border: 1px solid transparent;
+  background:
+    linear-gradient(180deg, #150e08 0%, #0c0809 60%, #08080a 100%) padding-box,
+    linear-gradient(
+        170deg,
+        rgba(255, 216, 150, 0.85) 0%,
+        rgba(255, 154, 45, 0.55) 28%,
+        rgba(255, 106, 0, 0.3) 60%,
+        rgba(255, 106, 0, 0.2) 100%
+      )
+      border-box;
+  box-shadow:
+    inset 0 1px 0 rgba(255, 216, 150, 0.12),
+    0 18px 40px -30px rgba(0, 0, 0, 0.95);
+}
+
+/* Quieter sibling for panels nested INSIDE a .dfy-panel: an order summary row
+   inside a card. Two amber rings inside each other reads as a bevel. */
+.dfy-panel-inset {
+  border-radius: 12px;
+  background: rgba(0, 0, 0, 0.32);
+  box-shadow: inset 0 0 0 1px rgba(255, 154, 45, 0.14);
+}
+
+/* Form fields. The old ones were a white hairline on #15171C, which is the one
+   place on the funnel where a visitor is asked to do work, styled as though it
+   belonged to a different product. Focus takes the page's orange rather than a
+   browser default, and the ring is the same amber used everywhere else. */
+.dfy-field {
+  width: 100%;
+  border-radius: 12px;
+  border: 1px solid rgba(255, 154, 45, 0.18);
+  background: rgba(0, 0, 0, 0.35);
+  padding: 0.75rem 1rem;
+  color: #fff;
+  transition:
+    border-color var(--dfy-quick) var(--dfy-ease),
+    box-shadow var(--dfy-quick) var(--dfy-ease);
+}
+
+.dfy-field::placeholder {
+  color: rgba(201, 207, 218, 0.4);
+}
+
+.dfy-field:focus {
+  outline: none;
+  border-color: rgba(255, 138, 28, 0.7);
+  box-shadow: 0 0 0 3px rgba(255, 106, 0, 0.16);
+}
+
+.dfy-field-error {
+  border-color: rgba(255, 106, 106, 0.55);
+}
+
+/* The small pill: trust chips, step markers, the eyebrow on these pages. Warm
+   tint rather than the neutral white glass these pages used, for the same
+   reason the CTA's refund chip was re-toned. */
+.dfy-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.375rem;
+  border-radius: 9999px;
+  border: 1px solid rgba(255, 154, 45, 0.28);
+  background: rgba(255, 106, 0, 0.1);
+  color: #ffc87a;
+}
+
+/* ---- India / International switch ---- */
+.dfy-switch {
+  padding: 5px;
+  border-radius: 9999px;
+  border: 1px solid rgba(255, 154, 45, 0.22);
+  background: rgba(255, 255, 255, 0.03);
+}
+
+/* Sized up from 13px/8x22. At the old size the control read as a filter chip
+   sitting under the headline; it is actually the switch that decides which half
+   of the proof a visitor sees, so it needs to look like a thing you press. The
+   track padding goes up with it so the pill keeps its inset rather than
+   thickening into a border. */
+.dfy-switch-btn {
+  border-radius: 9999px;
+  padding: 11px 30px;
+  font-size: 15px;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  color: rgba(255, 255, 255, 0.55);
+  transition:
+    color 0.2s ease,
+    background-color 0.2s ease,
+    box-shadow 0.2s ease;
+}
+
+.dfy-switch-btn:hover {
+  color: rgba(255, 255, 255, 0.85);
+}
+
+/* The selected state is lit rather than filled: a solid orange pill here would
+   read as the page's CTA and compete with the real one. */
+.dfy-switch-btn.is-active {
+  color: #fff;
+  background: linear-gradient(180deg, #ff8a1c 0%, #ef5f00 100%);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 233, 199, 0.45),
+    0 6px 16px -8px rgba(255, 106, 0, 0.8);
+}
+
+.dfy-switch-btn:focus-visible {
+  outline: 2px solid rgba(255, 200, 120, 0.9);
+  outline-offset: 2px;
+}
+
+/* The avatar. Ringed in the same run as the card, so a portrait and a set of
+   initials sit in an identical frame. */
+.dfy-story-avatar {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 56px;
+  height: 56px;
+  border-radius: 9999px;
+  overflow: hidden;
+  background: linear-gradient(160deg, #1a1008 0%, #0d0a0b 60%, #08080a 100%);
+  box-shadow:
+    inset 0 0 0 1px rgba(255, 176, 74, 0.35),
+    0 0 18px -10px rgba(255, 122, 18, 0.8);
+}
+
+/* The ROI badge: outlined, so the number above it stays the loudest thing on
+   the card. */
+.dfy-roi {
+  color: #ffc87a;
+  border: 1px solid rgba(255, 154, 45, 0.35);
+  background: rgba(255, 106, 0, 0.08);
+}
+
+/* The play control on a testimonial card. Glass rather than a solid orange
+   disc: the CTA is the only thing on this page allowed to be a filled orange
+   shape, and a grid of forty orange discs would bury it. */
+.dfy-play {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 46px;
+  height: 46px;
+  padding-left: 3px;
+  border-radius: 9999px;
+  color: #fff;
+  border: 1px solid rgba(255, 216, 150, 0.55);
+  background: rgba(20, 12, 6, 0.45);
+  backdrop-filter: blur(6px);
+  box-shadow: 0 0 22px -8px rgba(255, 122, 18, 0.9);
+  transition:
+    scale 0.2s ease,
+    background-color 0.2s ease,
+    border-color 0.2s ease;
+}
+
+/* `scale`, not `transform`: the card centres this with a translate transform. */
+.dfy-play:hover {
+  scale: 1.06;
+  border-color: rgba(255, 216, 150, 0.9);
+  background: rgba(255, 106, 0, 0.35);
+}
+
+.dfy-play:focus-visible {
+  outline: 2px solid rgba(255, 200, 120, 0.9);
+  outline-offset: 3px;
+}
+
+/* Two rings leaving the play control on a slow, even cycle — one starting half
+   a cycle behind the other, so the spacing between them never changes. They sit
+   BEHIND the disc (negative z) rather than around it, which is what keeps the
+   glass edge crisp while the light travels. */
+.dfy-play::before,
+.dfy-play::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  border-radius: 9999px;
+  border: 1px solid rgba(255, 200, 122, 0.7);
+  opacity: 0;
+  animation: dfy-play-ripple 3.2s ease-out infinite;
+}
+
+.dfy-play::after {
+  animation-delay: 1.6s;
+  border-color: rgba(255, 122, 18, 0.6);
+}
+
+@keyframes dfy-play-ripple {
+  0% {
+    transform: scale(1);
+    opacity: 0;
+  }
+
+  12% {
+    opacity: 0.55;
+  }
+
+  100% {
+    transform: scale(2.1);
+    opacity: 0;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .dfy-play::before,
+  .dfy-play::after {
+    animation: none;
+  }
+}
+
+/* ---- Services ----
+   A hairline between rows instead of a box around each one. It is brightest in
+   the middle and gone at both ends, the same figure as the eyebrow rules, so it
+   separates without ruling a hard line across the page. The last row has none:
+   a divider under the final item would fence the section off from what follows
+   it. */
+.dfy-service-row + .dfy-service-row {
+  border-top: 1px solid transparent;
+  border-image: linear-gradient(
+      90deg,
+      rgba(255, 154, 45, 0) 0%,
+      rgba(255, 154, 45, 0.22) 22%,
+      rgba(255, 216, 150, 0.32) 50%,
+      rgba(255, 154, 45, 0.22) 78%,
+      rgba(255, 154, 45, 0) 100%
+    )
+    1;
+}
+
+/* The index. Small and warm rather than large and outlined — it is a marker
+   for the eye running down the column, not a design element in its own right. */
+.dfy-service-index {
+  color: #ff8a1c;
+  letter-spacing: 0.08em;
+}
+
+/* ---- Services timeline ----
+   A centre rule with a node per service, rows alternating either side.
+
+   The rule is drawn per ROW rather than as one line down the list. A single
+   full-height line would have to be clipped at every node to avoid running
+   through it, which means hard-coding node positions; a per-row segment starts
+   below its own node and ends at the row's foot, so the gaps land correctly no
+   matter how tall a row grows or how many rows exist.
+
+   Below md it collapses to one stacked column with the rule down the left. Two
+   columns at phone width leaves neither side enough measure to read. */
+.dfy-tl {
+  list-style: none;
+  /* margin-top is deliberately absent: the gap above this list belongs to
+     .dfy-sec-body like every other section's, not to the timeline.
+
+     Both the margin and the padding are long-hand on purpose. A `margin: 0
+     auto` shorthand reset the rhythm's margin-top to zero; a `padding: 0`
+     shorthand did the same thing to the px-6 on the <ol>, which is why the
+     diamonds and the rule were sitting hard against the left edge of a phone
+     with the section's gutter apparently doing nothing. This file loads after
+     Tailwind, so a shorthand here silently wins over a utility class every
+     time. The gutter is therefore owned here, in full, rather than split
+     between the two places. */
+  margin-left: auto;
+  margin-right: auto;
+  padding-top: 0;
+  padding-bottom: 0;
+  padding-left: 1.5rem;
+  padding-right: 1.5rem;
+}
+
+@media (min-width: 768px) {
+  .dfy-tl {
+    padding-left: 2.5rem;
+    padding-right: 2.5rem;
+  }
+}
+
+.dfy-tl-row {
+  position: relative;
+  padding-left: 2.75rem;
+  padding-bottom: 2.75rem;
+  text-align: left;
+}
+
+/* The segment: starts under this row's node, runs to the row's foot.
+
+   Each connector is its own orange-to-amber ramp: it leaves the node in the
+   same #ff5c00 the node's own gradient starts on, and lands on #ffbe4d just as
+   the next node knocks it out. So the run reads as light travelling down the
+   list and handing off dot to dot, rather than as a rule that happens to be
+   coloured.
+
+   One pixel, but solid. What made the earlier version disappear was the
+   opacity, not the width: a hairline at 0.13 alpha on black reads as a scratch.
+   At full saturation the same single pixel is clearly a line, and it stays a
+   line rather than becoming a bar. */
+.dfy-tl-row::before {
+  content: '';
+  position: absolute;
+  top: 1.4rem;
+  bottom: 0;
+  left: 0.6rem;
+  width: 1px;
+  background: linear-gradient(
+    to bottom,
+    #ff5c00 0%,
+    #ff7a12 35%,
+    #ffa63a 72%,
+    #ffbe4d 100%
+  );
+}
+
+.dfy-tl-row:last-child {
+  padding-bottom: 0;
+}
+.dfy-tl-row:last-child::before {
+  display: none;
+}
+
+/* The node: a diamond, not a dot and not a sparkle. A dot reads as a bullet and
+   a sparkle belongs to the site this was modelled on; a rotated square is sharp
+   enough to sit with Poppins 700 and carries the same orange-to-amber ramp as
+   the headline and the eyebrow, so the page keeps one light source. */
+.dfy-tl-node {
+  position: absolute;
+  top: 0.275rem;
+  left: 0.125rem;
+  width: 0.95rem;
+  height: 0.95rem;
+  transform: rotate(45deg);
+  border-radius: 2px;
+  background: linear-gradient(135deg, #ff5c00 0%, #ff8a1c 55%, #ffbe4d 100%);
+  /* Knocked out of the line rather than laid over it: a ring of the section's
+     own black first, then the amber. The line can then run clean behind the
+     node and still look interrupted by it, which is the detail that separates a
+     drawn timeline from a stack of dots with strokes between them.
+
+     Sized to hold against the connector without outshouting it, and the halo
+     kept tight: the glow is there to seat the diamond on the line, not to make
+     a second bright object beside it. */
+  box-shadow:
+    0 0 0 4px #000,
+    0 0 0 5px rgba(255, 122, 18, 0.22),
+    0 0 12px rgba(255, 122, 18, 0.3);
+}
+
+@media (min-width: 768px) {
+  .dfy-tl-row {
+    display: grid;
+    grid-template-columns: 1fr 5rem 1fr;
+    padding-left: 0;
+    padding-bottom: 3.5rem;
+  }
+
+  .dfy-tl-row::before {
+    left: 50%;
+    transform: translateX(-50%);
+    top: 1.65rem;
+  }
+  .dfy-tl-node {
+    left: 50%;
+    top: 0.5rem;
+    margin-left: -0.475rem;
+  }
+
+  /* Stretch, not centre. Centring let each row find its own vertical middle, so
+     a 16:9 still sat against a text block of a different height and every row
+     was a few pixels out at the top and a few more at the bottom: the kind of
+     misalignment that reads as sloppy without anyone being able to name it.
+
+     Stretched, the media cell is exactly as tall as the text beside it. Top
+     edge to title, bottom edge to the last line of the kicker, on every row.
+     The still is cropped to fit rather than letterboxed, which it can afford:
+     every file is 16:9 and every text block lands near that ratio already, so
+     the crop is a few percent, not a reframe. */
+  .dfy-tl-row {
+    align-items: stretch;
+  }
+
+  /* No side padding on either cell. The 5rem centre column is the gutter, and
+     splitting the gap between the column and a padding made the two sides
+     uneven, and it put the media's rounded corners on a transparent padding
+     box instead of on the image. */
+  /* grid-row is pinned on both cells, and that is the load-bearing part of this
+     block, not the columns.
+
+     Auto-placement only ever moves forward. On the odd rows the panel takes
+     column 1 and the cursor is sitting before column 3 when the media arrives,
+     so the media lands beside it. On the even rows the order is reversed: the
+     panel takes column 3, the cursor is now past the end of the row, and the
+     media cannot go backwards to column 1, so it is pushed down into a second
+     grid row instead. That is why every alternate still sat below its text
+     rather than next to it. Naming the row makes the placement explicit and the
+     swap symmetrical. */
+  .dfy-tl-panel {
+    grid-row: 1;
+    grid-column: 1;
+  }
+  .dfy-tl-media {
+    grid-row: 1;
+    grid-column: 3;
+    /* a floor, so a short row cannot squash the still into a strip. Every text
+       block here clears it, so in practice the text is what sets the height. */
+    min-height: 190px;
+  }
+
+  /* every other row swaps sides */
+  .dfy-tl-row:nth-child(even) .dfy-tl-panel {
+    grid-column: 3;
+  }
+  .dfy-tl-row:nth-child(even) .dfy-tl-media {
+    grid-column: 1;
+  }
+}
+
+/* /dfy-new checkout — single clean phone field.
+   Overrides the global PhoneInput + PhoneInputCountry styles above (which add a
+   light #E6E6E6 border and rounded corners) so the flag, dial code and number
+   share ONE field border on the dark funnel background. Scoped to .tgo-phone. */
+.tgo-phone .PhoneInput {
+  display: flex;
+  align-items: center;
+  width: 100%;
+}
+
+.tgo-phone .PhoneInputCountry {
+  margin: 0 0.5rem 0 0 !important;
+  padding: 0 !important;
+  border: 0 !important;
+  border-radius: 0 !important;
+  background: transparent !important;
+}
+
+.tgo-phone .PhoneInputCountryIcon,
+.tgo-phone .PhoneInputCountryIcon--border {
+  box-shadow: none !important;
+  background: transparent !important;
+  border: 0 !important;
+}
+
+.tgo-phone .PhoneInputCountrySelect {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  opacity: 0;
+  margin: 0 !important;
+  padding: 0 !important;
+  border: 0 !important;
+  background: transparent !important;
+  cursor: pointer;
+  color: #000;
+}
+
+.tgo-phone .PhoneInputCountrySelectArrow {
+  color: rgba(255, 255, 255, 0.55);
+  opacity: 1;
+}
+
+.tgo-phone .PhoneInput input,
+.tgo-phone .PhoneInputInput {
+  margin: 0 !important;
+  padding: 0 !important;
+  border: 0 !important;
+  border-radius: 0 !important;
+  background: transparent !important;
+  color: #fff !important;
+  font-family: inherit !important;
+  font-size: 1rem !important;
+  line-height: 1.5 !important;
+  width: 100%;
+  box-shadow: none !important;
+}
+
+.tgo-phone .PhoneInput input:focus,
+.tgo-phone .PhoneInputInput:focus {
+  outline: none !important;
+  box-shadow: none !important;
+  border: 0 !important;
+}
+
+.tgo-phone .PhoneInput input::placeholder {
+  color: rgba(255, 255, 255, 0.3) !important;
+}

@@ -64,7 +64,8 @@ export function Featured() {
                   src={asset(p.src)}
                   alt={copy === 0 ? p.name : ""}
                   aria-hidden={copy === 1 || undefined}
-                  inert={copy === 1 || undefined}
+                  /* React 18 only writes `inert` as a string; true warns. */
+                  {...(copy === 1 ? { inert: "" } : {})}
                   style={{ "--logo-h": `${p.h}px` } as React.CSSProperties}
                   width={p.w}
                   height={p.nh}

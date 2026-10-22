@@ -4,7 +4,12 @@ import { NextResponse } from "next/server";
 
 import { CHECKOUT_CONFIG, capiReady } from "@/lib/checkout-config";
 import { sendCapiEvent } from "@/lib/meta-capi";
-import { unpackContext } from "@/lib/order-notes";
+import {
+  buildDfyV2PabblyPayload,
+  isTestPayment,
+  sendDfyV2Pabbly,
+} from "@/lib/dfy-v2-pabbly";
+import { DFY_V2_KIND, unpackContext } from "@/lib/order-notes";
 
 /**
  * Razorpay webhook, and on this project it has exactly ONE job left: send
@@ -88,17 +93,32 @@ export async function POST(req: Request) {
      and sendCapiEvent reduces it again on the way out. */
   const eventSourceUrl = CHECKOUT_CONFIG.fallbackEventSourceUrl;
 
+  /* /dfy-v2 sales also go to its Pabbly, before the Meta step so a missing
+     CAPI config cannot stop them. A ≤ ₹1 QA payment reaches Pabbly flagged
+     is_test and is never sent to Meta, as on the original funnel. */
+  const isDfy = notes.kind === DFY_V2_KIND;
+  const pabbly = isDfy
+    ? await sendDfyV2Pabbly(buildDfyV2PabblyPayload(payment, notes, ctx))
+    : undefined;
+  if (isDfy && isTestPayment(payment)) {
+    console.log(`[rzp-webhook] ${paymentId} test payment, DFYPurchase not sent`);
+    return NextResponse.json({ ok: true, pabbly, capi: "skipped-test" });
+  }
+
   if (!capiReady()) {
     console.warn("[rzp-webhook] CAPI not configured, Meta Purchase not sent");
-    return NextResponse.json({ ok: true, capi: "skipped" });
+    return NextResponse.json({ ok: true, pabbly, capi: "skipped" });
   }
+
+  /* /dfy-v2 sales go to the shared pixel under their own name. */
+  const eventName = isDfy ? "DFYPurchase" : "Purchase";
 
   /* event_id is the payment id: unique per payment, and stable if Razorpay
      retries the webhook, so a retry cannot double-count the sale. */
   const result = await sendCapiEvent({
     pixelId: CHECKOUT_CONFIG.meta.pixelId,
     accessToken: CHECKOUT_CONFIG.meta.accessToken,
-    eventName: "Purchase",
+    eventName,
     eventId: paymentId,
     eventSourceUrl,
     user: {
@@ -126,6 +146,6 @@ export async function POST(req: Request) {
     testEventCode: CHECKOUT_CONFIG.meta.testEventCode || undefined,
   });
 
-  console.log(`[rzp-webhook] ${paymentId} Purchase capi=${result.ok}`);
-  return NextResponse.json({ ok: true, capi: result.ok ? "sent" : "error" });
+  console.log(`[rzp-webhook] ${paymentId} ${eventName} capi=${result.ok}`);
+  return NextResponse.json({ ok: true, pabbly, capi: result.ok ? "sent" : "error" });
 }

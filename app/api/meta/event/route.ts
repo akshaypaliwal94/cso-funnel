@@ -19,7 +19,14 @@ import { sendCapiEvent, sha256Hex, type SendableEvent } from "@/lib/meta-capi";
  * webhook's equivalents have to travel via the order notes, because that
  * request comes from Razorpay. See lib/request-signals.ts.
  */
-const ALLOWED: SendableEvent[] = ["ViewContent", "AddToCart", "InitiateCheckout"];
+const ALLOWED: SendableEvent[] = [
+  "ViewContent",
+  "AddToCart",
+  "InitiateCheckout",
+  "DFYViewContent",
+  "DFYAddToCart",
+  "DFYInitiateCheckout",
+];
 
 export async function POST(req: Request) {
   if (!capiReady()) {

@@ -70,13 +70,15 @@ export type StandardEvent =
  * an event name, and the event name is one of the surfaces a dataset is
  * classified on.
  *
- * EMPTY ON PURPOSE. `never` means the compiler rejects every custom event
- * until someone widens this type, which is a review. The Kaizen funnel's
- * QualifiedLead exists because that checkout asks a qualifying question; this
- * one asks none, and a custom event with nothing to segment on is a wasted
- * Aggregated Event Measurement slot on iOS, where standard events rank first.
+ * The DFY* events are the /dfy-v2 funnel's own names on this shared pixel
+ * (Atul, 2026-10-21), so its traffic and sales stay separable from the main
+ * funnel's standard events. DFYPurchase is sent by the webhook only.
  */
-export type CustomEvent = never;
+export type CustomEvent =
+  | "DFYViewContent"
+  | "DFYAddToCart"
+  | "DFYInitiateCheckout"
+  | "DFYPurchase";
 
 export type SendableEvent = StandardEvent | CustomEvent;
 
