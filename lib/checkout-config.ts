@@ -28,6 +28,11 @@ export const CHECKOUT_CONFIG = {
     accessToken: process.env.META_CAPI_ACCESS_TOKEN ?? "",
     testEventCode: process.env.META_CAPI_TEST_EVENT_CODE ?? "",
   },
+  /* /dfy-v2 reports to its own pixel (Atul, 2026-10-22). Same test event code. */
+  dfyMeta: {
+    pixelId: process.env.DFY_V2_META_PIXEL_ID ?? "",
+    accessToken: process.env.DFY_V2_META_CAPI_ACCESS_TOKEN ?? "",
+  },
   razorpay: {
     keyId: process.env.RAZORPAY_KEY_ID ?? "",
     keySecret: process.env.RAZORPAY_KEY_SECRET ?? "",
@@ -35,12 +40,20 @@ export const CHECKOUT_CONFIG = {
   },
 } as const;
 
+export type Funnel = "main" | "dfy_v2";
+
+/** The pixel and token a funnel's events go to. */
+export const metaFor = (funnel: Funnel) =>
+  funnel === "dfy_v2" ? CHECKOUT_CONFIG.dfyMeta : CHECKOUT_CONFIG.meta;
+
 /**
  * True only when a real CAPI call can be made. Routes check this and skip
  * quietly rather than posting to Meta with an empty pixel id.
  */
-export const capiReady = () =>
-  Boolean(CHECKOUT_CONFIG.meta.pixelId && CHECKOUT_CONFIG.meta.accessToken);
+export const capiReady = (funnel: Funnel = "main") => {
+  const m = metaFor(funnel);
+  return Boolean(m.pixelId && m.accessToken);
+};
 
 /**
  * Whether this deployment is transacting in test mode, derived rather than

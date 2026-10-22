@@ -23,7 +23,7 @@
  * why the five human fields stay outside them.
  */
 
-/** The `kind` note on a /dfy-v2 order. Its Purchase is sent as DFYPurchase. */
+/** The `kind` note on a /dfy-v2 order. Its Purchase goes to the /dfy-v2 pixel. */
 export const DFY_V2_KIND = "dfy_v2_call";
 
 /** The machine-readable half of the order, carried in `x0` to `x9`. */

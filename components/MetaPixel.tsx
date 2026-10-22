@@ -1,5 +1,6 @@
 "use client";
 
+import { usePathname } from "next/navigation";
 import Script from "next/script";
 import { useEffect } from "react";
 
@@ -15,10 +16,17 @@ import { captureFbclid } from "@/lib/client-signals";
  *
  * Renders nothing when the pixel id is absent, so a missing env var leaves no
  * broken script tag behind.
+ *
+ * /dfy-v2/* loads its own pixel instead of the main one (Atul, 2026-10-22), so
+ * each page carries exactly one pixel.
  */
-const PIXEL_ID = process.env.NEXT_PUBLIC_META_PIXEL_ID ?? "";
+const MAIN_PIXEL_ID = process.env.NEXT_PUBLIC_META_PIXEL_ID ?? "";
+const DFY_V2_PIXEL_ID = process.env.NEXT_PUBLIC_DFY_V2_META_PIXEL_ID ?? "";
 
 export default function MetaPixel() {
+  const pathname = usePathname() ?? "";
+  const PIXEL_ID = pathname.startsWith("/dfy-v2") ? DFY_V2_PIXEL_ID : MAIN_PIXEL_ID;
+
   /* Two captures, both on first landing, both on EVERY page rather than only
      the landing page: a retargeting ad or an email can drop someone straight
      onto /checkout, and that visit is the only one carrying the campaign.
@@ -39,13 +47,18 @@ export default function MetaPixel() {
 
   return (
     <>
-      <Script id="meta-pixel" strategy="afterInteractive">
+      {/* ONE pixel per tab. fbq('track') reaches every pixel ever inited on the
+          page, so a client-side hop between / and /dfy-v2 must not init the
+          second one: that PageView would land in both datasets. The first pixel
+          wins until the next full page load. */}
+      <Script id={`meta-pixel-${PIXEL_ID}`} strategy="afterInteractive">
         {`!function(f,b,e,v,n,t,s){if(f.fbq)return;n=f.fbq=function(){n.callMethod?
 n.callMethod.apply(n,arguments):n.queue.push(arguments)};if(!f._fbq)f._fbq=n;
 n.push=n;n.loaded=!0;n.version='2.0';n.queue=[];t=b.createElement(e);t.async=!0;
 t.src=v;s=b.getElementsByTagName(e)[0];s.parentNode.insertBefore(t,s)}(window,
 document,'script','https://connect.facebook.net/en_US/fbevents.js');
-fbq('init','${PIXEL_ID}');fbq('track','PageView');`}
+if(!window.__metaPixelId){window.__metaPixelId='${PIXEL_ID}';
+fbq('init','${PIXEL_ID}');fbq('track','PageView');}`}
       </Script>
       <noscript>
         {/* eslint-disable-next-line @next/next/no-img-element */}

@@ -2,7 +2,7 @@ import crypto from "crypto";
 
 import { NextResponse } from "next/server";
 
-import { CHECKOUT_CONFIG, capiReady } from "@/lib/checkout-config";
+import { CHECKOUT_CONFIG, capiReady, metaFor } from "@/lib/checkout-config";
 import { sendCapiEvent } from "@/lib/meta-capi";
 import {
   buildDfyV2PabblyPayload,
@@ -101,24 +101,25 @@ export async function POST(req: Request) {
     ? await sendDfyV2Pabbly(buildDfyV2PabblyPayload(payment, notes, ctx))
     : undefined;
   if (isDfy && isTestPayment(payment)) {
-    console.log(`[rzp-webhook] ${paymentId} test payment, DFYPurchase not sent`);
+    console.log(`[rzp-webhook] ${paymentId} test payment, Purchase not sent`);
     return NextResponse.json({ ok: true, pabbly, capi: "skipped-test" });
   }
 
-  if (!capiReady()) {
-    console.warn("[rzp-webhook] CAPI not configured, Meta Purchase not sent");
+  /* /dfy-v2 sales go to that funnel's own pixel. */
+  const funnel = isDfy ? "dfy_v2" : "main";
+  if (!capiReady(funnel)) {
+    console.warn(`[rzp-webhook] CAPI not configured for ${funnel}, Meta Purchase not sent`);
     return NextResponse.json({ ok: true, pabbly, capi: "skipped" });
   }
-
-  /* /dfy-v2 sales go to the shared pixel under their own name. */
-  const eventName = isDfy ? "DFYPurchase" : "Purchase";
 
   /* event_id is the payment id: unique per payment, and stable if Razorpay
      retries the webhook, so a retry cannot double-count the sale. */
   const result = await sendCapiEvent({
-    pixelId: CHECKOUT_CONFIG.meta.pixelId,
-    accessToken: CHECKOUT_CONFIG.meta.accessToken,
-    eventName,
+    pixelId: metaFor(funnel).pixelId,
+    accessToken: metaFor(funnel).accessToken,
+    eventName: "Purchase",
+    /* /dfy-v2 only: `sales`, an exact duplicate of this Purchase, as a backup. */
+    alsoAs: isDfy ? ["sales"] : [],
     eventId: paymentId,
     eventSourceUrl,
     user: {
@@ -146,6 +147,6 @@ export async function POST(req: Request) {
     testEventCode: CHECKOUT_CONFIG.meta.testEventCode || undefined,
   });
 
-  console.log(`[rzp-webhook] ${paymentId} ${eventName} capi=${result.ok}`);
+  console.log(`[rzp-webhook] ${paymentId} Purchase${isDfy ? " + sales" : ""} (${funnel}) capi=${result.ok}`);
   return NextResponse.json({ ok: true, pabbly, capi: result.ok ? "sent" : "error" });
 }
