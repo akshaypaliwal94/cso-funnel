@@ -3,9 +3,9 @@
 import { useRouter, useSearchParams } from 'next/navigation';
 import React, { useEffect, useRef } from 'react';
 
-const NAMESPACE = 'tgo-hybrid-growth-call';
-const CAL_LINK = 'trainergoesonline/tgo-hybrid-growth-call';
-const ELEMENT_ID = 'my-cal-inline-tgo-hybrid-growth-call';
+const NAMESPACE = 'audit';
+const CAL_LINK = 'akshay-paliwal-zxrvel/audit';
+const ELEMENT_ID = 'my-cal-inline-audit';
 
 type CalApi = ((...args: unknown[]) => void) & {
   ns: Record<string, (...args: unknown[]) => void>;
@@ -91,13 +91,17 @@ const BookingWidget = () => {
       hideEventTypeDetails: false,
       layout: 'month_view',
     });
-    cal('on', {
-      action: 'bookingSuccessfulV2',
-      callback: () => {
-        const qs = searchParams.toString();
-        router.push(`/dfy-v2/call-booked${qs ? `?${qs}` : ''}`);
-      },
-    });
+    /* Newer embeds fire bookingSuccessfulV2, older ones bookingSuccessful;
+       some fire both, hence the guard. */
+    let redirected = false;
+    const onBooked = () => {
+      if (redirected) return;
+      redirected = true;
+      const qs = searchParams.toString();
+      router.push(`/dfy-v2/call-booked${qs ? `?${qs}` : ''}`);
+    };
+    cal('on', { action: 'bookingSuccessfulV2', callback: onBooked });
+    cal('on', { action: 'bookingSuccessful', callback: onBooked });
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
