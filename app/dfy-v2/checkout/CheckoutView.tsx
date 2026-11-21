@@ -289,7 +289,7 @@ const CheckoutContent: React.FC<{ copy: CheckoutCopy }> = ({ copy }) => {
   useEffect(() => {
     if (arrived.current) return;
     arrived.current = true;
-    trackDfyAddToCart(copy.source);
+    trackDfyAddToCart();
   }, []);
 
   // The quiz answers the landing page stored, for the lead Pabbly.
@@ -329,7 +329,7 @@ const CheckoutContent: React.FC<{ copy: CheckoutCopy }> = ({ copy }) => {
     };
 
     setIsLoading(true);
-    trackDfyInitiateCheckout(person, copy.source);
+    trackDfyInitiateCheckout(person);
 
     if (copy.leadEndpoint) {
       const lead = JSON.stringify({ ...person, dialCode, quiz, ...collectSignals() });
