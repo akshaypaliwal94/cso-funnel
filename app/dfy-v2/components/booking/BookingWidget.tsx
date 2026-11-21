@@ -56,7 +56,7 @@ function loadCal() {
   /* eslint-enable */
 }
 
-const BookingWidget = () => {
+const BookingWidget = ({ bookedPath = '/dfy-v2/call-booked' }: { bookedPath?: string }) => {
   const router = useRouter();
   const searchParams = useSearchParams();
   const mounted = useRef(false);
@@ -98,7 +98,7 @@ const BookingWidget = () => {
       if (redirected) return;
       redirected = true;
       const qs = searchParams.toString();
-      router.push(`/dfy-v2/call-booked${qs ? `?${qs}` : ''}`);
+      router.push(`${bookedPath}${qs ? `?${qs}` : ''}`);
     };
     cal('on', { action: 'bookingSuccessfulV2', callback: onBooked });
     cal('on', { action: 'bookingSuccessful', callback: onBooked });

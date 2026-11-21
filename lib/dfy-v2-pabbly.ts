@@ -97,10 +97,13 @@ export function buildDfyV2PabblyPayload(
 /** Never throws: a Pabbly failure must not fail the webhook into a retry loop. */
 export async function sendDfyV2Pabbly(
   payload: ReturnType<typeof buildDfyV2PabblyPayload>,
+  source = "",
 ): Promise<"sent" | "skipped" | "error"> {
-  const url = process.env.DFY_V2_PABBLY_WEBHOOK_URL;
+  /* A /dfy-v3 sale goes to its own Pabbly, never the dfy-v2 one. */
+  const envKey = source === "dfy_v3" ? "DFY_V3_PAYMENT_PABBLY_WEBHOOK_URL" : "DFY_V2_PABBLY_WEBHOOK_URL";
+  const url = process.env[envKey];
   if (!url) {
-    console.error("[rzp-webhook] DFY_V2_PABBLY_WEBHOOK_URL not set, Pabbly skipped");
+    console.error(`[rzp-webhook] ${envKey} not set, Pabbly skipped`);
     return "skipped";
   }
   try {

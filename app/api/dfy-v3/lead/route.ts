@@ -13,7 +13,7 @@ import { readClientIp, readClientUserAgent } from "@/lib/request-signals";
  *   Pabbly  the checkout's details plus the landing-page quiz answers, to
  *           DFY_V3_LEAD_PABBLY_WEBHOOK_URL. Every key goes on every call:
  *           Pabbly builds its field mapper from the first payload it sees.
- *   Meta    age_lead to the dfy pixel, for a custom conversion.
+ *   Meta    a standard Lead to the dfy pixel.
  *
  * Purchases keep going to the dfy-v2 Pabbly from the Razorpay webhook.
  */
@@ -101,7 +101,7 @@ export async function POST(req: Request) {
       ? sendCapiEvent({
           pixelId: metaFor("dfy_v2").pixelId,
           accessToken: metaFor("dfy_v2").accessToken,
-          eventName: "age_lead",
+          eventName: "Lead",
           eventId: payload.lead_id,
           eventSourceUrl:
             (typeof body.eventSourceUrl === "string" && body.eventSourceUrl) ||
@@ -126,6 +126,6 @@ export async function POST(req: Request) {
       : Promise.resolve("skipped"),
   ]);
 
-  console.log(`[dfy-v3-lead] ${payload.lead_id} age_lead=${meta}`);
+  console.log(`[dfy-v3-lead] ${payload.lead_id} Lead=${meta}`);
   return NextResponse.json({ ok: pabbly !== "error" && meta !== "error", pabbly, meta });
 }

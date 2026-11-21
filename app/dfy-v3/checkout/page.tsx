@@ -13,7 +13,7 @@ const DFY_V3_COPY: CheckoutCopy = {
     'We review your application for fit and, if appropriate, proceed with the diagnostic call and scope discussion.',
   lineItem: 'Application fee',
   detailsHint: 'We’ll use your application to evaluate fit and prepare for a diagnostic conversation.',
-  successPath: '/dfy-v3/thank-you',
+  successPath: '/dfy-v3/call-booking',
   leadEndpoint: '/api/dfy-v3/lead',
 };
 

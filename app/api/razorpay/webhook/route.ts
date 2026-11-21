@@ -98,7 +98,7 @@ export async function POST(req: Request) {
      is_test and is never sent to Meta, as on the original funnel. */
   const isDfy = notes.kind === DFY_V2_KIND;
   const pabbly = isDfy
-    ? await sendDfyV2Pabbly(buildDfyV2PabblyPayload(payment, notes, ctx))
+    ? await sendDfyV2Pabbly(buildDfyV2PabblyPayload(payment, notes, ctx), ctx.source)
     : undefined;
   if (isDfy && isTestPayment(payment)) {
     console.log(`[rzp-webhook] ${paymentId} test payment, Purchase not sent`);
@@ -118,9 +118,8 @@ export async function POST(req: Request) {
     pixelId: metaFor(funnel).pixelId,
     accessToken: metaFor(funnel).accessToken,
     eventName: "Purchase",
-    /* /dfy-v2 only: `sales`, an exact duplicate of this Purchase, as a backup.
-       A /dfy-v3 sale also goes out as age_purchase. */
-    alsoAs: isDfy ? (ctx.source === "dfy_v3" ? ["sales", "age_purchase"] : ["sales"]) : [],
+    /* /dfy-v2 only: `sales`, an exact duplicate of this Purchase, as a backup. */
+    alsoAs: isDfy ? ["sales"] : [],
     eventId: paymentId,
     eventSourceUrl,
     user: {
@@ -148,7 +147,6 @@ export async function POST(req: Request) {
     testEventCode: CHECKOUT_CONFIG.meta.testEventCode || undefined,
   });
 
-  const extras = isDfy ? (ctx.source === "dfy_v3" ? " + sales + age_purchase" : " + sales") : "";
-  console.log(`[rzp-webhook] ${paymentId} Purchase${extras} (${funnel}) capi=${result.ok}`);
+  console.log(`[rzp-webhook] ${paymentId} Purchase${isDfy ? " + sales" : ""} (${funnel}) capi=${result.ok}`);
   return NextResponse.json({ ok: true, pabbly, capi: result.ok ? "sent" : "error" });
 }

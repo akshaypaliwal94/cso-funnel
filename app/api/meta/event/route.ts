@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 
 import { CHECKOUT_CONFIG, capiReady, metaFor } from "@/lib/checkout-config";
-import { AGE_ALIAS, sendCapiEvent, sha256Hex, type SendableEvent, type StandardEvent } from "@/lib/meta-capi";
+import { sendCapiEvent, sha256Hex, type SendableEvent } from "@/lib/meta-capi";
 
 /**
  * One route for the three PRE-PAYMENT events: ViewContent, AddToCart and
@@ -51,14 +51,10 @@ export async function POST(req: Request) {
   const seed = email || fbp || `${Date.now()}_${Math.random()}`;
   const eventId = sha256Hex(`${seed}|${eventName}`);
 
-  const ageAlias =
-    funnel === "dfy_v2" && body.source === "dfy_v3" ? AGE_ALIAS[eventName as StandardEvent] : undefined;
-
   const result = await sendCapiEvent({
     pixelId: metaFor(funnel).pixelId,
     accessToken: metaFor(funnel).accessToken,
     eventName,
-    alsoAs: ageAlias ? [ageAlias] : [],
     eventId,
     eventSourceUrl:
       (typeof body.eventSourceUrl === "string" && body.eventSourceUrl) ||

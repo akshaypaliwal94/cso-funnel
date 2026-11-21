@@ -7,7 +7,7 @@ import { MainHeading } from '../common/Heading';
 import { TextBlock } from '../common/TextBlock';
 import BookingWidget from './BookingWidget'; // make sure path is correct
 
-const CallBooking = () => {
+const CallBooking = ({ bookedPath }: { bookedPath?: string }) => {
   return (
     <section className="p-6 pb-8 pt-4 md:pb-16 md:pt-6">
       <MainHeading className="mb-4 md:mb-6">
@@ -31,7 +31,7 @@ const CallBooking = () => {
 
       <div className="mx-auto max-w-6xl" id="booking-section">
         <Suspense fallback={<div>Loading booking form...</div>}>
-          <BookingWidget />
+          <BookingWidget bookedPath={bookedPath} />
         </Suspense>
       </div>
 

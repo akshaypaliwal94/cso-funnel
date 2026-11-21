@@ -588,7 +588,7 @@ function QualifyBtn({ className = 'btn' }: { className?: string }) {
 export default function DfyV3Page() {
   return (
     <>
-      <DfyFunnelTracker source="dfy_v3" />
+      <DfyFunnelTracker />
       <div className="topline">FOR COACHES, CONSULTANTS &amp; SERVICE PROVIDERS WITH A PROVEN OFFER</div>
       <header className="navigation">
         <nav className="wrap nav-inner" aria-label="Main navigation">
