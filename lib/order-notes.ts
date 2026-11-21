@@ -47,6 +47,7 @@ export type OrderContext = {
   fbclid: string;
   referrer: string;
   landingUrl: string;
+  source: string; // "dfy_v3" for the quiz funnel; empty on dfy-v2 orders
 };
 
 export const EMPTY_CONTEXT: OrderContext = {
@@ -69,6 +70,7 @@ export const EMPTY_CONTEXT: OrderContext = {
   fbclid: "",
   referrer: "",
   landingUrl: "",
+  source: "",
 };
 
 const CHUNK_SIZE = 256;
@@ -107,6 +109,7 @@ const OTHER_CAPS: Partial<Record<keyof OrderContext, number>> = {
   utmCampaign: 100,
   utmContent: 100,
   utmTerm: 100,
+  source: 12,
 };
 
 function applyCaps(ctx: OrderContext): OrderContext {

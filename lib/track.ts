@@ -37,13 +37,13 @@ import { collectSignals } from "@/lib/client-signals";
  */
 
 /** Fire and forget: analytics must never block or fail a click. */
-function capi(eventName: string, person: Person = {}, funnel?: "dfy_v2") {
+function capi(eventName: string, person: Person = {}, funnel?: "dfy_v2", source?: DfySource) {
   const s = collectSignals();
   try {
     void fetch("/api/meta/event", {
       method: "POST",
       headers: { "content-type": "application/json" },
-      body: JSON.stringify({ eventName, ...s, ...person, ...(funnel && { funnel }) }),
+      body: JSON.stringify({ eventName, ...s, ...person, ...(funnel && { funnel }), ...(source && { source }) }),
       keepalive: true, // survives the navigation a CTA click causes
     });
   } catch {
@@ -107,18 +107,21 @@ export function trackInitiateCheckout(person: Person) {
 }
 
 /* The /dfy-v2 funnel's equivalents: same events and rules, sent to its own
-   pixel. Its Purchase comes from the webhook. */
+   pixel. Its Purchase comes from the webhook. /dfy-v3 shares that pixel; its
+   calls carry source "dfy_v3", which adds the age_* twin of each event. */
 
-export function trackDfyViewContent() {
-  once("dfy_view_content", () => {
-    capi("ViewContent", {}, "dfy_v2");
+type DfySource = "dfy_v2" | "dfy_v3";
+
+export function trackDfyViewContent(source: DfySource = "dfy_v2") {
+  once(source === "dfy_v3" ? "age_view_content" : "dfy_view_content", () => {
+    capi("ViewContent", {}, "dfy_v2", source);
   });
 }
 
-export function trackDfyAddToCart() {
-  capi("AddToCart", {}, "dfy_v2");
+export function trackDfyAddToCart(source: DfySource = "dfy_v2") {
+  capi("AddToCart", {}, "dfy_v2", source);
 }
 
-export function trackDfyInitiateCheckout(person: Person) {
-  capi("InitiateCheckout", person, "dfy_v2");
+export function trackDfyInitiateCheckout(person: Person, source: DfySource = "dfy_v2") {
+  capi("InitiateCheckout", person, "dfy_v2", source);
 }

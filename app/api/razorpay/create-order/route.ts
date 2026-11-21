@@ -108,6 +108,7 @@ export async function POST(req: Request) {
       fbclid: truncate(body.fbclid, 200),
       referrer: truncate(body.referrer, 200),
       landingUrl: truncate(body.landingUrl, 300),
+      source: body.source === "dfy_v3" ? "dfy_v3" : "",
     }),
   };
 

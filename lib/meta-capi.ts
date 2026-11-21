@@ -74,7 +74,25 @@ export type StandardEvent =
  * (Atul, 2026-10-22). It is sent only by the webhook, alongside Purchase,
  * through `alsoAs`, never on its own.
  */
-export type CustomEvent = "sales";
+export type CustomEvent =
+  | "sales"
+  | "age_view_content"
+  | "age_add_to_cart"
+  | "age_initiate_checkout"
+  | "age_lead"
+  | "age_purchase";
+
+/**
+ * /dfy-v3 (AI Growth Engine) events: each standard event also goes out under
+ * its age_* name, same event_id, for custom conversions. age_lead has no
+ * standard twin and is sent on its own by /api/dfy-v3/lead.
+ */
+export const AGE_ALIAS: Partial<Record<StandardEvent, CustomEvent>> = {
+  ViewContent: "age_view_content",
+  AddToCart: "age_add_to_cart",
+  InitiateCheckout: "age_initiate_checkout",
+  Purchase: "age_purchase",
+};
 
 export type SendableEvent = StandardEvent | CustomEvent;
 
