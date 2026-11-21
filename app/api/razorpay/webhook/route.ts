@@ -98,7 +98,7 @@ export async function POST(req: Request) {
      is_test and is never sent to Meta, as on the original funnel. */
   const isDfy = notes.kind === DFY_V2_KIND;
   const pabbly = isDfy
-    ? await sendDfyV2Pabbly(buildDfyV2PabblyPayload(payment, notes, ctx))
+    ? await sendDfyV2Pabbly(buildDfyV2PabblyPayload(payment, notes, ctx), ctx.source)
     : undefined;
   if (isDfy && isTestPayment(payment)) {
     console.log(`[rzp-webhook] ${paymentId} test payment, Purchase not sent`);
