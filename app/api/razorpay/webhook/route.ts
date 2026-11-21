@@ -118,8 +118,9 @@ export async function POST(req: Request) {
     pixelId: metaFor(funnel).pixelId,
     accessToken: metaFor(funnel).accessToken,
     eventName: "Purchase",
-    /* /dfy-v2 only: `sales`, an exact duplicate of this Purchase, as a backup. */
-    alsoAs: isDfy ? ["sales"] : [],
+    /* /dfy-v2 only: `sales`, an exact duplicate of this Purchase, as a backup.
+       A /dfy-v3 sale also goes out as age_purchase. */
+    alsoAs: isDfy ? (ctx.source === "dfy_v3" ? ["sales", "age_purchase"] : ["sales"]) : [],
     eventId: paymentId,
     eventSourceUrl,
     user: {
@@ -147,6 +148,7 @@ export async function POST(req: Request) {
     testEventCode: CHECKOUT_CONFIG.meta.testEventCode || undefined,
   });
 
-  console.log(`[rzp-webhook] ${paymentId} Purchase${isDfy ? " + sales" : ""} (${funnel}) capi=${result.ok}`);
+  const extras = isDfy ? (ctx.source === "dfy_v3" ? " + sales + age_purchase" : " + sales") : "";
+  console.log(`[rzp-webhook] ${paymentId} Purchase${extras} (${funnel}) capi=${result.ok}`);
   return NextResponse.json({ ok: true, pabbly, capi: result.ok ? "sent" : "error" });
 }

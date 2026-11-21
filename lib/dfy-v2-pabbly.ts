@@ -5,7 +5,8 @@ import type { OrderContext } from "@/lib/order-notes";
 /**
  * The /dfy-v2 sale, posted to the same Pabbly webhook TGO-Marketing's dfy-v2
  * used (DFY_V2_PABBLY_WEBHOOK_URL), with the same 34 keys in the same order and
- * the same derivations. Pabbly builds its field mapper from the first payload
+ * the same derivations. A /dfy-v3 sale differs only in `product` and the
+ * `event_source_url` path. Pabbly builds its field mapper from the first payload
  * it sees, so every key goes on every call, empty or not.
  */
 
@@ -40,6 +41,8 @@ export function buildDfyV2PabblyPayload(
   const createdSec = Number(payment.created_at ?? 0);
   const createdAtIso = (createdSec ? new Date(createdSec * 1000) : new Date()).toISOString();
 
+  const isV3 = ctx.source === "dfy_v3";
+
   // The form's values, as TGO's payload used.
   const firstName = ctx.firstName;
   const lastName = ctx.lastName;
@@ -68,7 +71,7 @@ export function buildDfyV2PabblyPayload(
     client_ip_address: ctx.clientIp,
     client_user_agent: ctx.clientUserAgent,
     external_id: email ? sha256Hex(email.trim().toLowerCase()) : "",
-    event_source_url: `${originOnly(CHECKOUT_CONFIG.fallbackEventSourceUrl)}/dfy-v2/checkout`,
+    event_source_url: `${originOnly(CHECKOUT_CONFIG.fallbackEventSourceUrl)}/${isV3 ? "dfy-v3" : "dfy-v2"}/checkout`,
     amount: isTest ? 0 : amountRupees,
     // A real boolean: a Pabbly router reads the string "false" as true.
     is_test: isTest,
@@ -86,7 +89,7 @@ export function buildDfyV2PabblyPayload(
     order_id: String(payment.order_id ?? ""),
     name: `${firstName} ${lastName}`.trim(),
     currency,
-    product: "1:1 Call With Akshay",
+    product: isV3 ? "TGO AI Growth Engine Application" : "1:1 Call With Akshay",
     occupation: "",
   };
 }
