@@ -3,9 +3,19 @@
 import { useRouter, useSearchParams } from 'next/navigation';
 import React, { useEffect, useRef } from 'react';
 
-const NAMESPACE = 'audit';
-const CAL_LINK = 'akshay-paliwal-zxrvel/audit';
-const ELEMENT_ID = 'my-cal-inline-audit';
+/* Which Cal event the widget embeds. dfy-v2 books Akshay's audit; /dfy-v3
+   passes its own. */
+export type CalEvent = { namespace: string; calLink: string };
+
+export const DFY_V2_CAL: CalEvent = {
+  namespace: 'audit',
+  calLink: 'akshay-paliwal-zxrvel/audit',
+};
+
+export const DFY_V3_CAL: CalEvent = {
+  namespace: 'tgo-ai-growth-engine-call',
+  calLink: 'trainergoesonline/tgo-ai-growth-engine-call',
+};
 
 type CalApi = ((...args: unknown[]) => void) & {
   ns: Record<string, (...args: unknown[]) => void>;
@@ -56,7 +66,14 @@ function loadCal() {
   /* eslint-enable */
 }
 
-const BookingWidget = ({ bookedPath = '/dfy-v2/call-booked' }: { bookedPath?: string }) => {
+const BookingWidget = ({
+  bookedPath = '/dfy-v2/call-booked',
+  event = DFY_V2_CAL,
+}: {
+  bookedPath?: string;
+  event?: CalEvent;
+}) => {
+  const elementId = `my-cal-inline-${event.namespace}`;
   const router = useRouter();
   const searchParams = useSearchParams();
   const mounted = useRef(false);
@@ -67,21 +84,21 @@ const BookingWidget = ({ bookedPath = '/dfy-v2/call-booked' }: { bookedPath?: st
     mounted.current = true;
     loadCal();
     const Cal = window.Cal!;
-    Cal('init', NAMESPACE, { origin: 'https://app.cal.com' });
+    Cal('init', event.namespace, { origin: 'https://app.cal.com' });
     // Forwards the page's whole query string (utm_*, fbclid, payment id) into the booking.
     Cal.config = Cal.config || {};
     Cal.config.forwardQueryParams = true;
 
     // Set synchronously by the 'init' call above.
-    const cal = Cal.ns[NAMESPACE]!;
+    const cal = Cal.ns[event.namespace]!;
     cal('inline', {
-      elementOrSelector: `#${ELEMENT_ID}`,
+      elementOrSelector: `#${elementId}`,
       config: {
         layout: 'month_view',
         useSlotsViewOnSmallScreen: 'true',
         theme: 'auto',
       },
-      calLink: CAL_LINK,
+      calLink: event.calLink,
     });
     cal('ui', {
       cssVarsPerTheme: {
@@ -107,7 +124,7 @@ const BookingWidget = ({ bookedPath = '/dfy-v2/call-booked' }: { bookedPath?: st
 
   return (
     <div
-      id={ELEMENT_ID}
+      id={elementId}
       style={{ width: '100%', minHeight: '781px', overflow: 'scroll' }}
     />
   );

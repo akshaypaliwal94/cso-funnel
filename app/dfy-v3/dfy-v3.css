@@ -141,6 +141,19 @@ html:has(.dfy3) { scroll-behavior: smooth; scroll-padding-top: 90px; background:
 .dfy3 .field::placeholder { color: #6b7080; }
 .dfy3 .field:focus { border-color: var(--orange); box-shadow: 0 0 0 3px rgba(255, 106, 0, 0.18); }
 .dfy3 .is-hidden { display: none !important; }
+
+/* Country picker + number inside one .field, as on the dfy checkout. The
+   library's own select is stretched invisibly over the flag. */
+.dfy3 .phone-field { display: flex; align-items: center; padding-top: 0; padding-bottom: 0; }
+.dfy3 .phone-field:focus-within { border-color: var(--orange); box-shadow: 0 0 0 3px rgba(255, 106, 0, 0.18); }
+.dfy3 .phone-field .PhoneInput { display: flex; align-items: center; width: 100%; }
+.dfy3 .phone-field .PhoneInputCountry { margin-right: 10px; }
+.dfy3 .phone-field .PhoneInputCountryIcon,
+.dfy3 .phone-field .PhoneInputCountryIcon--border { box-shadow: none; background: transparent; }
+.dfy3 .phone-field .PhoneInputCountrySelect { color: #000; cursor: pointer; }
+.dfy3 .phone-field .PhoneInputCountrySelectArrow { color: var(--muted2); opacity: 1; }
+.dfy3 .phone-field .PhoneInputInput { flex: 1; min-width: 0; border: 0; outline: 0; background: transparent; color: #fff; padding: 0; min-height: 45px; }
+.dfy3 .phone-field .PhoneInputInput::placeholder { color: #6b7080; }
 .dfy3 .checkout-amount { font-size: 56px; letter-spacing: -0.07em; font-weight: 950; line-height: 1.1; margin: 7px 0; }
 .dfy3 .info-box { padding: 14px; border-radius: 10px; background: var(--tint); border: 1px solid rgba(255, 154, 45, 0.25); font-size: 13px; color: var(--muted); }
 .dfy3 .info-box strong { color: #fff; }
