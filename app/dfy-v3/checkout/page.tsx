@@ -14,7 +14,7 @@ const DFY_V3_COPY: CheckoutCopy = {
   lineItem: 'Application fee',
   detailsHint: 'We’ll use your application to evaluate fit and prepare for a diagnostic conversation.',
   successPath: '/dfy-v3/call-booking',
-  leadEndpoint: '/api/dfy-v3/lead',
+  prefillFromQuiz: true,
 };
 
 export default function DfyV3CheckoutPage() {

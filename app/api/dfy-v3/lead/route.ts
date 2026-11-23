@@ -2,20 +2,16 @@ import crypto from "crypto";
 
 import { NextResponse } from "next/server";
 
-import { CHECKOUT_CONFIG, capiReady, metaFor } from "@/lib/checkout-config";
-import { sendCapiEvent } from "@/lib/meta-capi";
 import { readClientIp, readClientUserAgent } from "@/lib/request-signals";
 
 /**
- * The /dfy-v3 lead, sent when the buyer presses Pay, so an unpaid applicant is
- * still captured. Two legs, independent of each other:
+ * The /dfy-v3 lead, sent when the quiz's details step is submitted: the
+ * details plus the five answers and whether they qualified, to
+ * DFY_V3_LEAD_PABBLY_WEBHOOK_URL. Qualified or not, every applicant is sent.
+ * Every key goes on every call: Pabbly builds its field mapper from the first
+ * payload it sees.
  *
- *   Pabbly  the checkout's details plus the landing-page quiz answers, to
- *           DFY_V3_LEAD_PABBLY_WEBHOOK_URL. Every key goes on every call:
- *           Pabbly builds its field mapper from the first payload it sees.
- *   Meta    a standard Lead to the dfy pixel.
- *
- * Purchases keep going to the dfy-v2 Pabbly from the Razorpay webhook.
+ * Pabbly only. The Meta Lead fires from the quiz itself (lib/track.ts).
  */
 
 const str = (v: unknown, max = 256) => (v == null ? "" : String(v)).trim().slice(0, max);
@@ -73,6 +69,8 @@ export async function POST(req: Request) {
     dial_code: dialCode,
     city,
     country_code: country.toUpperCase(),
+    // A real boolean: a Pabbly router reads the string "false" as true.
+    qualified: body.qualified === true,
     quiz_stage: str(quiz.stage, 120),
     quiz_challenge: str(quiz.challenge, 120),
     quiz_revenue: str(quiz.revenue, 60),
@@ -95,37 +93,6 @@ export async function POST(req: Request) {
   const url = process.env.DFY_V3_LEAD_PABBLY_WEBHOOK_URL;
   if (!url) console.error("[dfy-v3-lead] DFY_V3_LEAD_PABBLY_WEBHOOK_URL not set, Pabbly skipped");
 
-  const [pabbly, meta] = await Promise.all([
-    url ? postPabbly(url, payload) : Promise.resolve("skipped"),
-    capiReady("dfy_v2")
-      ? sendCapiEvent({
-          pixelId: metaFor("dfy_v2").pixelId,
-          accessToken: metaFor("dfy_v2").accessToken,
-          eventName: "Lead",
-          eventId: payload.lead_id,
-          eventSourceUrl:
-            (typeof body.eventSourceUrl === "string" && body.eventSourceUrl) ||
-            CHECKOUT_CONFIG.fallbackEventSourceUrl,
-          user: {
-            email: email || undefined,
-            phone: phoneDigits || undefined,
-            firstName: firstName || undefined,
-            lastName: lastName || undefined,
-            country,
-            city: city || undefined,
-            externalId: str(body.externalId, 64) || undefined,
-            fbc: fbc || undefined,
-            fbp: fbp || undefined,
-            clientIp: clientIp || undefined,
-            clientUserAgent: clientUserAgent || undefined,
-          },
-          valueRupees: CHECKOUT_CONFIG.amountRupees,
-          currency: CHECKOUT_CONFIG.currency,
-          testEventCode: CHECKOUT_CONFIG.meta.testEventCode || undefined,
-        }).then((r) => (r.ok ? "sent" : "error"))
-      : Promise.resolve("skipped"),
-  ]);
-
-  console.log(`[dfy-v3-lead] ${payload.lead_id} Lead=${meta}`);
-  return NextResponse.json({ ok: pabbly !== "error" && meta !== "error", pabbly, meta });
+  const pabbly = url ? await postPabbly(url, payload) : "skipped";
+  return NextResponse.json({ ok: pabbly !== "error", pabbly });
 }

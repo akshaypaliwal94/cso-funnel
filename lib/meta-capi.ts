@@ -62,7 +62,7 @@ export type StandardEvent =
   | "ViewContent"
   | "AddToCart"
   | "InitiateCheckout"
-  | "Lead" // /dfy-v3 only, sent by /api/dfy-v3/lead
+  | "Lead" // /dfy-v3 only: the quiz's last question answered
   | "Purchase";
 
 /**
@@ -75,7 +75,7 @@ export type StandardEvent =
  * (Atul, 2026-10-22). It is sent only by the webhook, alongside Purchase,
  * through `alsoAs`, never on its own.
  */
-export type CustomEvent = "sales";
+export type CustomEvent = "sales" | "QualifiedLead"; // QualifiedLead: /dfy-v3 quiz passed
 
 export type SendableEvent = StandardEvent | CustomEvent;
 

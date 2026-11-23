@@ -3,11 +3,16 @@
 /* eslint-disable @next/next/no-img-element */
 
 import { useRouter, useSearchParams } from 'next/navigation';
-import { Suspense, useState } from 'react';
+import 'react-phone-number-input/style.css';
+
+import { FormEvent, Suspense, useState } from 'react';
+import PhoneInput, { isPossiblePhoneNumber, parsePhoneNumber } from 'react-phone-number-input';
 
 import DfyFunnelTracker from '@/app/dfy-v2/components/DfyFunnelTracker';
 import { DFY_V2_PRICE_LABEL } from '@/app/dfy-v2/price';
 import { type CheckoutPrefill, PREFILL_KEY } from '@/lib/checkout-prefill';
+import { collectSignals } from '@/lib/client-signals';
+import { trackDfyLead, trackDfyQualifiedLead } from '@/lib/track';
 
 type Question = { key: string; title: string; help: string; options: [string, string][] };
 
@@ -89,13 +94,19 @@ const TABS: [string, string][] = [
   ['health', 'Account health'],
 ];
 
-type Stage = 'quiz' | 'fee' | 'nofit';
+type Stage = 'quiz' | 'contact' | 'fee' | 'nofit';
 
 function Qualify() {
   const [stage, setStage] = useState<Stage>('quiz');
   const [step, setStep] = useState(0);
   const [answers, setAnswers] = useState<Record<string, string>>({});
   const [quizError, setQuizError] = useState('');
+  const [firstName, setFirstName] = useState('');
+  const [lastName, setLastName] = useState('');
+  const [phone, setPhone] = useState(''); // E.164, from the picker
+  const [email, setEmail] = useState('');
+  const [contactConsent, setContactConsent] = useState(false);
+  const [contactError, setContactError] = useState('');
   const [feeConsent, setFeeConsent] = useState(false);
   const router = useRouter();
   const queryString = useSearchParams().toString();
@@ -104,7 +115,8 @@ function Qualify() {
 
   const preliminaryFit = () =>
     answers.stage !== 'new' &&
-    !(answers.revenue === 'under-1' && answers.budget === 'under-15') &&
+    answers.revenue !== 'under-1' &&
+    !(answers.revenue === '1-2' && answers.budget === 'under-15') &&
     !(answers.ticket === 'under-5' && answers.budget === 'under-15');
 
   const pick = (value: string) => {
@@ -122,7 +134,54 @@ function Qualify() {
       setQuizError('');
       return;
     }
-    setStage(preliminaryFit() ? 'fee' : 'nofit');
+    setStage('contact');
+  };
+
+  /* Step 6. Everyone who answers it is a Lead and goes to the lead Pabbly with
+     their answers, qualified or not; only a pass is a QualifiedLead. The
+     details then wait in sessionStorage to prefill the checkout. */
+  const submitContact = (e: FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    setContactError('');
+    if (!firstName.trim()) return setContactError('Please enter your first name.');
+    if (!lastName.trim()) return setContactError('Please enter your last name.');
+    if (!phone || !isPossiblePhoneNumber(phone)) return setContactError('Please enter a valid WhatsApp number.');
+    if (!/^\S+@\S+\.\S+$/.test(email.trim())) return setContactError('Please enter a valid email address.');
+    if (!contactConsent) return setContactError('Please agree to the application terms.');
+
+    const parsed = parsePhoneNumber(phone);
+    const dialCode = parsed ? `+${parsed.countryCallingCode}` : '';
+    const person = {
+      firstName: firstName.trim(),
+      lastName: lastName.trim(),
+      email: email.trim(),
+      phone: phone.replace(/\D/g, ''),
+      ...(parsed?.country && { country: parsed.country.toLowerCase() }),
+    };
+    const quiz = Object.fromEntries(
+      QUESTIONS.map((q) => [q.key, q.options.find(([v]) => v === answers[q.key])?.[1] ?? '']),
+    );
+    const fit = preliminaryFit();
+
+    trackDfyLead(person);
+    if (fit) trackDfyQualifiedLead(person);
+
+    // Fire and forget: the visitor never waits on Pabbly.
+    fetch('/api/dfy-v3/lead', {
+      method: 'POST',
+      headers: { 'content-type': 'application/json' },
+      body: JSON.stringify({ ...person, dialCode, quiz, qualified: fit, ...collectSignals() }),
+      keepalive: true,
+    }).catch(() => {});
+
+    const prefill: CheckoutPrefill = { firstName: person.firstName, lastName: person.lastName, email: person.email, phone };
+    try {
+      sessionStorage.setItem(PREFILL_KEY, JSON.stringify(prefill));
+    } catch {
+      /* Storage blocked: the checkout just opens empty. */
+    }
+
+    setStage(fit ? 'fee' : 'nofit');
   };
 
   const back = () => {
@@ -138,20 +197,9 @@ function Qualify() {
     setStage('quiz');
   };
 
-  /* The landing query string (utm_*, fbclid) goes along, as on dfy-v2. The
-     quiz answers wait in sessionStorage until the checkout sends them to Pabbly
-     with the buyer's details. */
+  // The landing query string (utm_*, fbclid) goes along, as on dfy-v2.
   const pay = () => {
     if (!feeConsent) return;
-    const quiz = Object.fromEntries(
-      QUESTIONS.map((q) => [q.key, q.options.find(([v]) => v === answers[q.key])?.[1] ?? '']),
-    );
-    const prefill: CheckoutPrefill = { quiz };
-    try {
-      sessionStorage.setItem(PREFILL_KEY, JSON.stringify(prefill));
-    } catch {
-      /* Storage blocked: the payment still works, the lead goes without answers. */
-    }
     router.push(queryString ? `/dfy-v3/checkout?${queryString}` : '/dfy-v3/checkout');
   };
 
@@ -198,6 +246,101 @@ function Qualify() {
         </div>
       </div>
 
+      <div className={stage === 'contact' ? '' : 'is-hidden'} id="contact-stage">
+        <div className="quiz-head">
+          <b>Almost there</b>
+          <span className="quiz-number">Your details</span>
+        </div>
+        <div className="bar">
+          <div className="bar-fill" style={{ width: '100%' }} />
+        </div>
+        <h3 className="question">Where can we reach you?</h3>
+        <p className="helptext">
+          We&apos;ll use your application to evaluate fit and prepare for a diagnostic conversation.
+        </p>
+        <form noValidate onSubmit={submitContact}>
+          <div className="field-grid">
+            <div className="field-wrap">
+              <label htmlFor="first-name">First name</label>
+              <input
+                className="field"
+                id="first-name"
+                name="firstName"
+                autoComplete="given-name"
+                placeholder="First name"
+                required
+                value={firstName}
+                onChange={(e) => setFirstName(e.target.value)}
+              />
+            </div>
+            <div className="field-wrap">
+              <label htmlFor="last-name">Last name</label>
+              <input
+                className="field"
+                id="last-name"
+                name="lastName"
+                autoComplete="family-name"
+                placeholder="Last name"
+                required
+                value={lastName}
+                onChange={(e) => setLastName(e.target.value)}
+              />
+            </div>
+            <div className="field-wrap">
+              <label htmlFor="whatsapp">WhatsApp number</label>
+              <div className="field phone-field">
+                <PhoneInput
+                  id="whatsapp"
+                  name="phone"
+                  international
+                  defaultCountry="IN"
+                  autoComplete="tel"
+                  placeholder="98765 43210"
+                  value={phone}
+                  onChange={(v) => setPhone(v || '')}
+                />
+              </div>
+            </div>
+            <div className="field-wrap">
+              <label htmlFor="email">Business email</label>
+              <input
+                className="field"
+                id="email"
+                name="email"
+                type="email"
+                autoComplete="email"
+                placeholder="you@business.com"
+                required
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+              />
+            </div>
+          </div>
+          <label className="consent">
+            <input
+              type="checkbox"
+              checked={contactConsent}
+              onChange={(e) => setContactConsent(e.target.checked)}
+            />
+            <span>
+              I agree to be contacted about my application and understand the{' '}
+              <a href="#privacy-note">privacy and application information</a> below.
+            </span>
+          </label>
+          <div className="quiz-actions">
+            <button className="back" type="button" onClick={() => setStage('quiz')}>
+              ← Back
+            </button>
+            <button className="btn" type="submit">
+              Continue <span aria-hidden="true">→</span>
+            </button>
+          </div>
+          <div className="error" role="alert">
+            {contactError}
+          </div>
+        </form>
+      </div>
+
       <div className={stage === 'fee' ? '' : 'is-hidden'} id="fee-stage">
         <span className="eyebrow">LAST STEP</span>
         <h3 className="question" style={{ marginTop: 10 }}>
@@ -225,7 +368,7 @@ function Qualify() {
             reviewed.
           </p>
         </div>
-        <button className="back" type="button" onClick={() => setStage('quiz')}>
+        <button className="back" type="button" onClick={() => setStage('contact')}>
           ← Back
         </button>
       </div>

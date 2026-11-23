@@ -5,9 +5,9 @@ import { LEGAL } from '@/lib/legal';
 import { DFY_V2_PRICE_LABEL } from '../../price';
 import { MainHeading } from '../common/Heading';
 import { TextBlock } from '../common/TextBlock';
-import BookingWidget from './BookingWidget'; // make sure path is correct
+import BookingWidget, { type CalEvent } from './BookingWidget';
 
-const CallBooking = ({ bookedPath }: { bookedPath?: string }) => {
+const CallBooking = ({ bookedPath, event }: { bookedPath?: string; event?: CalEvent }) => {
   return (
     <section className="p-6 pb-8 pt-4 md:pb-16 md:pt-6">
       <MainHeading className="mb-4 md:mb-6">
@@ -31,7 +31,7 @@ const CallBooking = ({ bookedPath }: { bookedPath?: string }) => {
 
       <div className="mx-auto max-w-6xl" id="booking-section">
         <Suspense fallback={<div>Loading booking form...</div>}>
-          <BookingWidget bookedPath={bookedPath} />
+          <BookingWidget bookedPath={bookedPath} event={event} />
         </Suspense>
       </div>
 

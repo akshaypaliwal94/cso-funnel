@@ -32,7 +32,7 @@ export type CheckoutCopy = {
   lineItem: string;
   detailsHint: string;
   successPath: string; // where the buyer lands once Razorpay confirms
-  leadEndpoint?: string; // posts details + quiz answers to a lead Pabbly
+  prefillFromQuiz?: boolean; // open with the details the /dfy-v3 quiz collected
 };
 
 export const DFY_V2_COPY: CheckoutCopy = {
@@ -233,7 +233,6 @@ const hintClass = 'text-[11px] font-semibold text-white/50';
 
 const CheckoutContent: React.FC<{ copy: CheckoutCopy }> = ({ copy }) => {
   const ORIGINAL_PRICE = copy.originalPrice;
-  const [quiz, setQuiz] = useState<Record<string, string> | undefined>();
   const [formData, setFormData] = useState<FormData>({
     firstName: '',
     lastName: '',
@@ -292,20 +291,24 @@ const CheckoutContent: React.FC<{ copy: CheckoutCopy }> = ({ copy }) => {
     trackDfyAddToCart();
   }, []);
 
-  // The quiz answers the landing page stored, for the lead Pabbly.
+  // Fill in what the /dfy-v3 quiz already collected.
   useEffect(() => {
-    if (!copy.leadEndpoint) return;
+    if (!copy.prefillFromQuiz) return;
     try {
       const raw = sessionStorage.getItem(PREFILL_KEY);
-      if (raw) setQuiz((JSON.parse(raw) as CheckoutPrefill).quiz);
+      if (!raw) return;
+      const p = JSON.parse(raw) as CheckoutPrefill;
+      setFormData((prev) => ({
+        ...prev,
+        firstName: p.firstName || prev.firstName,
+        lastName: p.lastName || prev.lastName,
+        email: p.email || prev.email,
+        phone: p.phone || prev.phone,
+      }));
     } catch {
-      /* Storage blocked or bad JSON: the lead goes without answers. */
+      /* Storage blocked or bad JSON: the form stays empty. */
     }
-  }, [copy.leadEndpoint]);
-
-  /* Last lead sent, so dismissing the sheet and paying again with the same
-     details does not post a duplicate. */
-  const sentLead = useRef('');
+  }, [copy.prefillFromQuiz]);
 
   const handleSubmit = async (e: FormEvent<HTMLFormElement>): Promise<void> => {
     e.preventDefault();
@@ -330,20 +333,6 @@ const CheckoutContent: React.FC<{ copy: CheckoutCopy }> = ({ copy }) => {
 
     setIsLoading(true);
     trackDfyInitiateCheckout(person);
-
-    if (copy.leadEndpoint) {
-      const lead = JSON.stringify({ ...person, dialCode, quiz, ...collectSignals() });
-      if (lead !== sentLead.current) {
-        sentLead.current = lead;
-        // Fire and forget: a lead failure must never block the payment.
-        fetch(copy.leadEndpoint, {
-          method: 'POST',
-          headers: { 'content-type': 'application/json' },
-          body: lead,
-          keepalive: true,
-        }).catch(() => {});
-      }
-    }
 
     try {
       if (!(await loadRazorpay())) throw new Error('sdk');

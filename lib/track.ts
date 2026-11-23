@@ -122,3 +122,20 @@ export function trackDfyAddToCart() {
 export function trackDfyInitiateCheckout(person: Person) {
   capi("InitiateCheckout", person, "dfy_v2");
 }
+
+/* /dfy-v3 quiz: Lead when the details step is submitted, whatever the
+   outcome; QualifiedLead when the answers pass and the ₹97 step shows. Both
+   carry the details just typed. Once per session each, so a restart or a
+   Back-and-forward does not recount. */
+
+export function trackDfyLead(person: Person) {
+  once("dfy_lead", () => {
+    capi("Lead", person, "dfy_v2");
+  });
+}
+
+export function trackDfyQualifiedLead(person: Person) {
+  once("dfy_qualified_lead", () => {
+    capi("QualifiedLead", person, "dfy_v2");
+  });
+}
