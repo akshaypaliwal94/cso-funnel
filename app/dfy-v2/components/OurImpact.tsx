@@ -44,13 +44,6 @@ const FACES: Face[] = [
     image: '/assets/dfy-new/influencers/sonia.jpg',
   },
   {
-    name: 'Peeyush Prabhat',
-    value: '1.2M',
-    label: 'YT Subscribers',
-    platform: 'youtube',
-    image: '/assets/dfy-new/influencers/peeyush.jpg',
-  },
-  {
     name: 'Asveth Sreiram',
     value: '700K',
     label: 'Followers',
@@ -154,13 +147,16 @@ export default function OurImpact() {
         <span className="dfy-title-white"> faces</span>
       </h2>
 
-      <ul className="dfy-sec-body mx-auto grid max-w-6xl grid-cols-2 gap-4 px-6 md:grid-cols-3 md:gap-6 md:px-10 lg:grid-cols-4">
+      {/* Flex-wrap rather than grid so an incomplete last row sits centred
+          instead of hugging the left edge. Each card's width reproduces the
+          old 2 / 3 / 4 column tracks: (100% - total gap) / columns. */}
+      <ul className="dfy-sec-body mx-auto flex max-w-6xl flex-wrap justify-center gap-4 px-6 md:gap-6 md:px-10">
         {FACES.map((face, index) => (
           <li
             key={face.name}
             data-reveal
             style={{ '--i': index } as React.CSSProperties}
-            className="dfy-face-card"
+            className="dfy-face-card w-[calc((100%-1rem)/2)] md:w-[calc((100%-3rem)/3)] lg:w-[calc((100%-4.5rem)/4)]"
           >
             <div className="dfy-face-art relative overflow-hidden rounded-[14px]">
               {face.image ? (
