@@ -114,10 +114,8 @@ function Qualify() {
   const item = QUESTIONS[step];
 
   const preliminaryFit = () =>
-    answers.stage !== 'new' &&
     answers.revenue !== 'under-1' &&
-    !(answers.revenue === '1-2' && answers.budget === 'under-15') &&
-    !(answers.ticket === 'under-5' && answers.budget === 'under-15');
+    !(answers.revenue === '1-2' && answers.budget === 'under-15');
 
   const pick = (value: string) => {
     setAnswers((a) => ({ ...a, [item.key]: value }));
