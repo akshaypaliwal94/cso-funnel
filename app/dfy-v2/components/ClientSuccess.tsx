@@ -208,13 +208,16 @@ const initials = (name: string) =>
     .map((w) => w[0])
     .join('');
 
-export default function ClientSuccess() {
+/* `header` replaces the eyebrow, title and intro, for pages with their own section type. */
+export default function ClientSuccess({ header }: { header?: React.ReactNode }) {
   const [active, setActive] = useState<TabId>('india');
   const [playing, setPlaying] = useState<string | null>(null);
   const tab = TABS.find((t) => t.id === active) ?? TABS[0];
 
   return (
     <section className="relative bg-black py-16 md:py-24">
+      {header ?? (
+      <>
       <div
         data-reveal
         className="mx-auto flex max-w-5xl items-center justify-center gap-4 px-6 md:gap-6"
@@ -242,6 +245,8 @@ export default function ClientSuccess() {
         revenue, attract better clients, and scale without relying on them for
         everything.
       </p>
+      </>
+      )}
 
       {/* The switch. Two buttons in a track rather than a select: there are
           exactly two states and both should be readable at a glance. */}
