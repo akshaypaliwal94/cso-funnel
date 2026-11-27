@@ -3,6 +3,8 @@ import './dfy-v3.css';
 import type { Metadata, Viewport } from 'next';
 import { Inter } from 'next/font/google';
 
+import DfyV2Skin from './DfyV2Skin';
+
 const inter = Inter({ subsets: ['latin'] });
 
 export const metadata: Metadata = {
@@ -18,5 +20,9 @@ export const viewport: Viewport = {
 /* dfy-v2-root is the class the cso skin's element rules in app/globals.css
    skip, so this page's own stylesheet is the only one styling it. */
 export default function DfyV3Layout({ children }: { children: React.ReactNode }) {
-  return <div className={`dfy-v2-root dfy3 ${inter.className}`}>{children}</div>;
+  return (
+    <div className={`dfy-v2-root dfy3 ${inter.className}`}>
+      <DfyV2Skin>{children}</DfyV2Skin>
+    </div>
+  );
 }

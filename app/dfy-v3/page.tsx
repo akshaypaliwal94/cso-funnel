@@ -8,7 +8,9 @@ import 'react-phone-number-input/style.css';
 import { FormEvent, Suspense, useState } from 'react';
 import PhoneInput, { isPossiblePhoneNumber, parsePhoneNumber } from 'react-phone-number-input';
 
+import ClientSuccess from '@/app/dfy-v2/components/ClientSuccess';
 import DfyFunnelTracker from '@/app/dfy-v2/components/DfyFunnelTracker';
+import RevealOnScroll from '@/app/dfy-v2/components/RevealOnScroll';
 import { DFY_V2_PRICE_LABEL } from '@/app/dfy-v2/price';
 import { type CheckoutPrefill, PREFILL_KEY } from '@/lib/checkout-prefill';
 import { collectSignals } from '@/lib/client-signals';
@@ -114,10 +116,8 @@ function Qualify() {
   const item = QUESTIONS[step];
 
   const preliminaryFit = () =>
-    answers.stage !== 'new' &&
     answers.revenue !== 'under-1' &&
-    !(answers.revenue === '1-2' && answers.budget === 'under-15') &&
-    !(answers.ticket === 'under-5' && answers.budget === 'under-15');
+    !(answers.revenue === '1-2' && answers.budget === 'under-15');
 
   const pick = (value: string) => {
     setAnswers((a) => ({ ...a, [item.key]: value }));
@@ -324,7 +324,10 @@ function Qualify() {
             />
             <span>
               I agree to be contacted about my application and understand the{' '}
-              <a href="#privacy-note">privacy and application information</a> below.
+              <a href="/privacy-policy" target="_blank" rel="noopener noreferrer">
+                privacy policy
+              </a>
+              .
             </span>
           </label>
           <div className="quiz-actions">
@@ -507,10 +510,6 @@ function CommandCenter() {
             </p>
           </div>
         </div>
-        <p className="demo-disclaimer">
-          Mock data and illustrative AI answers, not a connected live client dashboard. Real features, CRM compatibility
-          and Meta permissions require a working technical integration.
-        </p>
       </div>
     </div>
   );
@@ -537,33 +536,6 @@ function OwnerPhoto() {
     </div>
   );
 }
-
-const PROOF = [
-  {
-    img: 'aman-zohra',
-    alt: 'Aman and Zohra historical TGO client result graphic',
-    name: 'Aman & Zohra',
-    line: 'Natural fertility experts · ₹2L to ₹15L/month, as featured on the existing website',
-  },
-  {
-    img: 'ankita',
-    alt: 'Ankita Barasara historical TGO client result graphic',
-    name: 'Ankita Barasara',
-    line: 'Postpartum healing expert · ₹1L to ₹4L/month, as featured on the existing website',
-  },
-  {
-    img: 'anish-shubham',
-    alt: 'Anish and Shubham historical TGO client result graphic',
-    name: 'Anish & Shubham',
-    line: 'Science Driven Performance · ₹1L to ₹8L/month, as featured on the existing website',
-  },
-  {
-    img: 'nimisha',
-    alt: 'Nimisha Maniar historical TGO client result graphic',
-    name: 'Nimisha Maniar',
-    line: 'Studio Aware · ₹50L to ₹2Cr/year, as featured on the existing website',
-  },
-];
 
 const STEPS = [
   {
@@ -706,7 +678,7 @@ const FAQS = [
   ],
   [
     'What happens after the five questions and the ₹97 fee?',
-    "We review your application for fit and, if appropriate, proceed with the diagnostic call and scope discussion. The ₹97 is an application fee, not the installation price. If we determine you don't qualify, the application fee is refundable under the published terms. The payment, scheduling and refund integrations must be configured before launch.",
+    "We review your application for fit and, if appropriate, proceed with the diagnostic call and scope discussion. The ₹97 is an application fee, not the installation price. If we determine you don't qualify, the application fee is refundable under the published terms.",
   ],
 ];
 
@@ -914,58 +886,40 @@ export default function DfyV3Page() {
           </div>
         </section>
 
-        <section className="section pale" id="proof">
-          <div className="wrap">
-            <div className="center">
-              <span className="eyebrow">THE TRACK RECORD BEHIND THE SYSTEM</span>
-              <h2 className="heading">
-                They Built The Business. <span className="marker">We Helped Them Scale.</span>
-              </h2>
-              <p className="section-lede">
-                This isn&apos;t a collection of AI prompts assembled last week. The methods behind the AI Growth Engine
-                come from our 7-figure done-for-you marketing agency and years of hands-on execution for coaching and
-                service businesses.
-              </p>
-            </div>
-            <div className="stats">
-              <div className="stat">
-                <strong>1,000+</strong>
-                <span>Coaches, consultants &amp; service businesses served</span>
+        <div id="proof">
+          <RevealOnScroll />
+          <ClientSuccess
+            header={
+              <div className="wrap">
+                <div className="center">
+                  <span className="eyebrow">THE TRACK RECORD BEHIND THE SYSTEM</span>
+                  <h2 className="heading">
+                    They Built The Business. <span className="marker">We Helped Them Scale.</span>
+                  </h2>
+                  <p className="section-lede">
+                    This isn&apos;t a collection of AI prompts assembled last week. The methods behind the AI Growth
+                    Engine come from our 7-figure done-for-you marketing agency and years of hands-on execution for
+                    coaching and service businesses.
+                  </p>
+                </div>
+                <div className="stats">
+                  <div className="stat">
+                    <strong>1,000+</strong>
+                    <span>Coaches, consultants &amp; service businesses served</span>
+                  </div>
+                  <div className="stat">
+                    <strong>25</strong>
+                    <span>Countries served</span>
+                  </div>
+                  <div className="stat">
+                    <strong>₹200Cr+</strong>
+                    <span>Reported collective client turnover</span>
+                  </div>
+                </div>
               </div>
-              <div className="stat">
-                <strong>25</strong>
-                <span>Countries served</span>
-              </div>
-              <div className="stat">
-                <strong>₹200Cr+</strong>
-                <span>Reported collective client turnover</span>
-              </div>
-            </div>
-            <p className="small-source center">
-              TGO-reported historical figures. These are not results generated by the new AI Growth Engine. Verify
-              supporting records and definitions before publishing.
-            </p>
-            <div className="proof-grid">
-              {PROOF.map((p) => (
-                <figure className="proof-card" key={p.img}>
-                  <img
-                    loading="lazy"
-                    src={`https://www.akshaypaliwal.com/testimonials/india/${p.img}.webp?v=10`}
-                    alt={p.alt}
-                  />
-                  <figcaption>
-                    <strong>{p.name}</strong>
-                    <small>{p.line}</small>
-                  </figcaption>
-                </figure>
-              ))}
-            </div>
-            <p className="proof-note center">
-              Historical done-for-you agency case studies, not pilot results for the AI Command Center. Outcomes differ
-              by business and are not guaranteed. Images are linked from the existing Akshay Paliwal website.
-            </p>
-          </div>
-        </section>
+            }
+          />
+        </div>
 
         <section className="section" id="leaks">
           <div className="wrap">
@@ -1175,10 +1129,6 @@ export default function DfyV3Page() {
         <div className="wrap footer-inner">
           <span>
             <b>TGO AI Growth Engine</b> · © 2026 TrainerGoesOnline
-          </span>
-          <span id="privacy-note">
-            Application data is used to evaluate fit. Privacy, terms, refund policy and payment integration must be
-            finalized before launch.
           </span>
           <a href="#top">Back to top ↑</a>
         </div>
